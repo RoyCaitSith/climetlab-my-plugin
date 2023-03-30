@@ -4,6 +4,7 @@ import time
 import shutil
 import datetime
 import file_operations as fo
+from data_library import attributes
 from tqdm.notebook import tqdm
 
 def check_file_existence(time_start, time_end, directories, file_format, domains, history_interval):
@@ -89,18 +90,26 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
 
     return
 
-def run_wrf_forecast(case_name, exp_name, da_cycle, itime, forecast_hours, dir_exp, dir_scratch, da_domains, forecast_domains, cycling_interval, history_interval, whether_wait, nodes, ntasks, account, partition):
+def run_wrf_forecast(dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition):
 
-    exp_name = exp_name + '_C' + str(da_cycle).zfill(2)
-    case = '_'.join([case_name, exp_name])
+    itime = attributes[(dir_case, case_name)]['itime']
+    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
+    da_domains = attributes[(dir_case, case_name)]['da_domains']
+    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    history_interval = attributes[(dir_case, case_name)]['history_interval']
+
+    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
     initial_time = datetime.datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
     anl_start_time = initial_time + datetime.timedelta(hours=6.0)
-    anl_end_time = anl_start_time + datetime.timedelta(hours=6.0*(da_cycle-1))
+    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
     time_start = anl_end_time
     time_end = time_start + datetime.timedelta(hours=forecast_hours)
-    dir_da = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name, 'da')
-    dir_bkg = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name, 'bkg')
+    dir_da = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'da')
+    dir_bkg = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
     dir_case = os.path.join(dir_scratch, case)
 
     # Check the existence of wrf_inout
