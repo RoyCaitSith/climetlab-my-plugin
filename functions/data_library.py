@@ -17,8 +17,8 @@ attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/05_cycling_da/track_intensity/best_track',
-    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/2021_09L_Ida.csv',
-    'ibtracs': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/ibtracs.NA.list.v04r00.csv',
+    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2021_09L_Ida.csv',
+    'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'IDA',
     'ibtracs_season': 2021,
 }
@@ -35,8 +35,8 @@ attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'history_interval': 1,
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/10_cycling_da_tropics_v3/track_intensity/best_track',
-    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/2021_09L_Ida.csv',
-    'ibtracs': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/ibtracs.NA.list.v04r00.csv',
+    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2021_09L_Ida.csv',
+    'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'IDA',
     'ibtracs_season': 2021,
 }
@@ -53,8 +53,8 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/track_intensity/best_track',
-    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/2020_13L_Laura.csv',
-    'ibtracs': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/best_track/ibtracs.NA.list.v04r00.csv',
+    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2021_09L_Ida.csv',
+    'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'LAURA',
     'ibtracs_season': 2020,
 }
