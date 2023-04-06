@@ -10,6 +10,7 @@ attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/05_cycling_da',
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 3,
+    'time_window_max': 3.0,
     'da_domains': ['d01', 'd02'],
     'forecast_domains': ['d01', 'd02'],
     'GFDL_domains': ['d01'],
@@ -21,6 +22,9 @@ attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'IDA',
     'ibtracs_season': 2021,
+    'product': 'TROPICS V1',
+    'dir_tropics': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/Data/TROPICS',
+    'dir_cygnss': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/CYGNSS',
 }
 attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'itime': (2021, 8, 26,  0, 0, 0),
@@ -28,17 +32,21 @@ attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3',
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 3,
+    'time_window_max': 3.0,
     'da_domains': ['d01', 'd02'],
     'forecast_domains': ['d01', 'd02'],
     'GFDL_domains': ['d01'],
     'cycling_interval': 6,
-    'history_interval': 1,
+    'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/10_cycling_da_tropics_v3/track_intensity/best_track',
     'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2021_09L_Ida.csv',
     'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'IDA',
     'ibtracs_season': 2021,
+    'product': 'TROPICS V3',
+    'dir_tropics': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/Data/TROPICS_V3',
+    'dir_cygnss': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/CYGNSS',
 }
 attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'itime': (2020, 8, 24,  0, 0, 0),
@@ -46,6 +54,7 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor',
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 12,
+    'time_window_max': 1.5,
     'da_domains': ['d01'],
     'forecast_domains': ['d01', 'd02'],
     'GFDL_domains': ['d01'],
@@ -53,10 +62,11 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/track_intensity/best_track',
-    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2021_09L_Ida.csv',
+    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2020_13L_Laura.csv',
     'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'LAURA',
     'ibtracs_season': 2020,
+    'product': 'GOES-R',
 }
 compare_track_intensity_schemes['TROPICS_Ida_scheme_01'] = {
     'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
@@ -66,9 +76,6 @@ compare_track_intensity_schemes['TROPICS_Ida_scheme_01'] = {
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_T_ENS')],
-    'total_da_cycles': 3,
-    'extents': [(-95.0, -70.0, 10.0, 35.0), (-95.0, -70.0, 12.5, 35.0), (-95.0, -70.0, 12.5, 35.0)],
-    'GFDL_domains': ['d01'],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
     'labels': ['V1_CONTROL', 'V1_TROPICS_Q_ENS', 'V1_TROPICS_T_ENS', 'V1_TROPICS_Q_T_ENS', 'V3_TROPICS_Q_ENS', 'V3_TROPICS_T_ENS', 'V3_TROPICS_Q_T_ENS'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3]],
@@ -80,9 +87,6 @@ compare_track_intensity_schemes['TROPICS_Ida_scheme_02'] = {
               ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_T_CLR_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_CLR_ENS')],
-    'total_da_cycles': 3,
-    'extents': [(-95.0, -70.0, 10.0, 35.0), (-95.0, -70.0, 12.5, 35.0), (-95.0, -70.0, 12.5, 35.0)],
-    'GFDL_domains': ['d01'],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
     'labels': ['V1_CONTROL', 'V1_TROPICS_T_ENS', 'V1_TROPICS_T_CLR_ENS', 'V3_TROPICS_T_ENS', 'V3_TROPICS_T_CLR_ENS'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[1], sns_bright_cmap[2]],
@@ -94,10 +98,152 @@ compare_track_intensity_schemes['TROPICS_Ida_scheme_03'] = {
               ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_T_CLR_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_T_ENS'), \
               ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_T_CLR_ENS')],
-    'total_da_cycles': 3,
-    'GFDL_domains': ['d01'],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
     'labels': ['V1_CON_ENS', 'V1_CON_TROPICS_T_ENS', 'V1_CON_TROPICS_T_CLR_ENS', 'V3_CON_TROPICS_T_ENS', 'V3_CON_TROPICS_T_CLR_ENS'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[1], sns_bright_cmap[2]],
     'linestyles': ['-', '--', '--', '-', '-'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_04'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CONTROL', 'V1_Q_CLR', 'V1_T_CLR', 'V1_Q_T_CLR', 'V3_Q_CLR', 'V3_T_CLR', 'V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], \
+                                   sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3]],
+    'linestyles': ['-', '--', '--', '--', '-', '-', '-'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_05'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CYG_TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CONTROL', 'CYG', 'V1_Q_T_CLR', 'CYG_V1_Q_T_CLR', 'V3_Q_T_CLR', 'CYG_V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[3],  sns_bright_cmap[4], \
+                                                       sns_bright_cmap[3],  sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '--', '--', '-', '-'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_06'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CON_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CON', 'CON_V1_Q_CLR', 'CON_V1_T_CLR', 'CON_V1_Q_T_CLR', 'CON_V3_Q_CLR', 'CON_V3_T_CLR', 'CON_V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], \
+                                   sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3]],
+    'linestyles': ['-', '--', '--', '--', '-', '-', '-'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_07'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CON_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_CYG_TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CON', 'CON_CYG', 'CON_V3_Q_T_CLR', 'CON_CYG_V3_Q_T_CLR', 'CON_V3_Q_T_CLR', 'CON_CYG_V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[3],  sns_bright_cmap[4], \
+                                                       sns_bright_cmap[3],  sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '--', '--', '-', '-'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_08'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_TROPICS_Q_T_V1_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/05_cycling_da/track_intensity/Ida/Figures',
+    'labels': ['CONTROL', 'CYG', 'V1_Q', 'V1_T', 'V1_Q_T', 'CYG_V1_Q_T', 'V1_Q_CLR', 'V1_T_CLR', 'V1_Q_T_CLR', 'CYG_V1_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], \
+                                                       sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '--', '--', '--', '--'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_09'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CON_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_TROPICS_Q_T_V1_CLR_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_TROPICS_Q_T_V1_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/05_cycling_da/track_intensity/Ida/Figures',
+    'labels': ['CON', 'CON_CYG', 'CON_V1_Q', 'CON_V1_T', 'CON_V1_Q_T', 'CON_CYG_V1_Q_T', 'CON_V1_Q_CLR', 'CON_V1_T_CLR', 'CON_V1_Q_T_CLR', 'CON_CYG_V1_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], \
+                                                       sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '--', '--', '--', '--'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_10'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CYG_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CYG_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'TROPICS_Q_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CYG_TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CONTROL', 'CYG', 'V3_Q', 'V3_T', 'V3_Q_T', 'CYG_V3_Q_T', 'V3_Q_CLR', 'V3_T_CLR', 'V3_Q_T_CLR', 'CYG_V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], \
+                                                       sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '--', '--', '--', '--'],
+}
+compare_track_intensity_schemes['TROPICS_Ida_scheme_11'] = {
+    'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CON_ENS'), \
+              ('/05_TROPICS/05_cycling_da', 'Ida', 'CON_CYG_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_CYG_TROPICS_Q_T_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_TROPICS_Q_T_V3_CLR_ENS'), \
+              ('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida', 'CON_CYG_TROPICS_Q_T_V3_CLR_ENS')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3/track_intensity/Ida/Figures',
+    'labels': ['CON', 'CON_CYG', 'CON_V3_Q', 'CON_V3_T', 'CON_V3_Q_T', 'CON_CYG_V3_Q_T', 'CON_V3_Q_CLR', 'CON_V3_T_CLR', 'CON_V3_Q_T_CLR', 'CON_CYG_V3_Q_T_CLR'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[5], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], \
+                                                       sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '--', '--', '--', '--'],
+}
+compare_track_intensity_schemes['GOES_Laura_scheme_01'] = {
+    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_ALL'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'PB'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_08'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_09'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_10')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/Laura/Figures',
+    'labels': ['ASRBC4CLD_CLD_ALL', 'PB', 'ASRBC4CLD_CLD_08', 'ASRBC4CLD_CLD_09', 'ASRBC4CLD_CLD_10'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-'],
+}
+compare_track_intensity_schemes['GOES_Laura_scheme_02'] = {
+    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/Laura/Figures',
+    'labels': ['NPB_ASRBC4CLD_CLD_ALL', 'NPB', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-'],
 }
