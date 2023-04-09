@@ -551,7 +551,7 @@ def compare_averaged_RMSE_specific_time_each_cycle(scheme, variable, specific_ho
                         ymin = np.min([ymin, RMSE])
                         ymax = np.max([ymax, RMSE])
                         extend_label = labels[idc]
-                        if 'CON' in exp_name and 'CON' not in labels[idc]: extend_label = 'CON_' + extend_label
+                        if 'CON' in exp_name and 'CON' not in labels[idc] and 'CTRL' not in labels[idc]: extend_label = 'CON_' + extend_label
                         if 'CLR' in exp_name and 'CLR' not in labels[idc]: extend_label = extend_label + '_CLR'
                         ax.bar(idc, RMSE, width, color=colors[idc], label=extend_label+': '+RMSE_str, zorder=3)
 

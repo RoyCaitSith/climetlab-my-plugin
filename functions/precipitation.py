@@ -31,7 +31,7 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
         initial_time = datetime.datetime(*itime)
         forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-        forecast_domains=attributes[(dir_case, case_name)]['forecast_domains']
+        GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         history_interval=attributes[(dir_case, case_name)]['history_interval']
         dir_track_intensity=attributes[(dir_case, case_name)]['dir_track_intensity']
@@ -49,9 +49,12 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
             dir_rainfall = '/'.join([dir_exp, 'rainfall', case_name, exp_name+'_C'+str(da_cycle).zfill(2)])
             os.makedirs(dir_rainfall, exist_ok=True)
 
-            for dom in tqdm(forecast_domains, desc='Forecast Domains', leave=False):
+            for dom in tqdm(GFDL_domains, desc='GFDL Domains', leave=False):
 
-                dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C'+str(da_cycle).zfill(2), 'bkg'])
+                if 'IMERG' in exp_name:
+                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C'+str(da_cycle).zfill(2), 'bkg'])
+                else:
+                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, exp_name+'_C'+str(da_cycle).zfill(2), 'bkg'])
                 wrfout = dir_wrfout + f'/wrfout_{dom}_' + initial_time.strftime('%Y-%m-%d_%H:%M:00')
                 ncfile = Dataset(wrfout)
                 RAINNC = getvar(ncfile, 'RAINNC')
@@ -137,8 +140,12 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
 def draw_6h_accumulated_precipitation(scheme):
 
     accumulated_hours = 6.0
-    rain_levels = [0.6, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0]
-    rain_labels = ['0.6', '1', '1.5', '2', '3', '4', '5', '6', '8', '10', '15', '20', '25', '30', '35', '40']
+
+    #rain_levels = [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.6, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, \
+                   #6.0, 8.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0]
+    #rain_labels = ['0.1', '0.15', '0.2', '0.25', '0.3', '0.4', '0.6', '1.0', '1.5', \
+                   #'2', '3', '4', '5', '6', '8', '10', '15', '20', '25', '30', '35', '40']
+
     radii = [150.0, 300.0, 450.0]
     angles = np.arange(0.0, 360.0, 2.0)
 
@@ -147,20 +154,20 @@ def draw_6h_accumulated_precipitation(scheme):
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     n_cases = len(compare_schemes[scheme]['cases'])
-    (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
+    (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][-1]
     labels = compare_schemes[scheme]['labels']
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
     initial_time = datetime.datetime(*itime)
     forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    forecast_domains=attributes[(dir_case, case_name)]['forecast_domains']
+    GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
     cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
     history_interval=attributes[(dir_case, case_name)]['history_interval']
     dir_track_intensity=attributes[(dir_case, case_name)]['dir_track_intensity']
     NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
 
-    for dom in tqdm(forecast_domains, desc='Forecast Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+    for dom in tqdm(GFDL_domains, desc='GFDL Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc="Cycles", leave=False):
 
             anl_start_time = initial_time + datetime.timedelta(hours=6.0)
@@ -172,12 +179,13 @@ def draw_6h_accumulated_precipitation(scheme):
             for idt in tqdm(range(n_time), desc="Time", leave=False):
 
                 time_now = forecast_start_time + datetime.timedelta(hours=idt*accumulated_hours)
-                time_label = forecast_start_time + datetime.timedelta(hours=idt*accumulated_hours/2.0)
+                time_label = time_now + datetime.timedelta(hours=accumulated_hours/2.0)
+                time_now_str = time_now.strftime('%Y%m%d%H')
                 time_label_str = time_label.strftime('%H UTC %d %b')
 
                 image_files = []
                 dir_rainfall = '/'.join([dir_exp, 'rainfall', case_name, 'Figures'])
-                output_file = dir_rainfall + '/' + '_'.join([time_now.strftime('%Y%m%d%H'), 'rainfall', '6h', scheme, dom+'.png'])
+                output_file = dir_rainfall + '/' + '_'.join([time_now_str, 'rainfall', '6h', scheme, 'C'+str(da_cycle).zfill(2), dom+'.png'])
 
                 observations = ['IMERG']
                 n_observations = len(observations)
@@ -198,8 +206,8 @@ def draw_6h_accumulated_precipitation(scheme):
                     TC_dates = list(df['Date_Time'][:])
                     del df
 
-                    pdfname = dir_rainfall + '/' + '_'.join([time_now.strftime('%Y%m%d%H'), 'rainfall', '6h', dom+'.pdf'])
-                    pngname = dir_rainfall + '/' + '_'.join([time_now.strftime('%Y%m%d%H'), 'rainfall', '6h', dom+'.png'])
+                    pdfname = dir_rainfall + '/' + '_'.join([time_label_str, 'rainfall', '6h', dom+'.pdf'])
+                    pngname = dir_rainfall + '/' + '_'.join([time_label_str, 'rainfall', '6h', dom+'.png'])
                     image_files.append(pngname)
 
                     with PdfPages(pdfname) as pdf:
@@ -222,10 +230,11 @@ def draw_6h_accumulated_precipitation(scheme):
                         extend_label = observations[ido]+': '+time_label_str
 
                         rain_masked = np.ma.masked_where(rain <= 0, rain)
-                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
+                        #pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
+                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=range(5, 56, 5), cmap='jet', extend='max', zorder=1)
                         ax.plot([-180.0, 180.0], [TC_lat, TC_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.plot([TC_lon, TC_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                        ax.text(TC_lon-4.8, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                        ax.text(TC_lon-4.6, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                         lat_polar = np.zeros((len(radii), len(angles)))
                         lon_polar = np.zeros((len(radii), len(angles)))
@@ -246,8 +255,10 @@ def draw_6h_accumulated_precipitation(scheme):
                         clb.set_label('6-hr Accumulated Precipitation (mm)', fontsize=10.0, labelpad=4.0)
                         clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                         clb.ax.minorticks_off()
-                        clb.set_ticks(rain_levels)
-                        clb.set_ticklabels(rain_labels)
+                        #clb.set_ticks(rain_levels)
+                        #clb.set_ticklabels(rain_labels)
+                        clb.set_ticks(range(5, 56, 10))
+                        clb.set_ticklabels(range(5, 56, 10))
 
                         plt.tight_layout()
                         plt.savefig(pngname, dpi=600)
@@ -298,14 +309,15 @@ def draw_6h_accumulated_precipitation(scheme):
                         mlons, mlats = m(rain_lon, rain_lat)
 
                         extend_label = labels[idc]
-                        if 'CON' in exp_name and 'CON' not in labels[idc]: extend_label = 'CON_' + extend_label
+                        if 'CON' in exp_name and 'CON' not in labels[idc] and 'CTRL' not in labels[idc]: extend_label = 'CON_' + extend_label
                         if 'CLR' in exp_name and 'CLR' not in labels[idc]: extend_label = extend_label + '_CLR'
 
                         rain_masked = np.ma.masked_where(rain <= 0, rain)
-                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
+                        #pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
+                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=range(5, 56, 5), cmap='jet', extend='max', zorder=1)
                         ax.plot([-180.0, 180.0], [TC_lat, TC_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.plot([TC_lon, TC_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                        ax.text(TC_lon-4.8, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                        ax.text(TC_lon-4.6, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                         lat_polar = np.zeros((len(radii), len(angles)))
                         lon_polar = np.zeros((len(radii), len(angles)))
@@ -326,8 +338,10 @@ def draw_6h_accumulated_precipitation(scheme):
                         clb.set_label('6-hr Accumulated Precipitation (mm)', fontsize=10.0, labelpad=4.0)
                         clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                         clb.ax.minorticks_off()
-                        clb.set_ticks(rain_levels)
-                        clb.set_ticklabels(rain_labels)
+                        #clb.set_ticks(rain_levels)
+                        #clb.set_ticklabels(rain_labels)
+                        clb.set_ticks(range(5, 56, 10))
+                        clb.set_ticklabels(range(5, 56, 10))
 
                         plt.tight_layout()
                         plt.savefig(pngname, dpi=600)
