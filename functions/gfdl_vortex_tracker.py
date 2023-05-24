@@ -43,7 +43,7 @@ def link_wrfout(dir_case, case_name, exp_name):
                     wrfout_read.START_DATE = anl_start_time.strftime('%Y-%m-%d_%H:00:00')
                     wrfout_read.SIMULATION_START_DATE = anl_start_time.strftime('%Y-%m-%d_%H:00:00')
 
-def setup_GFDL_folder(dir_case, case_name, exp_name, copy_exp_name):
+def setup_gfdl_folder(dir_case, case_name, exp_name, copy_exp_name):
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
@@ -80,7 +80,7 @@ def setup_GFDL_folder(dir_case, case_name, exp_name, copy_exp_name):
         print("Please revise run_unipost in postprd")
         print("Please run run_unipost!")
 
-def process_GFDL_files(dir_case, case_name, exp_name):
+def process_gfdl_files(dir_case, case_name, exp_name):
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']

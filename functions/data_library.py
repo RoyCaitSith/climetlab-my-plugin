@@ -71,6 +71,27 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'product': 'GOES-R',
     'dir_IMERG': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/IMERG',
 }
+attributes[('/08_CPEX_CV/01_AEW06_Ian', 'Ian')] = {
+    'itime': (2022, 9, 16,  0, 0, 0),
+    'forecast_hours': 54,
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian',
+    'dir_data': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian/data',
+    'dir_scratch': '/scratch/general/nfs1/u1237353',
+    'total_da_cycles': 5,
+    'time_window_max': 1.5,
+    'da_domains': ['d01'],
+    'forecast_domains': ['d01', 'd02'],
+    'GFDL_domains': ['d01'],
+    'cycling_interval': 6,
+    'history_interval': 6,
+    'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
+    'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian/track_intensity/best_track',
+    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian/track_intensity/best_track/2022_09L_Ian.csv',
+    'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian/track_intensity/best_track/ibtracs.ALL.list.v04r00.csv',
+    'ibtracs_case': 'IAN',
+    'ibtracs_season': 2022,
+    'dir_IMERG': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX_CV/01_AEW06_Ian/Data/IMERG',
+}
 compare_schemes['TROPICS_Ida_scheme_01'] = {
     'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
               ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_ENS'), \
