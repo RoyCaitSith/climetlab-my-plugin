@@ -1,11 +1,11 @@
 import os
 import math
 import datetime
+import importlib
 import numpy as np
 import pandas as pd
 import climetlab as cml
 import matplotlib.pyplot as plt
-from data_library import attributes, compare_schemes
 from combine_and_show_images import combine_images_grid
 from tqdm.notebook import tqdm
 from geopy.distance import great_circle
@@ -14,7 +14,10 @@ from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 from IPython.display import Image as IPImage
 
-def calculate_track_intensity_errors(dir_case, case_name, exp_name):
+def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
@@ -47,7 +50,7 @@ def calculate_track_intensity_errors(dir_case, case_name, exp_name):
             df.reset_index(drop=True, inplace=True)
             df.to_csv(dir_track_intensity + '/' + case + '_' + dom + '.csv', index=False)
 
-            anl_start_time = datetime.datetime(*itime) + datetime.timedelta(hours=6.0)
+            anl_start_time = datetime.datetime(*itime) + datetime.timedelta(hours=cycling_interval)
             total_simulation_hours = forecast_hours + cycling_interval*(int(da_cycle-1))
             n_lead_time = df.shape[0]
             error_df = pd.DataFrame(0.0, index=np.arange(n_lead_time), columns=['Forecast_Hour', 'Track_Error (km)', 'MSLP_Error (hPa)', 'MWS_Error (Knot)'])
@@ -66,19 +69,23 @@ def calculate_track_intensity_errors(dir_case, case_name, exp_name):
             error_df['MWS_Error (Knot)'] = df['MWS (Knot)'] - bt_df_MWS
             error_df.to_csv(dir_track_intensity + '/Error_' + case + '_' + dom + '.csv', index=False)
 
-def compare_track(scheme):
+def compare_track(data_library_scheme):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
     colors = compare_schemes[scheme]['colors']
     linestyles = compare_schemes[scheme]['linestyles']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         for dom in GFDL_domains:
@@ -99,7 +106,7 @@ def compare_track(scheme):
                 dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
                 initial_time = datetime.datetime(*itime)
-                anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+                anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
                 anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
                 forecast_start_time = anl_end_time
                 forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
@@ -135,7 +142,7 @@ def compare_track(scheme):
                     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
                     initial_time = datetime.datetime(*itime)
-                    anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+                    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
                     anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
                     forecast_start_time = anl_end_time
                     forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
@@ -183,19 +190,23 @@ def compare_track(scheme):
         image = IPImage(filename=output_file)
         display(image)
 
-def compare_intensity(scheme, variable):
+def compare_intensity(data_library_name, scheme, variable):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
     colors = compare_schemes[scheme]['colors']
     linestyles = compare_schemes[scheme]['linestyles']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         for dom in GFDL_domains:
@@ -217,7 +228,7 @@ def compare_intensity(scheme, variable):
                 cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
 
                 initial_time = datetime.datetime(*itime)
-                anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+                anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
                 anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
                 forecast_start_time = anl_end_time
                 forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
@@ -255,7 +266,7 @@ def compare_intensity(scheme, variable):
                     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
                     initial_time = datetime.datetime(*itime)
-                    anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+                    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
                     anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
                     forecast_start_time = anl_end_time
                     forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
@@ -305,11 +316,11 @@ def compare_intensity(scheme, variable):
         image = IPImage(filename=output_file)
         display(image)
 
-def compare_averaged_RMSE_time_series(scheme, variable):
+def compare_averaged_RMSE_time_series(data_library_name, scheme, variable):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
@@ -322,6 +333,10 @@ def compare_averaged_RMSE_time_series(scheme, variable):
     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     for dom in GFDL_domains:
 
@@ -400,11 +415,11 @@ def compare_averaged_RMSE_time_series(scheme, variable):
         image = IPImage(filename=pngname)
         display(image)
 
-def compare_averaged_RMSE_each_cycle(scheme, variable):
+def compare_averaged_RMSE_each_cycle(data_library_name, scheme, variable):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
@@ -417,6 +432,10 @@ def compare_averaged_RMSE_each_cycle(scheme, variable):
     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     for dom in GFDL_domains:
 
@@ -491,15 +510,15 @@ def compare_averaged_RMSE_each_cycle(scheme, variable):
         image = IPImage(filename=pngname)
         display(image)
 
-def compare_averaged_RMSE_specific_time_each_cycle(scheme, variable, specific_hours):
+def compare_averaged_RMSE_specific_time_each_cycle(data_library_name, scheme, variable, specific_hours):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     if 'Track' in variable: varname = 'track'
     if 'MSLP' in variable:  varname = 'MSLP'
     if 'MWS' in variable:   varname = 'MWS'
-
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
@@ -511,6 +530,10 @@ def compare_averaged_RMSE_specific_time_each_cycle(scheme, variable, specific_ho
     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
     for dom in GFDL_domains:
 

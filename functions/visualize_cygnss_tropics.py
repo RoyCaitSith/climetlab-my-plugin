@@ -2,13 +2,13 @@ import os
 import glob
 import netCDF4
 import datetime
+import importlib
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pathlib import Path
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
-from data_library import attributes
 from mpl_toolkits.basemap import Basemap
 from IPython.display import Image as IPImage
 from matplotlib.colors import LinearSegmentedColormap
@@ -16,28 +16,31 @@ from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def draw_CYGNSS_wind_speed(dir_cases, case_names):
+def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
     sns_bright_cmap = sns.color_palette('bright')
 
     n_cases = len(dir_cases)
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (dir_case, case_name) = (dir_cases[idc], case_names[idc])
+        (data_library_names, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
+
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
         itime = attributes[(dir_case, case_name)]['itime']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
         time_window_max = attributes[(dir_case, case_name)]['time_window_max']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         dir_cygnss = '/'.join([attributes[(dir_case, case_name)]['dir_cygnss'], case_name])
         dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C03', 'bkg'])
         dir_save = '/'.join([dir_exp, 'draw_Tropics', 'cygnss'])
+        grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+        grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
         initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(total_da_cycles-1))
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
@@ -140,28 +143,30 @@ def draw_CYGNSS_wind_speed(dir_cases, case_names):
         image = IPImage(filename=output_file)
         display(image)
 
-def draw_TROPICS_tpw(dir_cases, case_names):
+def draw_TROPICS_tpw(data_library_names, dir_cases, case_names):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
     sns_bright_cmap = sns.color_palette('bright')
 
     n_cases = len(dir_cases)
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (dir_case, case_name) = (dir_cases[idc], case_names[idc])
+        (data_library_name, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
         itime = attributes[(dir_case, case_name)]['itime']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
         time_window_max = attributes[(dir_case, case_name)]['time_window_max']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         product = attributes[(dir_case, case_name)]['product']
+        dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C03', 'bkg'])
         dir_save = '/'.join([dir_exp, 'draw_Tropics', 'total_precipitable_water'])
+        grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+        grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
         initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(total_da_cycles-1))
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
@@ -319,17 +324,22 @@ def draw_TROPICS_tpw(dir_cases, case_names):
         image = IPImage(filename=output_file)
         display(image)
 
-def draw_TROPICS_tpw_cdf(dir_cases, case_names):
+def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names):
 
-    dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
-    grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
     sns_bright_cmap = sns.color_palette('bright')
 
+    data_library_name = data_library_names[0]
     dir_case = dir_cases[0]
     case_name = case_names[0]
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
     dir_save = os.path.join(dir_exp, 'draw_Tropics', 'total_precipitable_water')
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+
     pdfname = dir_save + '/total_precipitable_water_cdf.pdf'
     pngname = dir_save + '/total_precipitable_water_cdf.png'
 

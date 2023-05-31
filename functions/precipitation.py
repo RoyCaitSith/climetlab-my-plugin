@@ -1,6 +1,7 @@
 import os
 import h5py
 import datetime
+import importlib
 import numpy as np
 import pandas as pd
 import cal_polar_to_latlon as clatlon
@@ -8,7 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from combine_and_show_images import combine_images_grid
 from mpl_toolkits.basemap import Basemap
-from data_library import attributes, compare_schemes
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords
 from netCDF4 import Dataset
@@ -17,7 +17,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
+def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_names, exp_names):
 
     accumulated_hours = 6.0
     IMERG_time_resolution = 0.5
@@ -25,7 +25,11 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
 
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (dir_case, case_name, exp_name) = (dir_cases[idc], case_names[idc], exp_names[idc])
+        # Import the necessary library
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         itime=attributes[(dir_case, case_name)]['itime']
         initial_time = datetime.datetime(*itime)
@@ -40,7 +44,7 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
 
-            anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+            anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
             forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
@@ -137,7 +141,7 @@ def calculate_6h_accumulated_precipitation(dir_cases, case_names, exp_names):
 
                 ncfile_output.close()
 
-def draw_6h_accumulated_precipitation(scheme):
+def draw_6h_accumulated_precipitation(data_library_name, scheme):
 
     accumulated_hours = 6.0
 
@@ -152,6 +156,10 @@ def draw_6h_accumulated_precipitation(scheme):
     dir_grayC = '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7/grayC'
     grayC_cm_data = np.loadtxt(dir_grayC + '/grayC.txt')
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
 
     n_cases = len(compare_schemes[scheme]['cases'])
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][-1]
@@ -170,7 +178,7 @@ def draw_6h_accumulated_precipitation(scheme):
     for dom in tqdm(GFDL_domains, desc='GFDL Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc="Cycles", leave=False):
 
-            anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+            anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
             forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)

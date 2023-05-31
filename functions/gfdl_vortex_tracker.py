@@ -2,11 +2,15 @@ import os
 import glob
 import shutil
 import datetime
-from data_library import attributes
+import importlib
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 
-def link_wrfout(dir_case, case_name, exp_name):
+def link_wrfout(data_library_name, dir_case, case_name, exp_name):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
@@ -21,7 +25,7 @@ def link_wrfout(dir_case, case_name, exp_name):
         case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
         initial_time = datetime.datetime(*itime)
         initial_time_str = initial_time.strftime('%Y%m%d%H')
-        anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         forecast_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
         dir_in = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
         dir_out = os.path.join(dir_exp, 'track_intensity', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'wrfprd')
@@ -43,7 +47,11 @@ def link_wrfout(dir_case, case_name, exp_name):
                     wrfout_read.START_DATE = anl_start_time.strftime('%Y-%m-%d_%H:00:00')
                     wrfout_read.SIMULATION_START_DATE = anl_start_time.strftime('%Y-%m-%d_%H:00:00')
 
-def setup_gfdl_folder(dir_case, case_name, exp_name, copy_exp_name):
+def setup_gfdl_folder(data_library_name, dir_case, case_name, exp_name, copy_exp_name):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
@@ -80,7 +88,11 @@ def setup_gfdl_folder(dir_case, case_name, exp_name, copy_exp_name):
         print("Please revise run_unipost in postprd")
         print("Please run run_unipost!")
 
-def process_gfdl_files(dir_case, case_name, exp_name):
+def process_gfdl_files(data_library_name, dir_case, case_name, exp_name):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
@@ -99,7 +111,7 @@ def process_gfdl_files(dir_case, case_name, exp_name):
         dtime = history_interval * 60
 
         initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=6.0)
+        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         forecast_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1
 
