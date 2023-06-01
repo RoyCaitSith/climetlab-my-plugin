@@ -6,6 +6,7 @@ import importlib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.basemap import Basemap
@@ -108,6 +109,115 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name):
             m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='h', ax=ax)
             m.drawcoastlines(linewidth=0.2, color='k')
             ax.plot(flight_lon, flight_lat, '-', color='k', linewidth=2.50, label='DC8', zorder=3)
+
+            ax.set_xticks(np.arange(-180, 181, 5))
+            ax.set_yticks(np.arange(-90, 91, 5))
+            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
+            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+            ax.tick_params('both', direction='in', labelsize=10.0)
+            ax.axis(extent)
+            ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+            ax.legend(loc='upper right', fontsize=5.0, handlelength=2.5).set_zorder(102)
+
+            plt.tight_layout()
+            plt.savefig(pngname, dpi=600)
+            pdf.savefig(fig)
+            plt.cla()
+            plt.clf()
+            plt.close()
+
+            image = IPImage(filename=pngname)
+            display(image)
+
+def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wrf_domain_exp_name='', goes=False, goes_time=(2023, 5, 31, 0, 0, 0)):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime.datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_data = attributes[(dir_case, case_name)]['dir_data']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    filenames = glob.glob(os.path.join(dir_data, '*flight_track*csv'))
+
+    if wrf_domain:
+
+        dir_wrfout = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, f"{wrf_domain_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg')
+        wrfout_format = 'wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}'
+        file_wrfout_d01 = os.path.join(dir_wrfout, wrfout_format.format(dom='d01', ctime=initial_time))
+        file_wrfout_d02 = os.path.join(dir_wrfout, wrfout_format.format(dom='d02', ctime=initial_time))
+
+        wrfout_d01 = Dataset(file_wrfout_d01)
+        lat_d01 = wrfout_d01.variables['XLAT'][0,:,:]
+        lon_d01 = wrfout_d01.variables['XLONG'][0,:,:]
+        wrfout_d01.close()
+
+        lat_d02 = []
+        lon_d02 = []
+        wrfout_d02 = Dataset(file_wrfout_d02)
+        lat_temp = wrfout_d02.variables['XLAT'][0,:,:]
+        lon_temp = wrfout_d02.variables['XLONG'][0,:,:]
+        n_we_d02 = len(lat_temp[0, :])
+        n_sn_d02 = len(lat_temp[:, 0])
+        lat_d02.extend(list(lat_temp[0, 0:n_we_d02-1:1]))
+        lat_d02.extend(list(lat_temp[0:n_sn_d02-1, n_we_d02-1]))
+        lat_d02.extend(list(lat_temp[n_sn_d02-1, n_we_d02-1:0:-1]))
+        lat_d02.extend(list(lat_temp[n_sn_d02-1:0:-1, 0]))
+        lon_d02.extend(list(lon_temp[0, 0:n_we_d02-1:1]))
+        lon_d02.extend(list(lon_temp[0:n_sn_d02-1, n_we_d02-1]))
+        lon_d02.extend(list(lon_temp[n_sn_d02-1, n_we_d02-1:0:-1]))
+        lon_d02.extend(list(lon_temp[n_sn_d02-1:0:-1, 0]))
+        lat_d02.append(lat_temp[0, 0])
+        lon_d02.append(lon_temp[0, 0])
+        wrfout_d02.close()
+
+    for filename in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        df = pd.read_csv(filename)
+        flight_time = df['Time']
+        flight_lat = df['LAT']
+        flight_lon = df['LON']
+        min_flight_time = np.min(flight_time)
+        max_flight_time = np.max(flight_time)
+        min_flight_lat  = np.min(flight_lat)
+        max_flight_lat  = np.max(flight_lat)
+        min_flight_lon  = np.min(flight_lon)
+        max_flight_lon  = np.max(flight_lon)
+
+        clon = 5*(min_flight_lon + max_flight_lon)/2.0//5
+        clat = 5*(min_flight_lat + max_flight_lat)/2.0//5
+        half_extent = np.max([5*abs(max_flight_lon - clon)//5+5, 5*abs(max_flight_lat - clat)//5+5, 15])
+        extent = [clon-half_extent+5.0, clon+half_extent, clat-half_extent+5.0, clat+half_extent]
+        if wrf_domain: extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
+
+        numbers = re.findall(r'\d+', filename)
+        day_str = numbers[-1]
+        pdfname = os.path.join(dir_data, '_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.pdf']))
+        pngname = os.path.join(dir_data, '_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.png']))
+
+        print('_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.csv']))
+        print(f"Time: from {min_flight_time} to {max_flight_time}")
+        print(f"LAT: from {min_flight_lat} to {max_flight_lat}")
+        print(f"LON: from {min_flight_lon} to {max_flight_lon}")
+
+        with PdfPages(pdfname) as pdf:
+
+            fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.0))
+
+            ax = axs
+            m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='h', ax=ax)
+            m.drawcoastlines(linewidth=0.2, color='k')
+            ax.plot(flight_lon, flight_lat, '-', color='k', linewidth=2.50, label='DC8', zorder=3)
+
+            if wrf_domain:
+                ax.plot(x_lon_d02, y_lat_d02, '-', color='k', linewidth=0.50, zorder=1)
+                ax.text(np.max(lon_d01)-2.00, np.min(lat_d01)+1.50, 'D01', ha='center', va='center', color='w', fontsize=10.0, zorder=7)
+                ax.text(np.max(lon_d02)-2.00, np.min(lat_d02)+1.50, 'D02', ha='center', va='center', color='w', fontsize=10.0, zorder=7)
 
             ax.set_xticks(np.arange(-180, 181, 5))
             ax.set_yticks(np.arange(-90, 91, 5))

@@ -94,7 +94,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
 
     return
 
-def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, boundary_data, whether_wait, nodes, ntasks, account, partition):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -102,6 +102,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
 
     # Set the directories of the input files or procedures
     dir_GFS = attributes[(dir_case, case_name)]['dir_GFS']
+    dir_GDAS = attributes[(dir_case, case_name)]['dir_GDAS']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     itime = attributes[(dir_case, case_name)]['itime']
@@ -181,8 +182,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         # Set the variables in the namelist.input
         namelist_input = fo.change_content(namelist_input_dir)
         # Time_Control
-        run_days_str   = max_dom * f"{str(total_hours//24)}, "
-        run_hours_str  = max_dom * f"{str(total_hours %24)}, "
+        run_days_str   = f"{str(total_hours//24)}, "
+        run_hours_str  = f"{str(total_hours %24)}, "
         start_YYYY_str = max_dom * f"{start_date.strftime('%Y')}, "
         start_MM_str   = max_dom * f"{start_date.strftime('%m')}, "
         start_DD_str   = max_dom * f"{start_date.strftime('%d')}, "
@@ -210,55 +211,49 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
 
         print(f"Create Geogrid_Data in {folder_dir}")
         os.mkdir(os.path.join(folder_dir, 'Geogrid_Data'))
-        print(f"Create GFS_Boundary_Condition_Data in {folder_dir}")
-        os.mkdir(os.path.join(folder_dir, 'GFS_Boundary_Condition_Data'))
+        print(f"Create Boundary_Condition_Data in {folder_dir}")
+        os.mkdir(os.path.join(folder_dir, 'Boundary_Condition_Data'))
         print(f"Create Metgrid_Data in {folder_dir}")
         os.mkdir(os.path.join(folder_dir, 'Metgrid_Data'))
         print(f"Create Run_WRF in {folder_dir}")
         os.mkdir(os.path.join(folder_dir, 'Run_WRF'))
         print(f"Create {initial_time_str} in {folder_dir}")
         os.mkdir(os.path.join(folder_dir, initial_time_str))
-        print('Copy the boundary condition data into GFS_Boundary_Condition_Data')
+        print('Copy the boundary condition data into Boundary_Condition_Data')
 
-        if period == 'cycling_da':
-            for fhours in range(0, analysis_hours + wps_interval, wps_interval):
-                time_now = initial_time + datetime.timedelta(hours = fhours)
-                time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
-                time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
-                time_now_YYYY = time_now.strftime('%Y')
-                gfs_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(0).zfill(3)}.grib2"
-                dir_gfs_filename = os.path.join(dir_GFS, gfs_filename)
-                print(dir_gfs_filename)
-                if os.path.exists(dir_gfs_filename):
-                    os.system(f"cp {dir_gfs_filename} {folder_dir}/GFS_Boundary_Condition_Data")
-                else:
-                    dir_rda = 'https://data.rda.ucar.edu/ds084.1'
-                    rda_gfs_filename = os.path.join(dir_rda, time_now_YYYY, time_now_YYYYMMDD, gfs_filename)
-                    response = requests.get(rda_gfs_filename, stream=True)
-                    with open(dir_gfs_filename, "wb") as f:
-                        f.write(response.content)
+        for idth in range(0, total_hours + wps_interval, wps_interval):
+            if period == 'cycling_da': fhours = 0
+            if period == 'forecast':
+                time_now = anl_end_time
+                fhours = idth
 
-        if period == 'forecast':
-            anl_end_time_YYYYMMDDHH = anl_end_time.strftime('%Y%m%d%H')
-            anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
-            anl_end_time_YYYY = anl_end_time.strftime('%Y')
-            for fhours in range(wps_interval, forecast_hours + wps_interval, wps_interval):
-                gfs_filename = f"gfs.0p25.{anl_end_time_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
-                dir_gfs_filename = os.path.join(dir_GFS, gfs_filename)
-                print(dir_gfs_filename)
-                if os.path.exists(dir_gfs_filename):
-                    os.system(f"cp {dir_gfs_filename} {folder_dir}/GFS_Boundary_Condition_Data")
-                else:
-                    dir_rda = 'https://data.rda.ucar.edu/ds084.1'
-                    rda_gfs_filename = os.path.join(dir_rda, anl_end_time_YYYY, anl_end_time_YYYYMMDD, gfs_filename)
-                    response = requests.get(rda_gfs_filename)
-                    with open(dir_gfs_filename, "wb") as f:
-                        f.write(response.content)
+            time_now = initial_time + datetime.timedelta(hours = idth)
+            time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
+            time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
+            time_now_YYYY = time_now.strftime('%Y')
+
+            if boundary_data == 'GFS':
+                bc_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
+                dir_bc_filename = os.path.join(dir_GFS, bc_filename)
+                dir_rda = 'https://data.rda.ucar.edu/ds084.1'
+            print(dir_bc_filename)
+
+            if os.path.exists(dir_bc_filename):
+                os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
+            else:
+                rda_bc_filename = os.path.join(dir_rda, time_now_YYYY, time_now_YYYYMMDD, bc_filename)
+                response = requests.get(rda_bc_filename, stream=True)
+                with open(dir_bc_filename, "wb") as f:
+                    f.write(response.content)
 
         # Set the variable in the run_wps.sh
+        if boundary_data == 'GFS': vtable = 'Vtable.GFS'
+        print(f"Vtable of Boundary Condition: {vtable}")
+
         run_wps = fo.change_content(run_wps_dir)
         run_wps.substitude_string('#SBATCH -J', ' ', initial_time_str[2::])
         run_wps.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
+        run_wps.substitude_string('ln -sf $WORK_DIRECTORY/WPS/ungrib/Variable_Tables', '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
         run_wps.save_content()
 
         # Set the variable in the run_wrf.sh
