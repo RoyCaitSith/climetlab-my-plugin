@@ -359,5 +359,7 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
                         plt.close()
 
                 combine_images_grid(image_files, output_file)
+                command = f"convert {output_file} -trim {output_file}"
+                subprocess.run(command, shell=True)
                 image = IPImage(filename=output_file)
                 display(image)

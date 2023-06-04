@@ -274,6 +274,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
 
     os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
     wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')
+    command = f"convert {wps_show_dom} -trim {wps_show_dom}"
+    subprocess.run(command, shell=True)
     image = IPImage(filename=wps_show_dom)
     display(image)
 

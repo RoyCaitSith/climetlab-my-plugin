@@ -187,6 +187,8 @@ def compare_track(data_library_scheme):
             image_files.append(dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_track.png")
 
         combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=output_file)
         display(image)
 
@@ -313,6 +315,8 @@ def compare_intensity(data_library_name, scheme, variable):
             if 'MWS' in variable:  image_files.append(dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_MWS.png")
 
         combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=output_file)
         display(image)
 
@@ -412,6 +416,8 @@ def compare_averaged_RMSE_time_series(data_library_name, scheme, variable):
             plt.clf()
             plt.close()
 
+        command = f"convert {pngname} -trim {pngname}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=pngname)
         display(image)
 
@@ -507,6 +513,8 @@ def compare_averaged_RMSE_each_cycle(data_library_name, scheme, variable):
             plt.clf()
             plt.close()
 
+        command = f"convert {pngname} -trim {pngname}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=pngname)
         display(image)
 
@@ -599,5 +607,7 @@ def compare_averaged_RMSE_specific_time_each_cycle(data_library_name, scheme, va
                 plt.close()
 
         combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=output_file)
         display(image)

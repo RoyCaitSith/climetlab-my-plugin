@@ -140,6 +140,8 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names):
                 plt.close()
 
         combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=output_file)
         display(image)
 
@@ -321,6 +323,8 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names):
                 plt.close()
 
         combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
         image = IPImage(filename=output_file)
         display(image)
 
@@ -393,5 +397,7 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names):
         plt.clf()
         plt.close()
 
+    command = f"convert {pngname} -trim {pngname}"
+    subprocess.run(command, shell=True)
     image = IPImage(filename=pngname)
     display(image)

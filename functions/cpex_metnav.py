@@ -126,6 +126,8 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name):
             plt.clf()
             plt.close()
 
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
             image = IPImage(filename=pngname)
             display(image)
 
@@ -235,5 +237,7 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
             plt.clf()
             plt.close()
 
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
             image = IPImage(filename=pngname)
             display(image)
