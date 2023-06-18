@@ -6,6 +6,7 @@ import shutil
 import datetime
 import requests
 import importlib
+import subprocess
 import file_operations as fo
 import matplotlib.pyplot as plt
 from tqdm.notebook import tqdm
@@ -124,7 +125,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
     for da_cycle in range(da_cycle_start, total_da_cycles+1):
 
         # Set the folder name of the new case
-        case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+        if period == 'cycling_da': case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+        if period == 'forecast': case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'Forecast'])
+
         folder_dir = os.path.join(dir_scratch, case)
         os.system(f"rm -rf {folder_dir}")
         fo.create_new_case_folder(folder_dir)
@@ -153,7 +156,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
             max_dom = len(da_domains)
             start_date = initial_time
             total_hours = analysis_hours
-            wps_interval = int(6)
+            wps_interval = cycling_interval
         if period == 'forecast':
             max_dom = len(forecast_domains)
             start_date = anl_end_time
@@ -207,6 +210,11 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         namelist_input.substitude_string('max_dom',          ' = ', f"{str(max_dom)}, ")
         namelist_input.substitude_string('history_outname',  ' = ', f"'{folder_dir}/{initial_time_str}/wrfout_d<domain>_<date>'")
         namelist_input.substitude_string('rst_outname',      ' = ', f"'{folder_dir}/{initial_time_str}/wrfrst_d<domain>_<date>'")
+
+        if boundary_data == 'GFS':
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
+            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
+
         namelist_input.save_content()
 
         print(f"Create Geogrid_Data in {folder_dir}")
@@ -222,12 +230,12 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         print('Copy the boundary condition data into Boundary_Condition_Data')
 
         for idth in range(0, total_hours + wps_interval, wps_interval):
+            time_now = initial_time + datetime.timedelta(hours = idth)
             if period == 'cycling_da': fhours = 0
             if period == 'forecast':
                 time_now = anl_end_time
                 fhours = idth
 
-            time_now = initial_time + datetime.timedelta(hours = idth)
             time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
             time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
             time_now_YYYY = time_now.strftime('%Y')
@@ -238,13 +246,12 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
             print(dir_bc_filename)
 
-            if os.path.exists(dir_bc_filename):
-                os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
-            else:
+            if not os.path.exists(dir_bc_filename):
                 rda_bc_filename = os.path.join(dir_rda, time_now_YYYY, time_now_YYYYMMDD, bc_filename)
                 response = requests.get(rda_bc_filename, stream=True)
                 with open(dir_bc_filename, "wb") as f:
                     f.write(response.content)
+            os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
 
         # Set the variable in the run_wps.sh
         if boundary_data == 'GFS': vtable = 'Vtable.GFS'
@@ -254,6 +261,10 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         run_wps.substitude_string('#SBATCH -J', ' ', initial_time_str[2::])
         run_wps.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
         run_wps.substitude_string('ln -sf $WORK_DIRECTORY/WPS/ungrib/Variable_Tables', '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
+
+        if boundary_data == 'GFS':
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gfs* $RUN_WRF_DIRECTORY')
+
         run_wps.save_content()
 
         # Set the variable in the run_wrf.sh
@@ -271,6 +282,16 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         print('Copy run_wrf.sh into Run_WRF')
         shutil.copy(run_wrf_dir, os.path.join(folder_dir, 'Run_WRF'))
         print('\n')
+
+        # Run WPS
+        print(f'Run WPS from {start_date} to {end_date}')
+        submit_job(dir_script=os.path.join(folder_dir, 'Run_WRF'),
+                   script_name='run_wps.sh',
+                   whether_wait=whether_wait,
+                   nodes=nodes,
+                   ntasks=ntasks,
+                   account=account,
+                   partition=partition)
 
     os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
     wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')

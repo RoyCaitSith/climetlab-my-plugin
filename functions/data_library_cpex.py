@@ -10,6 +10,7 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'dir_GFS': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/data/GFS',
     'dir_GDAS': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/data/GDAS',
     'dir_GOES': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/data/GOES',
+    'dir_GEFS': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/data/GEFS',
     'itime': (2022, 9, 16,  0, 0, 0),
     'forecast_hours': 240,
     'dir_scratch': '/scratch/general/nfs1/u1237353',

@@ -47,7 +47,7 @@ def download_goes_data_specific_days(download_start_time, n_days, data_set, dir_
 
 def download_goes_data_cycling_da(data_library_name, dir_case, case_name, data_set):
 
-
+    ####Unfinished
 
     bucket_name = "gcp-public-data-goes-16"
     storage_client = storage.Client.create_anonymous_client()
