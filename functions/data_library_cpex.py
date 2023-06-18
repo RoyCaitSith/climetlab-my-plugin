@@ -19,7 +19,7 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'da_domains': ['d01', 'd02'],
     'forecast_domains': ['d02'],
     'GFDL_domains': ['d01'],
-    'wps_interval': 3,
+    'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',

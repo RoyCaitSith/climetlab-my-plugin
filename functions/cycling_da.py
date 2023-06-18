@@ -281,7 +281,6 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         shutil.copy(run_wps_dir, os.path.join(folder_dir, 'Run_WRF'))
         print('Copy run_wrf.sh into Run_WRF')
         shutil.copy(run_wrf_dir, os.path.join(folder_dir, 'Run_WRF'))
-        print('\n')
 
         # Run WPS
         print(f'Run WPS from {start_date} to {end_date}')
@@ -292,6 +291,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
                    ntasks=ntasks,
                    account=account,
                    partition=partition)
+        print('\n')
 
     os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
     wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')

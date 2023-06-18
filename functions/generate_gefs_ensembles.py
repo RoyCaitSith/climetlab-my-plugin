@@ -1,9 +1,11 @@
 import os
+import shutil
 import datetime
 import importlib
 import subprocess
 import file_operations as fo
 from tqdm.notebook import tqdm
+from cycling_da import submit_job
 
 def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
@@ -87,7 +89,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, member, boundary_data, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, member, boundary_data, whether_wait, nodes, ntasks, account, partition):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -111,7 +113,7 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
     run_wps_dir        = os.path.join(dir_namelists, 'run_wps.sh')
     run_wrf_dir        = os.path.join(dir_namelists, 'run_wrf.sh')
 
-    print(f'Generate 6 and 12 hour ensemble forecasts for each cycles')
+    #print(f'Generate 6 and 12 hour ensemble forecasts for each cycles')
     ensemble_forecast_hours = [6, 12]
     for ens_hours in ensemble_forecast_hours:
         for idens in range(1, member+1):
@@ -122,7 +124,7 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                 folder_dir = os.path.join(dir_scratch, case)
                 os.system(f"rm -rf {folder_dir}")
                 fo.create_new_case_folder(folder_dir)
-                print(folder_dir)
+                #print(folder_dir)
 
                 start_date_str = ''
                 end_date_str = ''
@@ -144,14 +146,13 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                 analysis_hours   = da_cycle*cycling_interval
 
                 max_dom = len(da_domains)
-                total_hours = ens_hours
                 wps_interval = cycling_interval
-                start_date = initial_time + datetime.timedelta(hours = total_hours - ens_hours)
-                end_date = initial_time + datetime.timedelta(hours = total_hours)
-                print(f"domains: {max_dom}")
-                print(f"start_date: {start_date}")
-                print(f"end_date: {end_date}")
-                print(f"total_hours: {total_hours}")
+                start_date = anl_end_time - datetime.timedelta(hours = ens_hours)
+                end_date = anl_end_time
+                #print(f"domains: {max_dom}")
+                #print(f"start_date: {start_date}")
+                #print(f"end_date: {end_date}")
+                #print(f"ens_hours: {ens_hours}")
 
                 # Set the variables in the namelist.wps
                 namelist_wps = fo.change_content(namelist_wps_dir)
@@ -171,8 +172,8 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                 # Set the variables in the namelist.input
                 namelist_input = fo.change_content(namelist_input_dir)
                 # Time_Control
-                run_days_str   = f"{str(total_hours//24)}, "
-                run_hours_str  = f"{str(total_hours %24)}, "
+                run_days_str   = f"{str(ens_hours//24)}, "
+                run_hours_str  = f"{str(ens_hours %24)}, "
                 start_YYYY_str = max_dom * f"{start_date.strftime('%Y')}, "
                 start_MM_str   = max_dom * f"{start_date.strftime('%m')}, "
                 start_DD_str   = max_dom * f"{start_date.strftime('%d')}, "
@@ -200,30 +201,30 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                 namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
                 namelist_input.save_content()
 
-                print(f"Create Geogrid_Data in {folder_dir}")
+                #print(f"Create Geogrid_Data in {folder_dir}")
                 os.mkdir(os.path.join(folder_dir, 'Geogrid_Data'))
-                print(f"Create Boundary_Condition_Data in {folder_dir}")
+                #print(f"Create Boundary_Condition_Data in {folder_dir}")
                 os.mkdir(os.path.join(folder_dir, 'Boundary_Condition_Data'))
-                print(f"Create Metgrid_Data in {folder_dir}")
+                #print(f"Create Metgrid_Data in {folder_dir}")
                 os.mkdir(os.path.join(folder_dir, 'Metgrid_Data'))
-                print(f"Create Run_WRF in {folder_dir}")
+                #print(f"Create Run_WRF in {folder_dir}")
                 os.mkdir(os.path.join(folder_dir, 'Run_WRF'))
-                print(f"Create {initial_time_str} in {folder_dir}")
+                #print(f"Create {initial_time_str} in {folder_dir}")
                 os.mkdir(os.path.join(folder_dir, initial_time_str))
-                print('Copy the boundary condition data into Boundary_Condition_Data')
+                #print('Copy the boundary condition data into Boundary_Condition_Data')
 
-                fhours = 0
-                for idth in range(0, total_hours + wps_interval, wps_interval):
-                    time_now = start_date + datetime.timedelta(hours = idth)
-                    time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
-                    time_now_HH = time_now.strftime('%H')
-                    bc_filename = f'gep{str(idens).zfill(2)}.t{time_now_HH}z.pgrb2c.0p50.f{str(fhours).zfill(3)}'
+                time_now = start_date
+                time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
+                time_now_HH = time_now.strftime('%H')
+                for idth in range(0, ens_hours + wps_interval, wps_interval):
+                    bc_filename = f'gep{str(idens).zfill(2)}.t{time_now_HH}z.pgrb2c.0p50.f{str(idth).zfill(3)}'
                     dir_bc_filename = os.path.join(dir_GEFS, time_now_YYYYMMDD, time_now_HH, bc_filename)
                     os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
+                    #print(dir_bc_filename)
 
                 # Set the variable in the run_wps.sh
                 if boundary_data == 'GEFS': vtable = 'Vtable.GFSENS'
-                print(f"Vtable of Boundary Condition: {vtable}")
+                #print(f"Vtable of Boundary Condition: {vtable}")
 
                 run_wps = fo.change_content(run_wps_dir)
                 run_wps.substitude_string('#SBATCH -J', ' ', initial_time_str[2::])
@@ -238,15 +239,14 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                 run_wrf.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
                 run_wrf.save_content()
 
-                print('Copy namelist.wps into Run_WRF')
+                #print('Copy namelist.wps into Run_WRF')
                 shutil.copy(namelist_wps_dir, folder_dir)
-                print('Copy namelist.input into Run_WRF')
+                #print('Copy namelist.input into Run_WRF')
                 shutil.copy(namelist_input_dir, folder_dir)
-                print('Copy run_wps.sh into Run_WRF')
+                #print('Copy run_wps.sh into Run_WRF')
                 shutil.copy(run_wps_dir, os.path.join(folder_dir, 'Run_WRF'))
-                print('Copy run_wrf.sh into Run_WRF')
+                #print('Copy run_wrf.sh into Run_WRF')
                 shutil.copy(run_wrf_dir, os.path.join(folder_dir, 'Run_WRF'))
-                print('\n')
 
                 # Run WPS
                 print(f'Run WPS from {start_date} to {end_date}')
@@ -257,3 +257,99 @@ def gefs_run_wps_and_real(data_library_name, dir_case, case_name, exp_name, memb
                            ntasks=ntasks,
                            account=account,
                            partition=partition)
+                print('\n')
+
+def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    itime = attributes[(dir_case, case_name)]['itime']
+    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
+    da_domains = attributes[(dir_case, case_name)]['da_domains']
+    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    history_interval = attributes[(dir_case, case_name)]['history_interval']
+
+    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
+    initial_time = datetime.datetime(*itime)
+    initial_time_str = initial_time.strftime('%Y%m%d%H')
+    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+    time_start = anl_end_time
+    time_end = time_start + datetime.timedelta(hours=forecast_hours)
+    dir_da = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'da')
+    dir_bkg = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
+    dir_case = os.path.join(dir_scratch, case)
+
+    # Check the existence of wrf_inout
+    result_wrf_inout = check_file_existence(time_start=time_start,
+                                            time_end=time_start,
+                                            directories=[dir_da],
+                                            file_format='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
+                                            domains=da_domains,
+                                            history_interval=cycling_interval)
+    if not result_wrf_inout:
+        print('No wrf_inout file')
+        return
+    print('Finsh checking the existence of wrf_inout')
+
+    # Check the existence of wrfout
+    print('Check wrfout files')
+    result_wrfout = check_file_existence(time_start=time_start,
+                                         time_end=time_end,
+                                         directories=[dir_bkg, os.path.join(dir_case, initial_time_str)],
+                                         file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                                         domains=forecast_domains,
+                                         history_interval=history_interval)
+
+    if not result_wrfout:
+        # Copy wrfinput
+        print('Wrfout does not exist! Start to copy wrf_inout to run the forecast')
+        copy_files(time_start=time_start,
+                   time_end=time_start,
+                   dir_src=dir_da,
+                   file_format_src='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
+                   dir_dst=os.path.join(dir_case, 'Run_WRF'),
+                   file_format_dst='wrfinput_{dom}',
+                   domains=da_domains,
+                   history_interval=cycling_interval)
+
+        # Time_Control
+        print('Revise namelist.input')
+        update_namelist_time_control(time_start, time_end, forecast_hours, dir_case, forecast_domains, history_interval)
+
+        # Run wrf to get the forecast
+        print(f'Run wrf from {time_start} to {time_end}')
+        submit_job(dir_script=os.path.join(dir_case, 'Run_WRF'),
+                   script_name='run_wrf.sh',
+                   whether_wait=whether_wait,
+                   nodes=nodes,
+                   ntasks=ntasks,
+                   account=account,
+                   partition=partition)
+
+        if whether_wait:
+            # Check the existence of wrfout while finishing
+            print('Check wrfout files after running forecast')
+            result_wrfout = check_file_existence(time_start=time_start,
+                                                 time_end=time_end,
+                                                 directories=[dir_bkg, os.path.join(dir_case, initial_time_str)],
+                                                 file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                                                 domains=forecast_domains,
+                                                 history_interval=history_interval)
+            if not result_wrfout: print('Fail to run wrf forecast')
+
+    if result_wrfout:
+        print(f'Move wrf forecasts from {time_start} to {time_end}')
+        move_files(time_start=time_start,
+                   time_end=time_end,
+                   dir_src=os.path.join(dir_case, initial_time_str),
+                   file_format_src='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   dir_dst=dir_bkg,
+                   file_format_dst='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   domains=forecast_domains,
+                   history_interval=history_interval)
