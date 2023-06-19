@@ -95,7 +95,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
 
     return
 
-def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, boundary_data, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -109,6 +109,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
     itime = attributes[(dir_case, case_name)]['itime']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    boundary_data_deterministic = attributes[(dir_case, case_name)]['boundary_data_deterministic']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
@@ -211,7 +212,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         namelist_input.substitude_string('history_outname',  ' = ', f"'{folder_dir}/{initial_time_str}/wrfout_d<domain>_<date>'")
         namelist_input.substitude_string('rst_outname',      ' = ', f"'{folder_dir}/{initial_time_str}/wrfrst_d<domain>_<date>'")
 
-        if boundary_data == 'GFS':
+        if boundary_data_deterministic == 'GFS':
             namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
 
@@ -240,7 +241,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
             time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
             time_now_YYYY = time_now.strftime('%Y')
 
-            if boundary_data == 'GFS':
+            if boundary_data_deterministic == 'GFS':
                 bc_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
                 dir_bc_filename = os.path.join(dir_GFS, bc_filename)
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
@@ -254,7 +255,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
             os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
 
         # Set the variable in the run_wps.sh
-        if boundary_data == 'GFS': vtable = 'Vtable.GFS'
+        if boundary_data_deterministic == 'GFS': vtable = 'Vtable.GFS'
         print(f"Vtable of Boundary Condition: {vtable}")
 
         run_wps = fo.change_content(run_wps_dir)
@@ -262,7 +263,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, b
         run_wps.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
         run_wps.substitude_string('ln -sf $WORK_DIRECTORY/WPS/ungrib/Variable_Tables', '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
 
-        if boundary_data == 'GFS':
+        if boundary_data_deterministic == 'GFS':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gfs* $RUN_WRF_DIRECTORY')
 
         run_wps.save_content()

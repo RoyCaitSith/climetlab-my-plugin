@@ -89,7 +89,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, member, boundary_data, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -102,6 +102,8 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, memb
     itime = attributes[(dir_case, case_name)]['itime']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
+    ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
@@ -116,7 +118,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, memb
     #print(f'Generate 6 and 12 hour ensemble forecasts for each cycles')
     ensemble_forecast_hours = [6, 12]
     for ens_hours in ensemble_forecast_hours:
-        for idens in range(1, member+1):
+        for idens in range(1, int(ensemble_members/2)+1):
             for da_cycle in range(1, total_da_cycles+1):
 
                 # Set the folder name of the new case
@@ -223,7 +225,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, memb
                     #print(dir_bc_filename)
 
                 # Set the variable in the run_wps.sh
-                if boundary_data == 'GEFS': vtable = 'Vtable.GFSENS'
+                if boundary_data_ensemble == 'GEFS': vtable = 'Vtable.GFSENS'
                 #print(f"Vtable of Boundary Condition: {vtable}")
 
                 run_wps = fo.change_content(run_wps_dir)

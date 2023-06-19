@@ -40,8 +40,9 @@ class change_content:
             idx = idx-1
 
     def substitude_string(self, var_name, flag, sub_content):
+        var_pattern = re.escape(var_name)
         for idx, item in enumerate(self.content):
-            if re.match(var_name, item):
+            if re.match(var_pattern, item):
                 #self.content[idx] = var_name + flag + sub_content + " \n"
                 self.content[idx] = ''.join([var_name, flag, sub_content, " \n"])
 
