@@ -297,30 +297,30 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
                 dir_case = os.path.join(dir_scratch, case)
 
                 # Check the existence of wrfinput
-                print('Check wrfinput')
-                result_wrf_inout = check_file_existence(time_start=time_start,
-                                                        time_end=time_start,
-                                                        directories=[os.path.join(dir_case, 'Run_WRF')],
-                                                        file_format='wrfinput_{dom}',
-                                                        domains=da_domains,
-                                                        history_interval=cycling_interval)
+                result_wrfinput = check_file_existence(time_start=time_start,
+                                                       time_end=time_start,
+                                                       directories=[os.path.join(dir_case, 'Run_WRF')],
+                                                       file_format='wrfinput_{dom}',
+                                                       domains=da_domains,
+                                                       history_interval=cycling_interval)
+                print(f'Check wrfinput: {result_wrfinput}')
 
                 # Check the existence of wrfout
-                print('Check wrfout files')
                 result_wrfout = check_file_existence(time_start=time_start,
                                                      time_end=time_end,
                                                      directories=[os.path.join(dir_case, initial_time_str)],
                                                      file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
                                                      domains=da_domains,
                                                      history_interval=cycling_interval)
+                print(f'Check wrfout files: {result_wrfout}')
 
                 if result_wrfinput and not result_wrfout:
                     # Run wrf to get the forecast
                     print(f'Run wrf from {time_start} to {time_end}')
-                    #submit_job(dir_script=os.path.join(dir_case, 'Run_WRF'),
-                               #script_name='run_wrf.sh',
-                               #whether_wait=whether_wait,
-                               #nodes=nodes,
-                               #ntasks=ntasks,
-                               #account=account,
-                               #partition=partition)
+                    submit_job(dir_script=os.path.join(dir_case, 'Run_WRF'),
+                               script_name='run_wrf.sh',
+                               whether_wait=whether_wait,
+                               nodes=nodes,
+                               ntasks=ntasks,
+                               account=account,
+                               partition=partition)
