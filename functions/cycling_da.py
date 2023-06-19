@@ -69,7 +69,6 @@ def update_namelist_time_control(time_start, time_end, forecast_hours, dir_case,
     namelist_input.substitude_string('max_dom', ' = ', str(max_dom))
     namelist_input.substitude_string('run_days', ' = ', f'{forecast_hours // 24},')
     namelist_input.substitude_string('run_hours', ' = ', f'{forecast_hours % 24},')
-    namelist_input.substitude_string('input_from_file', ' = ', '.true., ' + '.false., ' * (max_dom - 1))
     namelist_input.substitude_string('history_interval', ' = ', f'{history_interval*60}, ' * max_dom)
     namelist_input.save_content()
 
@@ -209,6 +208,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         namelist_input.substitude_string('end_hour',         ' = ', end_HH_str)
         namelist_input.substitude_string('interval_seconds', ' = ', str(3600*wps_interval))
         namelist_input.substitude_string('max_dom',          ' = ', f"{str(max_dom)}, ")
+        namelist_input.substitude_string('history_interval', ' = ', f'{history_interval*60}, ' * max_dom)
         namelist_input.substitude_string('history_outname',  ' = ', f"'{folder_dir}/{initial_time_str}/wrfout_d<domain>_<date>'")
         namelist_input.substitude_string('rst_outname',      ' = ', f"'{folder_dir}/{initial_time_str}/wrfrst_d<domain>_<date>'")
 
@@ -361,8 +361,8 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
                    history_interval=cycling_interval)
 
         # Time_Control
-        print('Revise namelist.input')
-        update_namelist_time_control(time_start, time_end, forecast_hours, dir_case, forecast_domains, history_interval)
+        #print('Revise namelist.input')
+        #update_namelist_time_control(time_start, time_end, forecast_hours, dir_case, forecast_domains, history_interval)
 
         # Run wrf to get the forecast
         print(f'Run wrf from {time_start} to {time_end}')
