@@ -295,6 +295,7 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
                 time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
                 time_end = anl_end_time
                 dir_case = os.path.join(dir_scratch, case)
+                print(dir_case)
 
                 # Check the existence of wrfinput
                 result_wrfinput = check_file_existence(time_start=time_start,

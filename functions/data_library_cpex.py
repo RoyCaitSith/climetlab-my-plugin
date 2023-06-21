@@ -24,7 +24,7 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'history_interval': 6,
     'boundary_data_deterministic': 'GFS',
     'boundary_data_ensemble': 'GEFS',
-    'ensemble_members': 2,
+    'ensemble_members': 60,
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
     'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/best_track',
     'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/best_track/2022_09L_Ian.csv',
