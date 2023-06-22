@@ -51,8 +51,12 @@ class change_content:
             if re.search(judge_content, item):
                 self.content[idx] = sub_content
 
-    def add_string(self, add_content):
+    def append_string(self, add_content):
         self.content.append(add_content)
+
+    def add_a_space_satinfo(self):
+        for idx in range(1, len(self.content)):
+            self.content[idx] = ' ' + self.content[idx]
 
     def show_variable(self, var_name):
         for item in self.content:
