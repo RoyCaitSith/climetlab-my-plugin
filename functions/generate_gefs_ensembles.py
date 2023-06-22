@@ -5,7 +5,7 @@ import importlib
 import subprocess
 import file_operations as fo
 from tqdm.notebook import tqdm
-from cycling_da import submit_job, check_file_existence, update_namelist_time_control
+from cycling_da import submit_job, check_file_existence, update_namelist_time_control, copy_files
 
 def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
@@ -285,9 +285,9 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
     anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
 
     ensemble_forecast_hours = [6, 12]
-    for ens_hours in ensemble_forecast_hours:
-        for idens in range(1, int(ensemble_members/2)+1):
-            for da_cycle in range(1, total_da_cycles+1):
+    for da_cycle in range(1, total_da_cycles+1):
+        for ens_hours in ensemble_forecast_hours:
+            for idens in range(1, int(ensemble_members/2)+1):
 
                 # Set the folder name of the new case
                 case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
@@ -325,3 +325,66 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
                                ntasks=ntasks,
                                account=account,
                                partition=partition)
+
+def move_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    itime = attributes[(dir_case, case_name)]['itime']
+    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
+    da_domains = attributes[(dir_case, case_name)]['da_domains']
+    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    history_interval = attributes[(dir_case, case_name)]['history_interval']
+    boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
+    ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    dir_GEFS_WRF_Ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
+
+    initial_time = datetime.datetime(*itime)
+    initial_time_str = initial_time.strftime('%Y%m%d%H')
+    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+
+    ensemble_forecast_hours = [6, 12]
+    for da_cycle in range(1, total_da_cycles+1):
+
+        anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
+        anl_end_time_HH = anl_end_time.strftime('%H')
+        dir_ens = os.path.join(dir_GEFS_WRF_Ensemble, anl_end_time_YYYYMMDD, anl_end_time_HH)
+        os.makedirs(dir_ens, exist_ok=True)
+
+        for ideh, ens_hours in enumerate(ensemble_forecast_hours):
+            for idens in range(1, int(ensemble_members/2)+1):
+
+                # Set the folder name of the new case
+                time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
+                time_end = anl_end_time
+                case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
+                dir_case = os.path.join(dir_scratch, case)
+                print(case)
+
+                # Check the existence of wrfout
+                result_wrfout = check_file_existence(time_start=time_start,
+                                                     time_end=time_end,
+                                                     directories=[os.path.join(dir_case, initial_time_str)],
+                                                     file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                                                     domains=da_domains,
+                                                     history_interval=cycling_interval)
+
+                if result_wrfout:
+                    wrf_ens = '_'.join(['wrfout', '{dom}', str(int(idens+ideh*ensemble_members/2)).zfill(3)])
+                    copy_files(time_start=time_end,
+                               time_end=time_end,
+                               dir_src=os.path.join(dir_case, initial_time_str),
+                               file_format_src='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                               dir_dst=dir_ens,
+                               file_format_dst=wrf_ens,
+                               domains=da_domains,
+                               history_interval=cycling_interval)
+                else:
+                    print(f'Check wrfout files: {result_wrfout}')
