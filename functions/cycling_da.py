@@ -101,8 +101,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     attributes = getattr(module, 'attributes')
 
     # Set the directories of the input files or procedures
-    dir_GFS = attributes[(dir_case, case_name)]['dir_GFS']
-    dir_GDAS = attributes[(dir_case, case_name)]['dir_GDAS']
+    dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     itime = attributes[(dir_case, case_name)]['itime']
@@ -243,7 +242,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
 
             if boundary_data_deterministic == 'GFS':
                 bc_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
-                dir_bc_filename = os.path.join(dir_GFS, bc_filename)
+                dir_bc_filename = os.path.join(dir_data, 'GFS', bc_filename)
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
             print(dir_bc_filename)
 
@@ -300,6 +299,99 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     subprocess.run(command, shell=True)
     image = IPImage(filename=wps_show_dom)
     display(image)
+
+def run_cycling_da(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    itime = attributes[(dir_case, case_name)]['itime']
+    dir_data = attributes[(dir_case, case_name)]['dir_data']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    da_domains = attributes[(dir_case, case_name)]['da_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    dir_gefs_wrf_ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
+    dir_boundary_data_ensemble = attributes[(dir_case, case_name)]['dir_boudnary_data_ensemble']
+    ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
+
+    dir_main = os.path.join(dir_exp, 'cycling_da', case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}")
+    dir_da = os.path.join(dir_main, 'da')
+    dir_bkg = os.path.join(dir_main, 'bkg')
+    dir_gsi = os.path.join(dir_main, 'gsi')
+    dir_option = os.path.join(dir_main, 'option')
+    dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
+
+    initial_time = datetime.datetime(*itime)
+    initial_time_str = initial_time.strftime('%Y%m%d%H')
+    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='DA Cycle', unit="files", bar_format="{desc}: {n}/{total} DA Cycles | {elapsed}<{remaining}"):
+
+        time_now = initial_time + datetime.timedelta(hours=idc*cycling_interval)
+        time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
+        time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
+        time_now_HH = time_now.strftime('%H')
+        print(f"Run GSI at {time_now_YYYYMMDDHH}")
+
+        #for dom in da_domains:
+        for dom in ['d01']:
+
+            print(f"Check wrfinput file for {dom}")
+            wrf_inout = os.path.join(dir_da, f"wrf_inout.{time_now_YYYYMMDDHH}.{dom}")
+            if not os.path.exists(wrf_inout):
+
+                print(f"Copy satbias_out to satbias_out")
+                satbias_out = os.path.join(dir_da, '.'.join(['satbias_out', time_last_str, dom]))
+                os.system(f"cp {satbias_out} {dir_option}/comgsi_satbias_in")
+
+                print(f"Copy satbias_pc.out to satbias_pc.out")
+                satbias_pc_out = os.path.join(dir_da, '.'.join(['satbias_pc', 'out', time_last_str, dom]))
+                os.system(f"cp {satbias_pc_out} {dir_option}/comgsi_satbias_pc_in")
+
+                print(time_now_YYYYMMDDHH)
+                run_gsi_dir = os.path.join(dir_gsi, time_now_YYYYMMDDHH)
+                os.makedirs(run_gsi_dir, exist_ok=True)
+
+                print(f"Create bkg folder, and copy wrfout to bkg")
+                bkg_dir = os.path.join(run_gsi_dir, 'bkg')
+                wrfout  = os.path.join(dir_bkg, '_'.join(['wrfout', dom, time_now.strftime('%Y-%m-%d_%H:00:00')]))
+                os.makedirs(bkg_dir, exist_ok=True)
+                os.system(f"cp {wrfout} {bkg_dir}")
+
+                print(f"Create obs folder, and copy bufr to obs")
+                obs_dir = os.path.join(run_gsi_dir, 'obs')
+                os.makedirs(obs_dir, exist_ok=True)
+                if 'CON' in case_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
+
+                print(f"Create gfsens folder, and copy wrfout to gfsens")
+                gfsens_dir = os.path.join(run_gsi_dir, 'gfsens')
+                os.makedirs(gfsens_dir, exist_ok=True)
+                if boundary_data_ensemble = 'GEFS':
+                    for idens in range(n_ens): os.system(f"ln -sf {dir_gefs_wrf_ensemble}/wrfout_{dom}_{str(idens).zfill(3)} {gfsens_dir}/wrf_en{str(idens).zfill(3)}")
+
+                print(f"Copy, revise, and the script of running gsi at {time_now_str}")
+                run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))
+                run_gsi_input.substitude_string('ANAL_TIME', '=', time_now_str)
+                run_gsi_input.substitude_string('DOMAIN_NAME', '=', dom)
+                run_gsi_input.save_content()
+
+                info = os.popen(f"cd {dir_option} && sbatch ./run_GSI.sh").read()
+                jobid = re.findall(r"\d+\.?\d*", info)
+                print(f"Run gsi for domain {dom} at {time_now_str}, jobid: {jobid}")
+                flag = True
+                while flag:
+                    time.sleep(30)
+                    flag = False
+                    info = os.popen('squeue -u u1237353').read()
+                    number_in_info = re.findall(r"\d+\.?\d*", info)
+                    for num in number_in_info:
+                        if num == jobid[0]:
+                            flag = True
+
+hehehehe
+
+            info 
 
 def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition):
 

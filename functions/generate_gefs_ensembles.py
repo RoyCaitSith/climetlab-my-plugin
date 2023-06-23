@@ -12,7 +12,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    dir_GEFS = attributes[(dir_case, case_name)]['dir_GEFS']
+    dir_data = attributes[(dir_case, case_name)]['dir_data']
     itime = attributes[(dir_case, case_name)]['itime']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
@@ -22,6 +22,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     download_stime = initial_time - datetime.timedelta(hours=cycling_interval)
     download_etime = anl_end_time
     n_download_time = int((download_etime - download_stime).total_seconds()/cycling_interval/3600 + 1)
+    dir_GEFS = os.path.join(dir_data, 'GEFS')
     os.makedirs(dir_GEFS, exist_ok=True)
 
     aws_s3_cp = 'aws s3 cp --no-sign-request '
@@ -96,7 +97,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
     attributes = getattr(module, 'attributes')
 
     # Set the directories of the input files or procedures
-    dir_GEFS = attributes[(dir_case, case_name)]['dir_GEFS']
+    dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     itime = attributes[(dir_case, case_name)]['itime']
@@ -108,6 +109,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
     forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
     forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_GEFS = os.path.join(dir_data, 'GEFS')
 
     # I do not need to set the directories of these files
     namelist_wps_dir   = os.path.join(dir_namelists, 'namelist.wps')

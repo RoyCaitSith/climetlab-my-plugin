@@ -52,6 +52,7 @@ def download_goes_data_cycling_da(data_library_name, dir_case, case_name, data_s
     bucket_name = "gcp-public-data-goes-16"
     storage_client = storage.Client.create_anonymous_client()
     bucket = storage_client.bucket(bucket_name)
+    dir_GOES = os.path.join(dir_data, 'GOES')
 
     for idx in tqdm(range(n_days), desc='Day', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         time_now = download_start_time + datetime.timedelta(days=idx)
@@ -60,7 +61,7 @@ def download_goes_data_cycling_da(data_library_name, dir_case, case_name, data_s
         start_time = datetime.datetime(int(year)-1, 12, 31, 0, 0, 0)
         time_dif = time_now - start_time
         day = str(time_dif.days).zfill(3)
-        dir_day = f"{dir_GOES}/{time_str}"
+        dir_day = os.path.join(dir_GOES, time_str)
 
         os.makedirs(dir_day, exist_ok=True)
 

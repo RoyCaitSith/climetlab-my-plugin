@@ -34,13 +34,14 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
         itime=attributes[(dir_case, case_name)]['itime']
         initial_time = datetime.datetime(*itime)
         forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
+        dir_data=attributes[(dir_case, case_name)]['dir_data']
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
         GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         history_interval=attributes[(dir_case, case_name)]['history_interval']
         dir_track_intensity=attributes[(dir_case, case_name)]['dir_track_intensity']
         NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
-        dir_IMERG=attributes[(dir_case, case_name)]['dir_IMERG']
+        dir_IMERG=os.path.join(dir_data, 'IMERG')
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
 
