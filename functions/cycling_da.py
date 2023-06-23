@@ -315,6 +315,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     dir_gefs_wrf_ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
     boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
+    
 
     dir_main = os.path.join(dir_exp, 'cycling_da', case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_da = os.path.join(dir_main, 'da')
@@ -377,8 +378,8 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
 
                 print(f"Copy, revise, and the script of running gsi at {time_now_YYYYMMDDHH}")
                 run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))
-                run_gsi_input.substitude_string('DATA_DIR', '=', )
-                run_gsi_input.substitude_string('OPTION_ROOT', '=', )
+                run_gsi_input.substitude_string('DATA_DIR', '=', dir_gsi)
+                run_gsi_input.substitude_string('OPTION_ROOT', '=', dir_option)
                 run_gsi_input.substitude_string('ANAL_TIME', '=', time_now_YYYYMMDDHH)
                 run_gsi_input.substitude_string('DOMAIN_NAME', '=', dom)
                 run_gsi_input.save_content()
@@ -395,8 +396,6 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
                     for num in number_in_info:
                         if num == jobid[0]:
                             flag = True
-
-                print(miao)
 
                 info = os.popen(f"grep 'ENDING DATE-TIME' {run_gsi_dir}/case_{dom}/stdout").readlines()
                 if len(info) == 1:
