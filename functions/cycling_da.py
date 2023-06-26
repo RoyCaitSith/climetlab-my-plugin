@@ -50,13 +50,13 @@ def move_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_for
             else:
                 print(f'{file_name_dst} already exists in {dir_dst}')
 
-def update_namelist_time_control(time_start, time_end, forecast_hours, dir_case, forecast_domains, history_interval):
+def update_namelist_time_control(time_start, time_end, forecast_hours, dir_scratch_case, forecast_domains, history_interval):
 
     def update_time_parts(dt, max_dom):
         time_parts = ['%Y', '%m', '%d', '%H']
         return [dt.strftime(time_part) + ', ' for time_part in time_parts]
 
-    namelist_input_dir = os.path.join(dir_case, 'Run_WRF', 'namelist.input')
+    namelist_input_dir = os.path.join(dir_scratch_case, 'Run_WRF', 'namelist.input')
     namelist_input = fo.change_content(namelist_input_dir)
     max_dom = len(forecast_domains)
     start_parts = update_time_parts(time_start, max_dom)
@@ -311,6 +311,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     itime = attributes[(dir_case, case_name)]['itime']
     dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
@@ -318,13 +319,14 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
-    
+
     dir_main = os.path.join(dir_exp, 'cycling_da', case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_da = os.path.join(dir_main, 'da')
     dir_bkg = os.path.join(dir_main, 'bkg')
     dir_gsi = os.path.join(dir_main, 'gsi')
     dir_option = os.path.join(dir_main, 'option')
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
+    dir_scratch_case = os.path.join(dir_scratch, '_'.join([case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}"]))
 
     option_filelist = ['anavinfo_arw_netcdf_glbe', 'cloudy_radiance_info.txt', 'comgsi_namelist.sh', 'comgsi_satbias_in', 'comgsi_satbias_pc_in', \
                        'global_convinfo.txt', 'global_satinfo.txt', 'gsi.x', 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
@@ -332,7 +334,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     print(f"Copy files to dir_option")
     for option_file in option_filelist:
         os.system(f"cp {dir_namelists}/{option_file} {dir_option}/{option_file}")
-    
+
     initial_time = datetime.datetime(*itime)
     initial_time_YYYYMMDDHH = initial_time.strftime('%Y%m%d%H')
     time_last = initial_time
@@ -473,27 +475,23 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
 
         time_last = time_now
         time_now = time_now + datetime.timedelta(hours = cycling_interval)
-
         time_last_YYYYMMDDHH = time_last.strftime('%Y%m%d%H')
         time_now_YYYYMMDDHH  = time_now.strftime('%Y%m%d%H')
 
         #Run WRF
-        print(f"Check wrfout at {dir_case}/{initial_time_str}")
-        print(f"Check wrfout at ', dir_bkg")
+        print(f"Check wrfout at {dir_scratch_case}/{initial_time_YYYYMMDDHH} and dir_bkg")
+        wrfout_exist = check_file_existence(time_start=time_last,
+                                            time_end=time_now,
+                                            directories=[dir_bkg, os.path.join(dir_scratch_case, initial_time_YYYYMMDDHH)],
+                                            file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                                            domains=da_domains,
+                                            history_interval=cycling_interval)
 
-        wrfout_exist = True
-        ctime = time_last
-        while ctime <= time_now:
-            for dom in domains:
-                wrfout_at_dir_case = dir_case + '/' + initial_time_str + '/wrfout_' + dom + '_' + ctime.strftime('%Y-%m-%d_%H:%M:00')
-                wrfout_at_dir_bkg  = dir_bkg + '/wrfout_' + dom + '_' + ctime.strftime('%Y-%m-%d_%H:%M:00')
-                if (not os.path.exists(wrfout_at_dir_case)) and (not os.path.exists(wrfout_at_dir_bkg)):
-                    wrfout_exist = False
-            ctime = ctime + datetime.timedelta(hours = history_interval/60)
+        if not wrfout_exist and idc < total_da_cycles:
 
-        if not wrfout_exist and time_last < anl_end_time:
-
-            namelist_input_dir = dir_case + '/Run_WRF/namelist.input'
+            namelist_input_dir = os.path.join()
+            
+            dir_case + '/Run_WRF/namelist.input'
             namelist_input = fo.change_content(namelist_input_dir)
 
             #Time_Control
@@ -597,7 +595,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     time_end = time_start + datetime.timedelta(hours=forecast_hours)
     dir_da = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'da')
     dir_bkg = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
-    dir_case = os.path.join(dir_scratch, case)
+    dir_scratch_case = os.path.join(dir_scratch, case)
 
     # Check the existence of wrf_inout
     result_wrf_inout = check_file_existence(time_start=time_start,
@@ -615,7 +613,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     print('Check wrfout files')
     result_wrfout = check_file_existence(time_start=time_start,
                                          time_end=time_end,
-                                         directories=[dir_bkg, os.path.join(dir_case, initial_time_str)],
+                                         directories=[dir_bkg, os.path.join(dir_scratch_case, initial_time_str)],
                                          file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
                                          domains=forecast_domains,
                                          history_interval=history_interval)
@@ -627,18 +625,18 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
                    time_end=time_start,
                    dir_src=dir_da,
                    file_format_src='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
-                   dir_dst=os.path.join(dir_case, 'Run_WRF'),
+                   dir_dst=os.path.join(dir_scratch_case, 'Run_WRF'),
                    file_format_dst='wrfinput_{dom}',
                    domains=da_domains,
                    history_interval=cycling_interval)
 
         # Time_Control
         #print('Revise namelist.input')
-        #update_namelist_time_control(time_start, time_end, forecast_hours, dir_case, forecast_domains, history_interval)
+        #update_namelist_time_control(time_start, time_end, forecast_hours, dir_scratch_case, forecast_domains, history_interval)
 
         # Run wrf to get the forecast
         print(f'Run wrf from {time_start} to {time_end}')
-        submit_job(dir_script=os.path.join(dir_case, 'Run_WRF'),
+        submit_job(dir_script=os.path.join(dir_scratch_case, 'Run_WRF'),
                    script_name='run_wrf.sh',
                    whether_wait=whether_wait,
                    nodes=nodes,
@@ -652,7 +650,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
             print('Check wrfout files after running forecast')
             result_wrfout = check_file_existence(time_start=time_start,
                                                  time_end=time_end,
-                                                 directories=[dir_bkg, os.path.join(dir_case, initial_time_str)],
+                                                 directories=[dir_bkg, os.path.join(dir_scratch_case, initial_time_str)],
                                                  file_format='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
                                                  domains=forecast_domains,
                                                  history_interval=history_interval)
@@ -662,7 +660,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
         print(f'Move wrf forecasts from {time_start} to {time_end}')
         move_files(time_start=time_start,
                    time_end=time_end,
-                   dir_src=os.path.join(dir_case, initial_time_str),
+                   dir_src=os.path.join(dir_scratch_case, initial_time_str),
                    file_format_src='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
                    dir_dst=dir_bkg,
                    file_format_dst='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
