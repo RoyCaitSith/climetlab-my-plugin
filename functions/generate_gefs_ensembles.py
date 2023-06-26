@@ -90,7 +90,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition, nodelist):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -261,10 +261,11 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
                            nodes=nodes,
                            ntasks=ntasks,
                            account=account,
-                           partition=partition)
+                           partition=partition,
+                           nodelist=nodelist)
                 print('\n')
 
-def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition):
+def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition, nodelist):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -326,7 +327,8 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
                                nodes=nodes,
                                ntasks=ntasks,
                                account=account,
-                               partition=partition)
+                               partition=partition,
+                               nodelist=nodelist)
 
 def move_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name):
 

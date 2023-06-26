@@ -72,7 +72,7 @@ def update_namelist_time_control(time_start, time_end, forecast_hours, dir_case,
     namelist_input.substitude_string('history_interval', ' = ', f'{history_interval*60}, ' * max_dom)
     namelist_input.save_content()
 
-def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, partition, user_id='u1237353', sleep_interval=15):
+def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, partition, nodelist, user_id='u1237353', sleep_interval=15):
 
     script_name_dir = os.path.join(dir_script, script_name)
     script = fo.change_content(script_name_dir)
@@ -80,6 +80,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
     script.substitude_string('#SBATCH --ntasks', '=', str(ntasks))
     script.substitude_string('#SBATCH --account', '=', account)
     script.substitude_string('#SBATCH --partition', '=', partition)
+    script.substitude_string('#SBATCH --nodelist', '=', nodelist)
     script.save_content()
 
     info = os.popen(f'cd {dir_script} && sbatch {script_name}').read()
@@ -94,7 +95,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
 
     return
 
-def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition):
+def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition, nodelist):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -291,7 +292,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
                    nodes=nodes,
                    ntasks=ntasks,
                    account=account,
-                   partition=partition)
+                   partition=partition,
+                   nodelist=nodelist)
         print('\n')
 
     os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
@@ -301,7 +303,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     image = IPImage(filename=wps_show_dom)
     display(image)
 
-def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntasks, account, partition):
+def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntasks, account, partition, nodelist):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -315,16 +317,22 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     dir_gefs_wrf_ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
     boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
+    dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     
-
     dir_main = os.path.join(dir_exp, 'cycling_da', case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_da = os.path.join(dir_main, 'da')
     dir_bkg = os.path.join(dir_main, 'bkg')
     dir_gsi = os.path.join(dir_main, 'gsi')
     dir_option = os.path.join(dir_main, 'option')
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
-    dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
 
+    option_filelist = ['anavinfo_arw_netcdf_glbe', 'cloudy_radiance_info.txt', 'comgsi_namelist.sh', 'comgsi_satbias_in', 'comgsi_satbias_pc_in', \
+                       'global_convinfo.txt', 'global_satinfo.txt', 'gsi.x', 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
+                       'read_diag_conv.x', 'read_diag_rad_anl.x', 'read_diag_rad_ges_jacobian.x', 'read_diag_rad_ges.x', 'run_gsi.sh', 'run_GSI.sh']
+    print(f"Copy files to dir_option")
+    for option_file in option_filelist:
+        os.system(f"cp {dir_namelists}/{option_file} {dir_option}/{option_file}")
+    
     initial_time = datetime.datetime(*itime)
     initial_time_YYYYMMDDHH = initial_time.strftime('%Y%m%d%H')
     time_last = initial_time
@@ -338,8 +346,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
         time_now_HH = time_now.strftime('%H')
         print(f"Run GSI at {time_now_YYYYMMDDHH}")
 
-        #for dom in da_domains:
-        for dom in ['d01']:
+        for dom in da_domains:
 
             print(f"Check wrfinput file for {dom}")
             wrf_inout = os.path.join(dir_da, f"wrf_inout.{time_now_YYYYMMDDHH}.{dom}")
@@ -368,13 +375,12 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
                 os.makedirs(obs_dir, exist_ok=True)
                 if 'CONV' in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
 
-                print(f"Create gfsens folder, and copy wrfout to gfsens")
-                gfsens_dir = os.path.join(run_gsi_dir, 'gfsens')
-                os.makedirs(gfsens_dir, exist_ok=True)
+                print(f"Create ens folder, and copy wrfout to ens")
+                ens_dir = os.path.join(run_gsi_dir, 'ens')
+                os.makedirs(ens_dir, exist_ok=True)
                 if boundary_data_ensemble == 'GEFS':
-                    #for idens in range(1, int(ensemble_members+1)):
-                    for idens in range(1, int(ensemble_members/2+1)):
-                        os.system(f"ln -sf {dir_gefs_wrf_ensemble}/{time_now_YYYYMMDD}/{time_now_HH}/wrfout_{dom}_{str(idens).zfill(3)} {gfsens_dir}/wrf_en{str(idens).zfill(3)}")
+                    for idens in range(1, int(ensemble_members+1)):
+                        os.system(f"ln -sf {dir_gefs_wrf_ensemble}/{time_now_YYYYMMDD}/{time_now_HH}/wrfout_{dom}_{str(idens).zfill(3)} {ens_dir}/wrf_en{str(idens).zfill(3)}")
 
                 print(f"Copy, revise, and the script of running gsi at {time_now_YYYYMMDDHH}")
                 run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))
@@ -567,7 +573,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
             if os.path.exists(wrfout_at_dir_case):
                 os.system('rm -rf ' + wrfout_at_dir_case)
 
-def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition):
+def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition, nodelist):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -638,7 +644,8 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
                    nodes=nodes,
                    ntasks=ntasks,
                    account=account,
-                   partition=partition)
+                   partition=partition,
+                   nodelist=nodelist)
 
         if whether_wait:
             # Check the existence of wrfout while finishing
