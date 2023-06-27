@@ -16,7 +16,7 @@ from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names):
+def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp_name):
 
     sns_bright_cmap = sns.color_palette('bright')
 
@@ -34,7 +34,7 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names):
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         dir_cygnss = '/'.join([attributes[(dir_case, case_name)]['dir_cygnss'], case_name])
-        dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C03', 'bkg'])
+        dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{cygnss_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
         dir_save = '/'.join([dir_exp, 'draw_Tropics', 'cygnss'])
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
@@ -145,7 +145,7 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names):
         image = IPImage(filename=output_file)
         display(image)
 
-def draw_TROPICS_tpw(data_library_names, dir_cases, case_names):
+def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, cygnss_exp_name):
 
     sns_bright_cmap = sns.color_palette('bright')
 
@@ -162,7 +162,7 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names):
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         product = attributes[(dir_case, case_name)]['product']
         dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-        dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C03', 'bkg'])
+        dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{cygnss_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
         dir_save = '/'.join([dir_exp, 'draw_Tropics', 'total_precipitable_water'])
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])

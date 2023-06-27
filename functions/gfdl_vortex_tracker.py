@@ -27,8 +27,8 @@ def link_wrfout(data_library_name, dir_case, case_name, exp_name):
         initial_time_str = initial_time.strftime('%Y%m%d%H')
         anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         forecast_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
-        dir_in = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
-        dir_out = os.path.join(dir_exp, 'track_intensity', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'wrfprd')
+        dir_in = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
+        dir_out = os.path.join(dir_exp, 'track_intensity', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'wrfprd')
         os.makedirs(dir_out, exist_ok=True)
 
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1

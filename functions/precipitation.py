@@ -17,7 +17,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_names, exp_names):
+def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_names, exp_names, imerg_exp_name='CONV'):
 
     accumulated_hours = 6.0
     IMERG_time_resolution = 0.5
@@ -57,9 +57,9 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
             for dom in tqdm(GFDL_domains, desc='GFDL Domains', leave=False):
 
                 if 'IMERG' in exp_name:
-                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, 'CON_ENS_C'+str(da_cycle).zfill(2), 'bkg'])
+                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{imerg_exp_name}_C{str(da_cycle).zfill(2)}", 'bkg'])
                 else:
-                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', 'Data', case_name, exp_name+'_C'+str(da_cycle).zfill(2), 'bkg'])
+                    dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg'])
                 wrfout = dir_wrfout + f'/wrfout_{dom}_' + initial_time.strftime('%Y-%m-%d_%H:%M:00')
                 ncfile = Dataset(wrfout)
                 RAINNC = getvar(ncfile, 'RAINNC')

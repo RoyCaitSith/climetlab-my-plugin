@@ -149,7 +149,7 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
 
     if wrf_domain:
 
-        dir_wrfout = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, f"{wrf_domain_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg')
+        dir_wrfout = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{wrf_domain_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg')
         wrfout_format = 'wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}'
         file_wrfout_d01 = os.path.join(dir_wrfout, wrfout_format.format(dom='d01', ctime=initial_time))
         file_wrfout_d02 = os.path.join(dir_wrfout, wrfout_format.format(dom='d02', ctime=initial_time))

@@ -130,19 +130,6 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
                 fo.create_new_case_folder(folder_dir)
                 #print(folder_dir)
 
-                start_date_str = ''
-                end_date_str = ''
-                run_days_str = ''
-                run_hours_str = ''
-                start_YYYY_str = ''
-                start_MM_str = ''
-                start_DD_str = ''
-                start_HH_str = ''
-                end_YYYY_str = ''
-                end_MM_str = ''
-                end_DD_str = ''
-                end_HH_str = ''
-
                 initial_time     = datetime.datetime(*itime)
                 initial_time_str = initial_time.strftime('%Y%m%d%H')
                 anl_start_time   = initial_time + datetime.timedelta(hours=cycling_interval)

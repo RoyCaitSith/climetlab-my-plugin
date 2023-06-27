@@ -26,7 +26,7 @@ def check_file_existence(time_start, time_end, directories, file_format, domains
 def copy_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_format_dst, domains, history_interval):
 
     n_time = int((time_end-time_start).total_seconds()/3600/history_interval+1)
-    for idt in tqdm(range(n_time), desc='Files', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+    for idt in tqdm(range(n_time), desc='Time', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         ctime = time_start + datetime.timedelta(hours=idt*history_interval)
         for dom in domains:
             file_name_src = file_format_src.format(dom=dom, ctime=ctime)
@@ -38,7 +38,7 @@ def copy_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_for
 def move_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_format_dst, domains, history_interval):
 
     n_time = int((time_end-time_start).total_seconds()/3600/history_interval+1)
-    for idt in tqdm(range(n_time), desc='Files', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+    for idt in tqdm(range(n_time), desc='Time', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         ctime = time_start + datetime.timedelta(hours=idt*history_interval)
         for dom in domains:
             file_name_src = file_format_src.format(dom=dom, ctime=ctime)
@@ -50,27 +50,62 @@ def move_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_for
             else:
                 print(f'{file_name_dst} already exists in {dir_dst}')
 
-def update_namelist_time_control(time_start, time_end, forecast_hours, dir_scratch_case, forecast_domains, history_interval):
+def copy_files_after_gsi(dir_option, run_gsi_dir, dir_da, time_now_string, domains):
 
-    def update_time_parts(dt, max_dom):
-        time_parts = ['%Y', '%m', '%d', '%H']
-        return [dt.strftime(time_part) + ', ' for time_part in time_parts]
+    for dom in domains:
 
-    namelist_input_dir = os.path.join(dir_scratch_case, 'Run_WRF', 'namelist.input')
-    namelist_input = fo.change_content(namelist_input_dir)
-    max_dom = len(forecast_domains)
-    start_parts = update_time_parts(time_start, max_dom)
-    end_parts = update_time_parts(time_end, max_dom)
-    for idx, time_part in enumerate(['start_year', 'start_month', 'start_day', 'start_hour']):
-        namelist_input.substitude_string(time_part, ' = ', start_parts[idx] * max_dom)
-    for idx, time_part in enumerate(['end_year', 'end_month', 'end_day', 'end_hour']):
-        namelist_input.substitude_string(time_part, ' = ', end_parts[idx] * max_dom)
+        diag_conv_ges    = os.path.join(dir_da, '.'.join(['diag_conv_ges', time_now_string, dom]))
+        results_conv_ges = os.path.join(dir_da, '.'.join(['results_conv_ges', time_now_string, dom]))
+        f = open(os.path.join(dir_option, 'namelist.conv'), 'w')
+        f.write(f"&iosetup\n")
+        f.write(f" infilename='{diag_conv_ges}',\n")
+        f.write(f" outfilename='{results_conv_ges}',\n")
+        f.write(f"/")
+        f.close()
 
-    namelist_input.substitude_string('max_dom', ' = ', str(max_dom))
-    namelist_input.substitude_string('run_days', ' = ', f'{forecast_hours // 24},')
-    namelist_input.substitude_string('run_hours', ' = ', f'{forecast_hours % 24},')
-    namelist_input.substitude_string('history_interval', ' = ', f'{history_interval*60}, ' * max_dom)
-    namelist_input.save_content()
+        print(f"Copy diag conv ges files")
+        os.system(f"cp {dir_option}/namelist.conv {dir_da}")
+        os.system(f"cp {dir_option}/read_diag_conv.x {dir_da}")
+        os.system(f"cp {run_gsi_dir}/case_{dom}/diag_conv_ges.* {diag_conv_ges}")
+
+        print(f"Run read_diag_conv.x")
+        os.system(f"cd {dir_da} && ./read_diag_conv.x")
+        os.system(f"rm -rf {dir_da}/namelist.conv")
+        os.system(f"rm -rf {dir_da}/read_diag_conv.x")
+
+        diag_conv_anl    = os.path.join(dir_da, '.'.join(['diag_conv_anl', time_now_string, dom]))
+        results_conv_anl = os.path.join(dir_da, '.'.join(['results_conv_anl', time_now_string, dom]))
+        f = open(os.path.join(dir_option, 'namelist.conv'), 'w')
+        f.write(f"&iosetup\n")
+        f.write(f" infilename='{diag_conv_anl}',\n")
+        f.write(f" outfilename='{results_conv_anl}',\n")
+        f.write(f"/")
+        f.close()
+
+        print(f"Copy diag conv anl files")
+        os.system(f"cp {dir_option}/namelist.conv {dir_da}")
+        os.system(f"cp {dir_option}/read_diag_conv.x {dir_da}")
+        os.system(f"cp {run_gsi_dir}/case_{dom}/diag_conv_anl.* {diag_conv_anl}")
+
+        print(f"Run read_diag_conv.x")
+        os.system(f"cd {dir_da} && ./read_diag_conv.x")
+        os.system(f"rm -rf {dir_da}/namelist.conv")
+        os.system(f"rm -rf {dir_da}/read_diag_conv.x")
+
+        print(f"Save ens_spread.grd")
+        ens_spread = os.path.join(dir_da, '_'.join(['ens', 'spread', time_now_string, f"{dom}.grd"]))
+        os.system(f"cp {run_gsi_dir}/case_{dom}/ens_spread.grd {ens_spread}")
+
+        print(f"Copy satbias_out")
+        satbias_out = os.path.join(dir_da, '.'.join(['satbias_out', time_now_string, dom]))
+        os.system(f"cp {run_gsi_dir}/case_{dom}/satbias_out {satbias_out}")
+
+        print(f"Copy satbias_pc.out")
+        satbias_pc_out = os.path.join(dir_da, '.'.join(['satbias_pc', 'out', time_now_string, dom]))
+        os.system(f"cp {run_gsi_dir}/case_{dom}/satbias_pc.out {satbias_pc_out}")
+
+        print(f"Save wrf_inout of domain {dom}")
+        os.system(f"cp {run_gsi_dir}/case_{dom}/wrf_inout {dir_da}/wrf_inout.{time_now_string}.{dom}")
 
 def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, partition, nodelist, user_id='u1237353', sleep_interval=15):
 
@@ -133,19 +168,6 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         os.system(f"rm -rf {folder_dir}")
         fo.create_new_case_folder(folder_dir)
         print(folder_dir)
-
-        start_date_str = ''
-        end_date_str = ''
-        run_days_str = ''
-        run_hours_str = ''
-        start_YYYY_str = ''
-        start_MM_str = ''
-        start_DD_str = ''
-        start_HH_str = ''
-        end_YYYY_str = ''
-        end_MM_str = ''
-        end_DD_str = ''
-        end_HH_str = ''
 
         initial_time     = datetime.datetime(*itime)
         initial_time_str = initial_time.strftime('%Y%m%d%H')
@@ -303,7 +325,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     image = IPImage(filename=wps_show_dom)
     display(image)
 
-def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntasks, account, partition, nodelist):
+def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
+                   gsi_nodes, gsi_ntasks, gsi_account, gsi_partition, gsi_nodelist, \
+                   wrf_nodes, wrf_ntasks, wrf_account, wrf_partition, wrf_nodelist):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -320,7 +344,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
 
-    dir_main = os.path.join(dir_exp, 'cycling_da', case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}")
+    dir_main = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_da = os.path.join(dir_main, 'da')
     dir_bkg = os.path.join(dir_main, 'bkg')
     dir_gsi = os.path.join(dir_main, 'gsi')
@@ -392,77 +416,25 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
                 run_gsi_input.substitude_string('DOMAIN_NAME', '=', dom)
                 run_gsi_input.save_content()
 
-                info = os.popen(f"cd {dir_option} && sbatch ./run_GSI.sh").read()
-                jobid = re.findall(r"\d+\.?\d*", info)
-                print(f"Run gsi for domain {dom} at {time_now_YYYYMMDDHH}, jobid: {jobid}")
-                flag = True
-                while flag:
-                    time.sleep(30)
-                    flag = False
-                    info = os.popen('squeue -u u1237353').read()
-                    number_in_info = re.findall(r"\d+\.?\d*", info)
-                    for num in number_in_info:
-                        if num == jobid[0]:
-                            flag = True
+                print(f"Run gsi for domain {dom} at {time_now_YYYYMMDDHH}")
+                submit_job(dir_script=dir_option,
+                           script_name='run_GSI.sh',
+                           whether_wait=True,
+                           nodes=gsi_nodes,
+                           ntasks=gsi_ntasks,
+                           account=gsi_account,
+                           partition=gsi_partition,
+                           nodelist=gsi_nodelist)
 
                 info = os.popen(f"grep 'ENDING DATE-TIME' {run_gsi_dir}/case_{dom}/stdout").readlines()
                 if len(info) == 1:
 
                     print(f"Finish running gsi at {time_now_YYYYMMDDHH} for {dom}")
-
-                    diag_conv_ges    = os.path.join(dir_da, '.'.join(['diag_conv_ges', time_now_YYYYMMDDHH, dom]))
-                    results_conv_ges = os.path.join(dir_da, '.'.join(['results_conv_ges', time_now_YYYYMMDDHH, dom]))
-                    f = open(os.path.join(dir_option, 'namelist.conv'), 'w')
-                    f.write(f"&iosetup\n")
-                    f.write(f" infilename='{diag_conv_ges}',\n")
-                    f.write(f" outfilename='{results_conv_ges}',\n")
-                    f.write(f"/")
-                    f.close()
-
-                    print(f"Copy diag conv ges files")
-                    os.system(f"cp {dir_option}/namelist.conv {dir_da}")
-                    os.system(f"cp {dir_option}/read_diag_conv.x {dir_da}")
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/diag_conv_ges.* {diag_conv_ges}")
-
-                    print(f"Run read_diag_conv.x")
-                    os.system(f"cd {dir_da} && ./read_diag_conv.x")
-                    os.system(f"rm -rf {dir_da}/namelist.conv")
-                    os.system(f"rm -rf {dir_da}/read_diag_conv.x")
-
-                    diag_conv_anl    = os.path.join(dir_da, '.'.join(['diag_conv_anl', time_now_YYYYMMDDHH, dom]))
-                    results_conv_anl = os.path.join(dir_da, '.'.join(['results_conv_anl', time_now_YYYYMMDDHH, dom]))
-                    f = open(os.path.join(dir_option, 'namelist.conv'), 'w')
-                    f.write(f"&iosetup\n")
-                    f.write(f" infilename='{diag_conv_anl}',\n")
-                    f.write(f" outfilename='{results_conv_anl}',\n")
-                    f.write(f"/")
-                    f.close()
-
-                    print(f"Copy diag conv anl files")
-                    os.system(f"cp {dir_option}/namelist.conv {dir_da}")
-                    os.system(f"cp {dir_option}/read_diag_conv.x {dir_da}")
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/diag_conv_anl.* {diag_conv_anl}")
-
-                    print(f"Run read_diag_conv.x")
-                    os.system(f"cd {dir_da} && ./read_diag_conv.x")
-                    os.system(f"rm -rf {dir_da}/namelist.conv")
-                    os.system(f"rm -rf {dir_da}/read_diag_conv.x")
-
-                    print(f"Save ens_spread.grd")
-                    ens_spread = os.path.join(dir_da, '_'.join(['ens', 'spread', time_now_YYYYMMDDHH, f"{dom}.grd"]))
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/ens_spread.grd {ens_spread}")
-
-                    print(f"Copy satbias_out")
-                    satbias_out = os.path.join(dir_da, '.'.join(['satbias_out', time_now_YYYYMMDDHH, dom]))
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/satbias_out {satbias_out}")
-
-                    print(f"Copy satbias_pc.out")
-                    satbias_pc_out = os.path.join(dir_da, '.'.join(['satbias_pc', 'out', time_now_YYYYMMDDHH, dom]))
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/satbias_pc.out {satbias_pc_out}")
-
-                    print(f"Save wrf_inout of domain {dom}")
-                    os.system(f"cp {run_gsi_dir}/case_{dom}/wrf_inout {wrf_inout}")
-
+                    copy_files_after_gsi(dir_option=dir_option,
+                                         run_gsi_dir=run_gsi_dir,
+                                         dir_da=dir_da,
+                                         time_now_string=time_now_YYYYMMDDHH,
+                                         domains=[dom])
                     print(f"Delete slurm...")
                     os.system(f"rm -rf {dir_option}/slurm*")
 
@@ -489,87 +461,72 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, nodes, ntas
 
         if not wrfout_exist and idc < total_da_cycles:
 
-            namelist_input_dir = os.path.join()
-            
-            dir_case + '/Run_WRF/namelist.input'
+            namelist_input_dir = os.path.join(dir_scratch_case, 'Run_WRF', 'namelist.input')
             namelist_input = fo.change_content(namelist_input_dir)
+            max_dom = len(da_domains)
 
             #Time_Control
+            start_YYYY_str = max_dom * f"{time_last.strftime('%Y')}, "
+            start_MM_str   = max_dom * f"{time_last.strftime('%m')}, "
+            start_DD_str   = max_dom * f"{time_last.strftime('%d')}, "
+            start_HH_str   = max_dom * f"{time_last.strftime('%H')}, "
+            end_YYYY_str   = max_dom * f"{time_now.strftime('%Y')}, "
+            end_MM_str     = max_dom * f"{time_now.strftime('%m')}, "
+            end_DD_str     = max_dom * f"{time_now.strftime('%d')}, "
+            end_HH_str     = max_dom * f"{time_now.strftime('%H')}, "
+
             namelist_input.substitude_string('max_dom', ' = ', str(max_dom))
             namelist_input.substitude_string('run_days',  ' = ', str(cycling_interval//24) + ',')
             namelist_input.substitude_string('run_hours', ' = ', str(cycling_interval%24) + ',')
-            namelist_input.substitude_string('input_from_file', ' = ', '.true., ' * max_dom)
-
-            YYYY_str = time_last.strftime('%Y') + ', '
-            MM_str   = time_last.strftime('%m') + ', '
-            DD_str   = time_last.strftime('%d') + ', '
-            HH_str   = time_last.strftime('%H') + ', '
-            YYYY_str = YYYY_str * max_dom
-            MM_str   = MM_str * max_dom
-            DD_str   = DD_str * max_dom
-            HH_str   = HH_str * max_dom
-            namelist_input.substitude_string('start_year', ' = ', YYYY_str)
-            namelist_input.substitude_string('start_month', ' = ', MM_str)
-            namelist_input.substitude_string('start_day', ' = ', DD_str)
-            namelist_input.substitude_string('start_hour', ' = ', HH_str)
-
-            YYYY_str = time_now.strftime('%Y') + ', '
-            MM_str   = time_now.strftime('%m') + ', '
-            DD_str   = time_now.strftime('%d') + ', '
-            HH_str   = time_now.strftime('%H') + ', '
-            YYYY_str = YYYY_str * max_dom
-            MM_str   = MM_str * max_dom
-            DD_str   = DD_str * max_dom
-            HH_str   = HH_str * max_dom
-            namelist_input.substitude_string('end_year', ' = ', YYYY_str)
-            namelist_input.substitude_string('end_month', ' = ', MM_str)
-            namelist_input.substitude_string('end_day', ' = ', DD_str)
-            namelist_input.substitude_string('end_hour', ' = ', HH_str)
-
-            history_interval_str = str(history_interval) + ', '
-            history_interval_str = history_interval_str * max_dom
-            namelist_input.substitude_string('history_interval', ' = ', history_interval_str)
+            namelist_input.substitude_string('start_year', ' = ', start_YYYY_str)
+            namelist_input.substitude_string('start_month', ' = ', start_MM_str)
+            namelist_input.substitude_string('start_day', ' = ', start_DD_str)
+            namelist_input.substitude_string('start_hour', ' = ', start_HH_str)
+            namelist_input.substitude_string('end_year', ' = ', end_YYYY_str)
+            namelist_input.substitude_string('end_month', ' = ', end_MM_str)
+            namelist_input.substitude_string('end_day', ' = ', end_DD_str)
+            namelist_input.substitude_string('end_hour', ' = ', end_HH_str)
+            namelist_input.substitude_string('history_interval', ' = ', max_dom * f"{str(cycling_interval*60)}, ")
             namelist_input.save_content()
 
-            print('Copy wrfinput')
-            for dom in domains:
-                wrf_inout = dir_da + '/wrf_inout.' + time_last_str + '.' + dom
-                os.system('cp ' + wrf_inout + ' ' + dir_case + '/Run_WRF/wrfinput_' + dom)
+            print('Copy wrfinput to Run_WRF')
+            copy_files(time_start=time_last,
+                       time_end=time_last,
+                       dir_src=dir_da,
+                       file_format_src='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
+                       dir_dst=os.path.join(dir_scratch_case, 'Run_WRF'),
+                       file_format_dst='wrfinput_{dom}',
+                       domains=da_domains,
+                       history_interval=cycling_interval)
 
             #run wrf to get the forecast
-            info = os.popen('cd ' + dir_case + '/Run_WRF && sbatch run_wrf.sh').read()
-            jobid = re.findall(r"\d+\.?\d*", info)
-            print('Run wrf from ', time_last, ' to ', time_now, ', jobid: ', jobid)
-            flag = True
-            while flag:
-                time.sleep(30)
-                flag = False
-                info = os.popen('squeue -u u1237353').read()
-                number_in_info = re.findall(r"\d+\.?\d*", info)
-                for num in number_in_info:
-                    if num == jobid[0]:
-                        flag = True
+            print(f"Run wrf from {time_last} to {time_now}")
+            submit_job(dir_script=os.path.join(dir_scratch_case, 'Run_WRF'),
+                       script_name='run_wrf.sh',
+                       whether_wait=True,
+                       nodes=wrf_nodes,
+                       ntasks=wrf_ntasks,
+                       account=wrf_account,
+                       partition=wrf_partition,
+                       nodelist=wrf_nodelist)
 
-            print('Finish running wrf from ', time_last, ' to ', time_now)
+            print(f"Finish running wrf from {time_last} to {time_now}")
 
         #move the forecast files to the bkg folder
-        print('move the forecast files to the bkg folder at ', time_now)
-        ctime = time_last
-        while ctime <= time_now:
-            for dom in domains:
-                wrfout_at_dir_case = dir_case + '/' + initial_time_str + '/wrfout_' + dom + '_' + ctime.strftime('%Y-%m-%d_%H:%M:00')
-                wrfout_at_dir_bkg  = dir_bkg + '/wrfout_' + dom + '_' + ctime.strftime('%Y-%m-%d_%H:%M:00')
-                if os.path.exists(wrfout_at_dir_case) and not os.path.exists(wrfout_at_dir_bkg):
-                    os.system('mv ' + wrfout_at_dir_case + ' ' + wrfout_at_dir_bkg)
-                    print(wrfout_at_dir_case)
-            ctime = ctime + datetime.timedelta(hours = history_interval/60)
+        print(f"move the forecast files to the bkg folder at {time_now}")
+        move_files(time_start=time_last,
+                   time_end=time_now,
+                   dir_src=os.path.join(dir_scratch_case, initial_time_YYYYMMDDHH),
+                   file_format_src='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   dir_dst=dir_bkg,
+                   file_format_dst='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   domains=da_domains,
+                   history_interval=cycling_interval)
 
-        print('remove wrfout files at initial time')
-        ctime = time_last
-        for dom in domains:
-            wrfout_at_dir_case = dir_case + '/' + initial_time_str + '/wrfout_' + dom + '_' + ctime.strftime('%Y-%m-%d_%H:%M:00')
-            if os.path.exists(wrfout_at_dir_case):
-                os.system('rm -rf ' + wrfout_at_dir_case)
+        print('remove wrfout files')
+        for dom in da_domains:
+            wrfout_at_dir_case = f"{dir_scratch_case}/{initial_time_YYYYMMDDHH}/wrfout_{dom}_{time_last.strftime('%Y-%m-%d_%H:%M:00')}"
+            if os.path.exists(wrfout_at_dir_case): os.system(f"rm -rf {wrfout_at_dir_case}")
 
 def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition, nodelist):
 
@@ -586,15 +543,15 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     history_interval = attributes[(dir_case, case_name)]['history_interval']
 
-    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
+    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)], 'Forecast')
     initial_time = datetime.datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
     anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
     anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
     time_start = anl_end_time
     time_end = time_start + datetime.timedelta(hours=forecast_hours)
-    dir_da = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'da')
-    dir_bkg = os.path.join(dir_exp, 'cycling_da', 'Data', case_name, exp_name + '_C' + str(da_cycle).zfill(2), 'bkg')
+    dir_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'da')
+    dir_bkg = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
     dir_scratch_case = os.path.join(dir_scratch, case)
 
     # Check the existence of wrf_inout
@@ -629,10 +586,6 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
                    file_format_dst='wrfinput_{dom}',
                    domains=da_domains,
                    history_interval=cycling_interval)
-
-        # Time_Control
-        #print('Revise namelist.input')
-        #update_namelist_time_control(time_start, time_end, forecast_hours, dir_scratch_case, forecast_domains, history_interval)
 
         # Run wrf to get the forecast
         print(f'Run wrf from {time_start} to {time_end}')
