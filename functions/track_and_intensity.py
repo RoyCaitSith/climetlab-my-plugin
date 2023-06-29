@@ -2,6 +2,7 @@ import os
 import math
 import datetime
 import importlib
+import subprocess
 import numpy as np
 import pandas as pd
 import climetlab as cml

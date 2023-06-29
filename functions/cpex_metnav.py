@@ -3,6 +3,7 @@ import re
 import glob
 import datetime
 import importlib
+import subprocess
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -70,7 +71,6 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name):
     dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
     filenames = glob.glob(os.path.join(dir_data, '*flight_track*csv'))
 
     for filename in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
@@ -144,7 +144,6 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
     filenames = glob.glob(os.path.join(dir_data, '*flight_track*csv'))
 
     if wrf_domain:

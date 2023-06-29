@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import time
 import shutil
 import datetime
@@ -10,6 +9,7 @@ import subprocess
 import file_operations as fo
 import matplotlib.pyplot as plt
 from tqdm.notebook import tqdm
+from IPython.display import display
 from IPython.display import Image as IPImage
 
 def check_file_existence(time_start, time_end, directories, file_format, domains, history_interval):
@@ -107,7 +107,7 @@ def copy_files_after_gsi(dir_option, run_gsi_dir, dir_da, time_now_string, domai
         print(f"Save wrf_inout of domain {dom}")
         os.system(f"cp {run_gsi_dir}/case_{dom}/wrf_inout {dir_da}/wrf_inout.{time_now_string}.{dom}")
 
-def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, partition, nodelist, user_id='u1237353', sleep_interval=15):
+def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, partition, nodelist='', user_id='u1237353', sleep_interval=15):
 
     script_name_dir = os.path.join(dir_script, script_name)
     script = fo.change_content(script_name_dir)
@@ -130,7 +130,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
 
     return
 
-def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition, nodelist):
+def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -318,16 +318,18 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
                    nodelist=nodelist)
         print('\n')
 
-    os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
-    wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')
-    command = f"convert {wps_show_dom} -trim {wps_show_dom}"
-    subprocess.run(command, shell=True)
-    image = IPImage(filename=wps_show_dom)
-    display(image)
+    if period == 'cycling_da':
+        os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
+        wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')
+        command = f"convert {wps_show_dom} -trim {wps_show_dom}"
+        subprocess.run(command, shell=True)
+        image = IPImage(filename=wps_show_dom)
+        display(image)
 
 def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
-                   gsi_nodes, gsi_ntasks, gsi_account, gsi_partition, gsi_nodelist, \
-                   wrf_nodes, wrf_ntasks, wrf_account, wrf_partition, wrf_nodelist):
+                   gsi_nodes, gsi_ntasks, gsi_account, gsi_partition, \
+                   wrf_nodes, wrf_ntasks, wrf_account, wrf_partition, \
+                   gsi_nodelist='', wrf_nodelist=''):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -344,13 +346,19 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
 
-    dir_main = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
-    dir_da = os.path.join(dir_main, 'da')
-    dir_bkg = os.path.join(dir_main, 'bkg')
-    dir_gsi = os.path.join(dir_main, 'gsi')
-    dir_option = os.path.join(dir_main, 'option')
+    dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
     dir_scratch_case = os.path.join(dir_scratch, '_'.join([case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}"]))
+
+    dir_da = os.path.join(dir_cycling_da, 'da')
+    dir_bkg = os.path.join(dir_cycling_da, 'bkg')
+    dir_gsi = os.path.join(dir_cycling_da, 'gsi')
+    dir_option = os.path.join(dir_cycling_da, 'option')
+    os.makedirs(dir_cycling_da, exist_ok=True)
+    os.makedirs(dir_da, exist_ok=True)
+    os.makedirs(dir_bkg, exist_ok=True)
+    os.makedirs(dir_gsi, exist_ok=True)
+    os.makedirs(dir_option, exist_ok=True)
 
     option_filelist = ['anavinfo_arw_netcdf_glbe', 'cloudy_radiance_info.txt', 'comgsi_namelist.sh', 'comgsi_satbias_in', 'comgsi_satbias_pc_in', \
                        'global_convinfo.txt', 'global_satinfo.txt', 'gsi.x', 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
@@ -528,7 +536,52 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
             wrfout_at_dir_case = f"{dir_scratch_case}/{initial_time_YYYYMMDDHH}/wrfout_{dom}_{time_last.strftime('%Y-%m-%d_%H:%M:00')}"
             if os.path.exists(wrfout_at_dir_case): os.system(f"rm -rf {wrfout_at_dir_case}")
 
-def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition, nodelist):
+def prepare_wrf_forecast(data_library_name, dir_case, case_name, exp_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+    itime = attributes[(dir_case, case_name)]['itime']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    da_domains = attributes[(dir_case, case_name)]['da_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+
+    initial_time = datetime.datetime(*itime)
+    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+    anl_end_time = anl_start_time + datetime.timedelta(hours=(total_da_cycles-1)*cycling_interval)
+    dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
+    dir_da_in = os.path.join(dir_cycling_da, 'da')
+    dir_bkg_in = os.path.join(dir_cycling_da, 'bkg')
+
+    for idc in tqdm(range(1, total_da_cycles), desc='DA Cycle', unit="files", bar_format="{desc}: {n}/{total} DA Cycles | {elapsed}<{remaining}"):
+
+        anl_end_time = anl_start_time + datetime.timedelta(hours=(idc-1)*cycling_interval)
+        dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(idc).zfill(2)}")
+        dir_da_out = os.path.join(dir_cycling_da, 'da')
+        dir_bkg_out = os.path.join(dir_cycling_da, 'bkg')
+        os.makedirs(dir_cycling_da, exist_ok=True)
+        os.makedirs(dir_da_out, exist_ok=True)
+        os.makedirs(dir_bkg_out, exist_ok=True)
+
+        copy_files(time_start=anl_start_time,
+                   time_end=anl_end_time,
+                   dir_src=dir_da_in,
+                   file_format_src='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
+                   dir_dst=dir_da_out,
+                   file_format_dst='wrf_inout.{ctime:%Y%m%d%H}.{dom}',
+                   domains=da_domains,
+                   history_interval=cycling_interval)
+
+        copy_files(time_start=initial_time,
+                   time_end=anl_end_time,
+                   dir_src=dir_bkg_in,
+                   file_format_src='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   dir_dst=dir_bkg_out,
+                   file_format_dst='wrfout_{dom}_{ctime:%Y-%m-%d_%H:%M:00}',
+                   domains=da_domains,
+                   history_interval=cycling_interval)
+
+def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -543,7 +596,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     history_interval = attributes[(dir_case, case_name)]['history_interval']
 
-    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)], 'Forecast')
+    case = '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'Forecast'])
     initial_time = datetime.datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
     anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)

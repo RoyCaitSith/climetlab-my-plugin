@@ -1,26 +1,19 @@
 import os
 import datetime
 import importlib
+import subprocess
 import numpy as np
-import pandas as pd
-import cal_polar_to_latlon as clatlon
+import colormaps as cmaps
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from wrf import getvar, interplevel, latlon_coords
 from combine_and_show_images import combine_images_grid
 from mpl_toolkits.basemap import Basemap
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def set_parameters_variables(data_library_name, dir_case, case_name, var):
-
-    module = importlib.import_module(f"data_library_{data_library_name}")
-    attributes = getattr(module, 'attributes')
-    dir_ScientificColourMaps7=attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])    
+def set_parameters_variables(var):
 
     information = {}
     levels = {}
@@ -31,39 +24,37 @@ def set_parameters_variables(data_library_name, dir_case, case_name, var):
     information.update({'QVAPOR': {'unit': 'null', 'lb_title': "QVAPOR " + "($\mathregular{gkg^{-1}}$)", 'factor': 1000.0}})
 
     if 'ua' in var:
-        levels.update({925: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({850: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({700: [-22.5, 25.0, 5.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({500: [-22.5, 25.0, 5.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({300: [-36.0, 40.0, 8.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({200: [-36.0, 40.0, 8.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
+        levels.update({925: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({850: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({700: [-22.5, 25.0, 5.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({500: [-22.5, 25.0, 5.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({300: [-36.0, 40.0, 8.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({200: [-36.0, 40.0, 8.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
     if 'va' in var:
-        levels.update({925: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({850: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({700: [-13.5, 15.0, 3.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({500: [-13.5, 15.0, 3.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({300: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({200: [-18.0, 20.0, 4.0, 'RdBu_r', -3.5, 4.0, 1.0, 'RdBu_r']})
+        levels.update({925: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({850: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({700: [-13.5, 15.0, 3.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({500: [-13.5, 15.0, 3.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({300: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({200: [-18.0, 20.0, 4.0, cmaps.vik, -3.5, 4.0, 1.0, cmaps.vik]})
     if 'temp' in var:
-        levels.update({925: [285, 305, 2.0, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({850: [280, 300, 2.0, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({700: [275, 290, 1.5, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({500: [260, 270, 1.0, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({300: [230, 250, 2.0, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
-        levels.update({200: [210, 225, 1.5, 'rainbow', -3.5, 4.0, 1.0, 'RdBu_r']})
+        levels.update({925: [285, 305, 2.0, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({850: [280, 300, 2.0, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({700: [275, 290, 1.5, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({500: [260, 270, 1.0, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({300: [230, 250, 2.0, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
+        levels.update({200: [210, 225, 1.5, cmaps.lajolla, -3.5, 4.0, 1.0, cmaps.vik]})
     if 'QVAPOR' in var:
-        levels.update({925: [0.0, 20.0, 2.00, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
-        levels.update({850: [0.0, 15.0, 1.50, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
-        levels.update({700: [0.0, 10.0, 1.00, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
-        levels.update({500: [0.0, 5.00, 0.50, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
-        levels.update({300: [0.0, 1.00, 0.10, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
-        levels.update({200: [0.0, 0.10, 0.01, 'YlGn', -3.5, 4.0, 1.0, 'BrBG']})
+        levels.update({925: [0.0, 20.0, 2.00, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
+        levels.update({850: [0.0, 15.0, 1.50, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
+        levels.update({700: [0.0, 10.0, 1.00, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
+        levels.update({500: [0.0, 5.00, 0.50, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
+        levels.update({300: [0.0, 1.00, 0.10, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
+        levels.update({200: [0.0, 0.10, 0.01, cmaps.imola, -3.5, 4.0, 1.0, cmaps.cork]})
 
     return (information[var], levels)
 
-def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_names):
-
-    variables = ['ua', 'va', 'temp', 'QVAPOR']
+def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_names, variables = ['ua']):
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -158,9 +149,7 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
 
                 ncfile_output.close()
 
-def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_names):
-
-    variables = ['ua', 'va', 'temp', 'QVAPOR']
+def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names, variables = ['ua']):
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -176,8 +165,8 @@ def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_name
         initial_time = datetime.datetime(*itime)
         da_domains=attributes[(dir_case, case_name)]['da_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+
         anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
         dir_increment = os.path.join(dir_exp, 'increment')
         specific_case = '_'.join([case_name, exp_name, 'C'+str(total_da_cycles).zfill(2)])
@@ -187,16 +176,12 @@ def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_name
 
         for dom in tqdm(da_domains, desc='DA Domains', leave=False):
             for var in tqdm(variables, desc='Variables', leave=False):
-                (information, levels) = set_parameters_variables[var]
-                n_level = len(levels.keys())
-
+                (information, levels) = set_parameters_variables(var)
                 filename = os.path.join(dir_increment_case, '_'.join([var, 'analysis', 'increment', dom+'.nc']))
                 ncfile = Dataset(filename)
                 lat = ncfile.variables['lat'][:,:]
                 lon = ncfile.variables['lon'][:,:]
-                level = ncfile.variables['level'][:]
                 extent = [lon[0,0], lon[-1,-1], lat[0,0], lat[-1,-1]]
-                ncfile.close()
                 
                 for idt in range(0, total_da_cycles):
                     time_now = anl_start_time + datetime.timedelta(hours = idt*cycling_interval)
@@ -208,22 +193,23 @@ def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_name
                         idl = list(levels).index(lev)
                         (vmin1, vmax1, vint1, cmap1, vmin2, vmax2, vint2, cmap2) = levels[lev]
 
-                        pdfname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, str(lev).zfill(3)+'hPa', dom+'.pdf']))
-                        pngname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, str(lev).zfill(3)+'hPa', dom+'.png']))
+                        pdfname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'bkg', str(lev).zfill(3)+'hPa', dom+'.pdf']))
+                        pngname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'bkg', str(lev).zfill(3)+'hPa', dom+'.png']))
                         with PdfPages(pdfname) as pdf:
                     
-                            fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
+                            # fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
+                            fig, axs = plt.subplots(1, 1, figsize=(6.00, 3.50))
                             ax = axs
 
                             m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
                             m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
                             mlon, mlat = m(lon, lat)
-                            pcm = ax.contourf(mlon, mlat, information['factor']*ncfile.variables[var][idt,idl,0,:,:], levels=range(vmin1, vmax1+0.5*vint1, vint1), cmap=cmap1, extend='max', zorder=1)
+                            pcm = ax.contourf(mlon, mlat, information['factor']*ncfile.variables[var][idt,idl,0,:,:], levels=np.arange(vmin1, vmax1+0.5*vint1, vint1), cmap=cmap1, extend='both', zorder=1)
 
-                            ax.set_xticks(np.arange(-180, 181, 5))
-                            ax.set_yticks(np.arange(-90, 91, 5))
-                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
-                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+                            ax.set_xticks(np.arange(-180, 181, 10))
+                            ax.set_yticks(np.arange(-90, 91, 10))
+                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
                             ax.tick_params('both', direction='in', labelsize=10.0)
                             ax.axis(extent)
                             ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
@@ -232,8 +218,8 @@ def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_name
                             clb.set_label(information['lb_title'], fontsize=10.0, labelpad=4.0)
                             clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                             clb.ax.minorticks_off()
-                            clb.set_ticks(range(vmin1, vmax1+0.5*vint1, vint1))
-                            clb.set_ticklabels(range(vmin1, vmax1+0.5*vint1, vint1))
+                            clb.set_ticks(np.arange(vmin1, vmax1+0.5*vint1, vint1))
+                            clb.set_ticklabels(np.arange(vmin1, vmax1+0.5*vint1, vint1))
 
                             plt.tight_layout()
                             plt.savefig(pngname, dpi=600)
@@ -241,5 +227,84 @@ def draw_analysis_increments(data_library_names, dir_cases, case_names, exp_name
                             plt.cla()
                             plt.clf()
                             plt.close()
+                        
+                        command = f"convert {pngname} -trim {pngname}"
+                        subprocess.run(command, shell=True)
+
+                        pdfname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'anl', str(lev).zfill(3)+'hPa', dom+'.pdf']))
+                        pngname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'anl', str(lev).zfill(3)+'hPa', dom+'.png']))
+                        with PdfPages(pdfname) as pdf:
+                    
+                            # fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
+                            fig, axs = plt.subplots(1, 1, figsize=(6.00, 3.50))
+                            ax = axs
+
+                            m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
+                            m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
+                            mlon, mlat = m(lon, lat)
+                            pcm = ax.contourf(mlon, mlat, information['factor']*ncfile.variables[var][idt,idl,1,:,:], levels=np.arange(vmin1, vmax1+0.5*vint1, vint1), cmap=cmap1, extend='both', zorder=1)
+
+                            ax.set_xticks(np.arange(-180, 181, 10))
+                            ax.set_yticks(np.arange(-90, 91, 10))
+                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                            ax.tick_params('both', direction='in', labelsize=10.0)
+                            ax.axis(extent)
+                            ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                            clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
+                            clb.set_label(information['lb_title'], fontsize=10.0, labelpad=4.0)
+                            clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                            clb.ax.minorticks_off()
+                            clb.set_ticks(np.arange(vmin1, vmax1+0.5*vint1, vint1))
+                            clb.set_ticklabels(np.arange(vmin1, vmax1+0.5*vint1, vint1))
+
+                            plt.tight_layout()
+                            plt.savefig(pngname, dpi=600)
+                            pdf.savefig(fig)
+                            plt.cla()
+                            plt.clf()
+                            plt.close()
+
+                        command = f"convert {pngname} -trim {pngname}"
+                        subprocess.run(command, shell=True)
+
+                        pdfname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'inc', str(lev).zfill(3)+'hPa', dom+'.pdf']))
+                        pngname = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, 'inc', str(lev).zfill(3)+'hPa', dom+'.png']))
+                        with PdfPages(pdfname) as pdf:
+                    
+                            # fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
+                            fig, axs = plt.subplots(1, 1, figsize=(6.00, 3.50))
+                            ax = axs
+
+                            m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
+                            m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
+                            mlon, mlat = m(lon, lat)
+                            pcm = ax.contourf(mlon, mlat, information['factor']*(ncfile.variables[var][idt,idl,1,:,:]-ncfile.variables[var][idt,idl,0,:,:]), levels=np.arange(vmin2, vmax2+0.5*vint2, vint2), cmap=cmap2, extend='both', zorder=1)
+
+                            ax.set_xticks(np.arange(-180, 181, 10))
+                            ax.set_yticks(np.arange(-90, 91, 10))
+                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                            ax.tick_params('both', direction='in', labelsize=10.0)
+                            ax.axis(extent)
+                            ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                            clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
+                            clb.set_label(information['lb_title'], fontsize=10.0, labelpad=4.0)
+                            clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                            clb.ax.minorticks_off()
+                            clb.set_ticks(np.arange(vmin2, vmax2+0.5*vint2, vint2))
+                            clb.set_ticklabels(np.arange(vmin2, vmax2+0.5*vint2, vint2))
+
+                            plt.tight_layout()
+                            plt.savefig(pngname, dpi=600)
+                            pdf.savefig(fig)
+                            plt.cla()
+                            plt.clf()
+                            plt.close()
+
+                        command = f"convert {pngname} -trim {pngname}"
+                        subprocess.run(command, shell=True)
 
                 ncfile.close()
