@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import cal_polar_to_latlon as clatlon
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from combine_and_show_images import combine_images_grid
 from mpl_toolkits.basemap import Basemap
 from tqdm.notebook import tqdm
@@ -40,8 +39,6 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
         GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         history_interval=attributes[(dir_case, case_name)]['history_interval']
-        dir_track_intensity=attributes[(dir_case, case_name)]['dir_track_intensity']
-        NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
         dir_IMERG=os.path.join(dir_data, 'IMERG')
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):

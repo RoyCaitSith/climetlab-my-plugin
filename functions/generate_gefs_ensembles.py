@@ -5,7 +5,7 @@ import importlib
 import subprocess
 import file_operations as fo
 from tqdm.notebook import tqdm
-from cycling_da import submit_job, check_file_existence, update_namelist_time_control, copy_files
+from cycling_da import submit_job, check_file_existence, copy_files
 
 def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
@@ -27,7 +27,6 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
     aws_s3_cp = 'aws s3 cp --no-sign-request '
     aws_s3_bucket = 's3://noaa-gefs-pds/'
-    download_interval = cycling_interval
     forecast_interval = cycling_interval
     forecast_period = 12
     n_ensemble = 30
@@ -82,11 +81,11 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
                 combine_command = ' '.join(['grib_copy', download_file_name_a, download_file_name_b, download_file_name_c])
 
                 #print(aws_command_a)
-                output = subprocess.check_output(aws_command_a, shell=True)
+                subprocess.check_output(aws_command_a, shell=True)
                 #print(aws_command_b)
-                pipe = subprocess.check_output(aws_command_b, shell=True)
+                subprocess.check_output(aws_command_b, shell=True)
                 #print(combine_command)
-                pipe = subprocess.check_output(combine_command, shell=True)
+                subprocess.check_output(combine_command, shell=True)
 
                 forecast_ntime += forecast_interval
 
@@ -106,9 +105,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
     boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
-    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
-    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
     dir_GEFS = os.path.join(dir_data, 'GEFS')
 
     # I do not need to set the directories of these files
@@ -134,7 +131,6 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
                 initial_time_str = initial_time.strftime('%Y%m%d%H')
                 anl_start_time   = initial_time + datetime.timedelta(hours=cycling_interval)
                 anl_end_time     = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
-                analysis_hours   = da_cycle*cycling_interval
 
                 max_dom = len(da_domains)
                 wps_interval = cycling_interval
@@ -259,14 +255,9 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
     attributes = getattr(module, 'attributes')
 
     itime = attributes[(dir_case, case_name)]['itime']
-    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
-    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-    history_interval = attributes[(dir_case, case_name)]['history_interval']
-    boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
@@ -324,14 +315,9 @@ def move_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name):
     attributes = getattr(module, 'attributes')
 
     itime = attributes[(dir_case, case_name)]['itime']
-    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
-    forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-    history_interval = attributes[(dir_case, case_name)]['history_interval']
-    boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     dir_GEFS_WRF_Ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']

@@ -22,7 +22,7 @@ def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
-    initial_time = datetime.datetime(*itime)
+    initial_time=datetime.datetime(*itime)
     forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
