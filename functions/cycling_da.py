@@ -7,7 +7,6 @@ import requests
 import importlib
 import subprocess
 import file_operations as fo
-import matplotlib.pyplot as plt
 from tqdm.notebook import tqdm
 from IPython.display import display
 from IPython.display import Image as IPImage
@@ -128,8 +127,6 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
             time.sleep(sleep_interval)
         print(f'Finish running the job')
 
-    return
-
 def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
@@ -204,6 +201,13 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         # Metgrid
         namelist_wps.substitude_string('opt_output_from_metgrid_path', ' = ', f"'{folder_dir}/Metgrid_Data/'")
         namelist_wps.save_content()
+
+        if period == 'cycling_da':
+            wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')
+            # os.system(f"ncl {dir_namelists}/plotgrids_new.ncl")
+            subprocess.run(f"convert {wps_show_dom} -trim {wps_show_dom}", shell=True)
+            image = IPImage(filename=wps_show_dom)
+            display(image)
 
         # Set the variables in the namelist.input
         namelist_input = fo.change_content(namelist_input_dir)
@@ -317,14 +321,6 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
                    partition=partition,
                    nodelist=nodelist)
         print('\n')
-
-    if period == 'cycling_da':
-        os.system(f"cd {dir_namelists} && ncl plotgrids_new.ncl")
-        wps_show_dom = os.path.join(dir_namelists, 'wps_show_dom.png')
-        command = f"convert {wps_show_dom} -trim {wps_show_dom}"
-        subprocess.run(command, shell=True)
-        image = IPImage(filename=wps_show_dom)
-        display(image)
 
 def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                    gsi_nodes, gsi_ntasks, gsi_account, gsi_partition, \
@@ -595,6 +591,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     history_interval = attributes[(dir_case, case_name)]['history_interval']
+    wps_interval = attributes[(dir_case, case_name)]['wps_interval']
 
     case = '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'Forecast'])
     initial_time = datetime.datetime(*itime)
@@ -602,7 +599,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
     anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
     time_start = anl_end_time
-    time_end = time_start + datetime.timedelta(hours=forecast_hours)
+    time_end = time_start + datetime.timedelta(hours=forecast_hours+wps_interval)
     dir_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'da')
     dir_bkg = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
     dir_scratch_case = os.path.join(dir_scratch, case)
