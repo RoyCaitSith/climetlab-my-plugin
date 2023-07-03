@@ -12,7 +12,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    dir_data = attributes[(dir_case, case_name)]['dir_data']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     itime = attributes[(dir_case, case_name)]['itime']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
@@ -22,6 +22,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     download_stime = initial_time - datetime.timedelta(hours=cycling_interval)
     download_etime = anl_end_time
     n_download_time = int((download_etime - download_stime).total_seconds()/cycling_interval/3600 + 1)
+    dir_data = os.path.join(dir_exp, 'data')
     dir_GEFS = os.path.join(dir_data, 'GEFS')
     os.makedirs(dir_GEFS, exist_ok=True)
 
@@ -89,14 +90,14 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition, nodelist=''):
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
     # Set the directories of the input files or procedures
-    dir_data = attributes[(dir_case, case_name)]['dir_data']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     itime = attributes[(dir_case, case_name)]['itime']
@@ -106,6 +107,8 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
+    
+    dir_data = os.path.join(dir_exp, 'data')
     dir_GEFS = os.path.join(dir_data, 'GEFS')
 
     # I do not need to set the directories of these files
@@ -121,7 +124,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
             for da_cycle in range(1, total_da_cycles+1):
 
                 # Set the folder name of the new case
-                case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
+                case = '_'.join([case_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
                 folder_dir = os.path.join(dir_scratch, case)
                 os.system(f"rm -rf {folder_dir}")
                 fo.create_new_case_folder(folder_dir)
@@ -248,7 +251,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, exp_name, whet
                            nodelist=nodelist)
                 print('\n')
 
-def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whether_wait, nodes, ntasks, account, partition, nodelist=''):
+def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -271,7 +274,7 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
             for idens in range(1, int(ensemble_members/2)+1):
 
                 # Set the folder name of the new case
-                case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
+                case = '_'.join([case_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
                 anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
                 time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
                 time_end = anl_end_time
@@ -308,7 +311,7 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name, whet
                                partition=partition,
                                nodelist=nodelist)
 
-def move_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name):
+def move_wrf_forecast_gefs(data_library_name, dir_case, case_name):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -341,7 +344,7 @@ def move_wrf_forecast_gefs(data_library_name, dir_case, case_name, exp_name):
                 # Set the folder name of the new case
                 time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
                 time_end = anl_end_time
-                case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
+                case = '_'.join([case_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
                 dir_case = os.path.join(dir_scratch, case)
                 print(case)
 

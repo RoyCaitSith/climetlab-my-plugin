@@ -134,7 +134,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     attributes = getattr(module, 'attributes')
 
     # Set the directories of the input files or procedures
-    dir_data = attributes[(dir_case, case_name)]['dir_data']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     itime = attributes[(dir_case, case_name)]['itime']
@@ -146,6 +146,11 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
     forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_GFS = os.path.join(dir_data, 'GFS')
+    os.makedirs(dir_data, exist_ok=True)
+    os.makedirs(dir_GFS, exist_ok=True)
 
     # I do not need to set the directories of these files
     namelist_wps_dir   = os.path.join(dir_namelists, 'namelist.wps')
@@ -270,7 +275,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
 
             if boundary_data_deterministic == 'GFS':
                 bc_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
-                dir_bc_filename = os.path.join(dir_data, 'GFS', bc_filename)
+                dir_bc_filename = os.path.join(dir_GFS, bc_filename)
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
             print(dir_bc_filename)
 
@@ -331,19 +336,20 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     attributes = getattr(module, 'attributes')
 
     itime = attributes[(dir_case, case_name)]['itime']
-    dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
-    dir_gefs_wrf_ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
     boundary_data_ensemble = attributes[(dir_case, case_name)]['boundary_data_ensemble']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
 
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_gefs_wrf_ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
     dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
+    dir_dawn = os.path.join(dir_data, "DAWN")
     dir_scratch_case = os.path.join(dir_scratch, '_'.join([case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}"]))
 
     dir_da = os.path.join(dir_cycling_da, 'da')
@@ -403,7 +409,8 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 print(f"Create obs folder, and copy bufr to obs")
                 obs_dir = os.path.join(run_gsi_dir, 'obs')
                 os.makedirs(obs_dir, exist_ok=True)
-                if 'CONV' in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
+                if 'CTRL' not in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
+                if 'DAWN' in exp_name: os.system(f"cp {dir_dawn}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d ")
 
                 print(f"Create ens folder, and copy wrfout to ens")
                 ens_dir = os.path.join(run_gsi_dir, 'ens')

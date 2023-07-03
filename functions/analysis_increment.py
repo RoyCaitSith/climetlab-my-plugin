@@ -81,7 +81,7 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
         for dom in tqdm(da_domains, desc='DA Domains', leave=False):
             for var in tqdm(variables, desc='Variables', leave=False):
 
-                (information, levels) = set_parameters_variables(data_library_name, dir_case, case_name, var)
+                (information, levels) = set_parameters_variables(var)
                 n_level = len(levels.keys())
 
                 filename = os.path.join(dir_increment_case, '_'.join([var, 'analysis', 'increment', dom+'.nc']))
@@ -128,7 +128,7 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
                             ncfile_output.createVariable('lat',   'f8', ('n_lat',  'n_lon'))
                             ncfile_output.createVariable('lon',   'f8', ('n_lat',  'n_lon'))
                             ncfile_output.createVariable(var,     'f8', ('n_time', 'n_level', 'n_wrf', 'n_lat', 'n_lon'))
-                            ncfile_output.variables['level'][:] = levels
+                            ncfile_output.variables['level'][:] = list(levels.keys())
                             ncfile_output.variables['lat'][:,:] = lat
                             ncfile_output.variables['lon'][:,:] = lon
                             ncfile_output.description           = var
@@ -137,8 +137,8 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
                             ncfile_output.variables[var][idt,0,0,:,:] = var_bkg
                             ncfile_output.variables[var][idt,0,1,:,:] = var_anl
                         else:
-                            temp_bkg = interplevel(var_bkg, p_bkg, levels)
-                            temp_anl = interplevel(var_anl, p_anl, levels)
+                            temp_bkg = interplevel(var_bkg, p_bkg, list(levels.keys()))
+                            temp_anl = interplevel(var_anl, p_anl, list(levels.keys()))
                             for idl in range(len(levels)):
                                 ncfile_output.variables[var][idt,idl,0,:,:] = temp_bkg[idl,:,:]
                                 ncfile_output.variables[var][idt,idl,1,:,:] = temp_anl[idl,:,:]
