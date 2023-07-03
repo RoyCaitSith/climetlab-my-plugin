@@ -10,7 +10,7 @@ from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from metpy.units import units
 
-def create_HALO_bufr_temp_cv(data_library_name, dir_case, case_name):
+def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -66,47 +66,71 @@ def create_HALO_bufr_temp_cv(data_library_name, dir_case, case_name):
             initial_time = datetime.datetime.strptime(date, "%Y%m%d")
             time_s_hours = (time_s - initial_time).total_seconds()/3600.0
             time_e_hours = (time_e - initial_time).total_seconds()/3600.0
+            print(time_s_hours)
+            print(time_e_hours)
 
-            HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
-            print(HALO.name)
-            print(HALO.keys())
-            n_loc = np.array(HALO['Nav_Data']['gps_lat']).size
-            # n_hgt = np.array(HALO['DataProducts']['Altitude']).size
-            n_hgt = np.array(HALO['z']).size
-            print(n_hgt)
-            print(HALO['z'])
-            print(np.max(np.array(HALO['z'])))
-            print(np.min(np.array(HALO['z'])))
+            if 'CV' in dir_case:
+                HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
+                n_loc = np.array(HALO['Nav_Data']['gps_lat']).size
+                n_hgt = np.array(HALO['z']).size
 
-            HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
-            HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
-            HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
-            print(np.array(HALO['Nav_Data']['gps_time']))
-            print(miao)
-            HALO_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
-            HALO_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
-            HALO_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
-            HALO_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
-            HALO_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
-            HALO_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in HALO_datetime])
-            HALO_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in HALO_datetime])
-            HALO_seco = HALO_seco + HALO_mcse/1000000.0
-            HALO_altitude = np.tile(HALO['DataProducts']['Altitude'], (n_loc, 1)).flatten()
-            print(HALO_altitude)
-            print(miao)
-            HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
-            HALO_pressure = np.array(HALO['State']['Pressure']).flatten()
-            HALO_pressure = HALO_pressure*100000.0
-            HALO_temperature = np.array(HALO['State']['Temperature']).flatten()
-            HALO_mixing_ratio = np.array(HALO['DataProducts']['h2o_mmr_v']).flatten()
-            HALO_mixing_ratio = HALO_mixing_ratio/1000.0
-            HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
-            HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
+                HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
+                HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
+                HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
+                HALO_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
+                HALO_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
+                HALO_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
+                HALO_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
+                HALO_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
+                HALO_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in HALO_datetime])
+                HALO_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in HALO_datetime])
+                HALO_seco = HALO_seco + HALO_mcse/1000000.0
+                HALO_altitude = np.tile(HALO['z'], (n_loc, 1)).flatten()
+                HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
+                HALO_pressure = np.array(HALO['State']['Pressure']).flatten()
+                HALO_pressure = HALO_pressure*101325.0
+                HALO_temperature = np.array(HALO['State']['Temperature']).flatten()
+                HALO_mixing_ratio = np.array(HALO['h2o_mmr_v']).flatten()
+                HALO_mixing_ratio = HALO_mixing_ratio/1000.0
+                HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
+                HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
+                HALO_relative_humidity = HALO_relative_humidity*100.0
+                HALO.close()
 
-            index = (~np.isnan(HALO_mixing_ratio)) & (HALO_datetime >= time_s_hours) & (HALO_datetime <= time_e_hours)
+            if 'AW' in dir_case:
+                HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
+                n_loc = np.array(HALO['Nav_Data']['gps_lat']).size
+                n_hgt = np.array(HALO['DataProducts']['Altitude']).size
+
+                HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
+                HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
+                HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
+                HALO_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
+                HALO_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
+                HALO_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
+                HALO_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
+                HALO_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
+                HALO_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in HALO_datetime])
+                HALO_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in HALO_datetime])
+                HALO_seco = HALO_seco + HALO_mcse/1000000.0
+                HALO_altitude = np.tile(HALO['DataProducts']['Altitude'], (n_loc, 1)).flatten()
+                HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
+                HALO_pressure = np.array(HALO['State']['Pressure']).flatten()
+                HALO_pressure = HALO_pressure*101325.0
+                HALO_temperature = np.array(HALO['State']['Temperature']).flatten()
+                HALO_mixing_ratio = np.array(HALO['DataProducts']['h2o_mmr_v']).flatten()
+                HALO_mixing_ratio = HALO_mixing_ratio/1000.0
+                HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
+                HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
+                HALO.close()                
+
+            index = (HALO_datetime >= time_s_hours) & (HALO_datetime <= time_e_hours) & \
+                    (~np.isnan(HALO_mixing_ratio)) & (HALO_mixing_ratio > 0) & \
+                    (HALO_altitude > 0)
+
             n_data = sum(index==True)
 
-            if n_data >= 0:
+            if n_data > 0:
 
                 n_total_data += n_data
                 YEAR += HALO_year[index].tolist()
@@ -176,10 +200,9 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     
     dir_data = os.path.join(dir_exp, 'data')
-    dir_DAWN = os.path.join(dir_data, 'DAWN')
-    dir_DAWN_bufr_temp = os.path.join(dir_DAWN, 'bufr_temp')
-    os.makedirs(dir_DAWN, exist_ok=True)
-    os.makedirs(dir_DAWN_bufr_temp, exist_ok=True)
+    dir_HALO = os.path.join(dir_data, 'HALO')
+    dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
+    os.makedirs(dir_HALO, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -187,17 +210,17 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
 
-        dir_DAWN_bufr = os.path.join(dir_DAWN, anl_end_time_YYYYMMDD)
-        file_DAWN_bufr = os.path.join(dir_DAWN_bufr, f"gdas.t{anl_end_time_HH}z.dawn.tm00.bufr_d")
-        dir_fortran = os.path.join(dir_DAWN, 'fortran_files')
-        file_fortran_bufr = os.path.join(dir_fortran, 'gdas.dawn.bufr')
-        os.makedirs(dir_DAWN_bufr, exist_ok=True)
+        dir_HALO_bufr = os.path.join(dir_HALO, anl_end_time_YYYYMMDD)
+        file_HALO_bufr = os.path.join(dir_HALO_bufr, f"gdas.t{anl_end_time_HH}z.halo.tm00.bufr_d")
+        dir_fortran = os.path.join(dir_HALO, 'fortran_files')
+        file_fortran_bufr = os.path.join(dir_fortran, 'gdas.halo.bufr')
+        os.makedirs(dir_HALO_bufr, exist_ok=True)
         os.system(f"rm -rf {file_fortran_bufr}")
 
         print('Check bufr_temp: ')
         flag = True
-        info = os.popen(f"cd {dir_DAWN_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH} && ls ./*.txt").readlines()
-        if len(info) != 17:
+        info = os.popen(f"cd {dir_HALO_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH} && ls ./*.txt").readlines()
+        if len(info) != 18:
             flag = False
         print(len(info))
         print(flag)
@@ -205,18 +228,18 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
         if flag:
 
             fdata = ''
-            with open(f"{dir_fortran}/bufr_encode_dawn.f90", 'r') as f:
+            with open(f"{dir_fortran}/bufr_encode_halo.f90", 'r') as f:
                 for line in f.readlines():
                     if(line.find('idate = ') == 4): line = f"    idate = {anl_end_time_YYYYMMDD}{anl_end_time_HH}\n"
-                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_DAWN_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH}/'\n"
+                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_HALO_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH}/'\n"
                     fdata += line
             f.close()
 
-            with open(f"{dir_fortran}/bufr_encode_dawn.f90", 'w') as f:
+            with open(f"{dir_fortran}/bufr_encode_halo.f90", 'w') as f:
                 f.writelines(fdata)
             f.close()
 
-            os.popen(f"cd {dir_fortran} && ./run_encode_dawn.sh > log_out")
+            os.popen(f"cd {dir_fortran} && ./run_encode_halo.sh > log_out")
             flag = True
             file_size = 0
             while flag:
@@ -230,4 +253,4 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
                         file_size = file_size_next
                 print(file_size)
 
-            os.system(f"mv {file_fortran_bufr} {file_DAWN_bufr}")
+            os.system(f"mv {file_fortran_bufr} {file_HALO_bufr}")

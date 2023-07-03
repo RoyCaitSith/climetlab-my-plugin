@@ -9,7 +9,7 @@ from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from metpy.units import units
 
-def create_DAWN_bufr_temp_cv(data_library_name, dir_case, case_name):
+def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -64,51 +64,54 @@ def create_DAWN_bufr_temp_cv(data_library_name, dir_case, case_name):
             initial_time = datetime.datetime.strptime(date, "%Y%m%d")
             time_s_hours = (time_s - initial_time).total_seconds()/3600.0
             time_e_hours = (time_e - initial_time).total_seconds()/3600.0
+            print(time_s_hours)
+            print(time_e_hours)
 
-            ncfile = Dataset(file_DAWN.rstrip('\n'))
-            lat = ncfile.variables['lat'][:]
-            lon = ncfile.variables['lon'][:]
-            altitude = np.arange(-0.015, 12.980, 0.030)*1000.0
-            ws = ncfile.variables['smoothed_Wind_Speed'][:, :]
-            wd = ncfile.variables['smoothed_Wind_Direction'][:, :]
-            profile_time = ncfile.groups['Date_Time'].variables['Profile_Time'][:]
-            qc_flag = ncfile.groups['Data_Quality'].variables['QC_flag'][:,:]
-            ac_roll = ncfile.groups['Nav_Data'].variables['AC_Roll'][:]
-            ncfile.close()
+            if 'CV' in dir_case:
+                ncfile = Dataset(file_DAWN.rstrip('\n'))
+                lat = ncfile.variables['lat'][:]
+                lon = ncfile.variables['lon'][:]
+                altitude = np.arange(-0.015, 12.980, 0.030)*1000.0
+                ws = ncfile.variables['smoothed_Wind_Speed'][:, :]
+                wd = ncfile.variables['smoothed_Wind_Direction'][:, :]
+                profile_time = ncfile.groups['Date_Time'].variables['Profile_Time'][:]
+                qc_flag = ncfile.groups['Data_Quality'].variables['QC_flag'][:,:]
+                ac_roll = ncfile.groups['Nav_Data'].variables['AC_Roll'][:]
+                ncfile.close()
 
-            (n_loc, n_hgt) = ws.shape
-            DAWN_latitude = np.transpose(np.tile(lat, (n_hgt, 1))).flatten('F')
-            DAWN_longitude = np.transpose(np.tile(lon, (n_hgt, 1))).flatten('F')
-            DAWN_time = np.transpose(np.tile(profile_time, (n_hgt, 1))).flatten('F')
-            DAWN_year = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_mnth = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_days = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_hour = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_minu = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_seco = np.zeros(n_loc*n_hgt, dtype=int)
-            DAWN_mcse = np.zeros(n_loc*n_hgt, dtype=int)
-            for idd, dtime in enumerate(DAWN_time):
-                DAWN_year[idd] = (initial_time + datetime.timedelta(hours = dtime)).year
-                DAWN_mnth[idd] = (initial_time + datetime.timedelta(hours = dtime)).month
-                DAWN_days[idd] = (initial_time + datetime.timedelta(hours = dtime)).day
-                DAWN_hour[idd] = (initial_time + datetime.timedelta(hours = dtime)).hour
-                DAWN_minu[idd] = (initial_time + datetime.timedelta(hours = dtime)).minute
-                DAWN_seco[idd] = (initial_time + datetime.timedelta(hours = dtime)).second
-                DAWN_mcse[idd] = (initial_time + datetime.timedelta(hours = dtime)).microsecond
-                DAWN_seco[idd] = DAWN_seco[idd] + DAWN_mcse[idd]/1000000.0
-            DAWN_altitude = np.tile(altitude, (n_loc, 1)).flatten('F')
-            DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
-            DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
-            DAWN_wind_direction = np.array(wd.flatten('F'))
-            DAWN_wind_speed = np.array(ws.flatten('F'))
-            DAWN_qc_flag = np.array(qc_flag.flatten('F'))
-            DAWN_ac_roll = np.abs(np.transpose(np.tile(ac_roll, (n_hgt, 1))).flatten('F'))
+                (n_loc, n_hgt) = ws.shape
+                DAWN_latitude = np.transpose(np.tile(lat, (n_hgt, 1))).flatten('F')
+                DAWN_longitude = np.transpose(np.tile(lon, (n_hgt, 1))).flatten('F')
+                DAWN_time = np.transpose(np.tile(profile_time, (n_hgt, 1))).flatten('F')
+                DAWN_year = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_mnth = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_days = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_hour = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_minu = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_seco = np.zeros(n_loc*n_hgt, dtype=int)
+                DAWN_mcse = np.zeros(n_loc*n_hgt, dtype=int)
+                for idd, dtime in enumerate(DAWN_time):
+                    DAWN_year[idd] = (initial_time + datetime.timedelta(hours = dtime)).year
+                    DAWN_mnth[idd] = (initial_time + datetime.timedelta(hours = dtime)).month
+                    DAWN_days[idd] = (initial_time + datetime.timedelta(hours = dtime)).day
+                    DAWN_hour[idd] = (initial_time + datetime.timedelta(hours = dtime)).hour
+                    DAWN_minu[idd] = (initial_time + datetime.timedelta(hours = dtime)).minute
+                    DAWN_seco[idd] = (initial_time + datetime.timedelta(hours = dtime)).second
+                    DAWN_mcse[idd] = (initial_time + datetime.timedelta(hours = dtime)).microsecond
+                    DAWN_seco[idd] = DAWN_seco[idd] + DAWN_mcse[idd]/1000000.0
+                DAWN_altitude = np.tile(altitude, (n_loc, 1)).flatten('F')
+                DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
+                DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
+                DAWN_wind_direction = np.array(wd.flatten('F'))
+                DAWN_wind_speed = np.array(ws.flatten('F'))
+                DAWN_qc_flag = np.array(qc_flag.flatten('F'))
+                DAWN_ac_roll = np.abs(np.transpose(np.tile(ac_roll, (n_hgt, 1))).flatten('F'))
 
             index = ~np.isnan(DAWN_wind_speed) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
                     (DAWN_qc_flag != 1) & (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
             n_data = sum(index==True)
 
-            if n_data >= 0:
+            if n_data > 0:
 
                 n_total_data += n_data
                 YEAR += DAWN_year[index].tolist()
@@ -178,7 +181,6 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
     dir_DAWN = os.path.join(dir_data, 'DAWN')
     dir_DAWN_bufr_temp = os.path.join(dir_DAWN, 'bufr_temp')
     os.makedirs(dir_DAWN, exist_ok=True)
-    os.makedirs(dir_DAWN_bufr_temp, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
