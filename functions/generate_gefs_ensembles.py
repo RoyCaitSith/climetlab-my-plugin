@@ -318,13 +318,15 @@ def move_wrf_forecast_gefs(data_library_name, dir_case, case_name):
     attributes = getattr(module, 'attributes')
 
     itime = attributes[(dir_case, case_name)]['itime']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_scratch = attributes[(dir_case, case_name)]['dir_scratch']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
-    dir_GEFS_WRF_Ensemble = attributes[(dir_case, case_name)]['dir_GEFS_WRF_Ensemble']
 
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_GEFS_WRF_Ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
     initial_time = datetime.datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
     anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)

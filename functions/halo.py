@@ -129,7 +129,6 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
                     (HALO_altitude > 0)
 
             n_data = sum(index==True)
-
             if n_data > 0:
 
                 n_total_data += n_data

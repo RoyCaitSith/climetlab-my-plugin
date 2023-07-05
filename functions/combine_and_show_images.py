@@ -10,17 +10,18 @@ def combine_images_grid(image_files, output_file, columns=3, padding=0):
 
     rows = math.ceil(len(images)/columns)
     grid_size = rows * columns
+    background_color = (255, 255, 255)
 
     # Fill the remaining spots with white images
     if len(images) < grid_size:
-        white_image = PILImage.new('RGB', (max_width, max_height), (255, 255, 255))
+        white_image = PILImage.new('RGB', (max_width, max_height), background_color)
         for _ in range(grid_size - len(images)):
             images.append(white_image)
 
     total_width = max_width * columns + padding * (columns - 1)
     total_height = max_height * rows + padding * (rows - 1)
 
-    combined_image = PILImage.new('RGB', (total_width, total_height))
+    combined_image = PILImage.new('RGB', (total_width, total_height), background_color)
 
     for i, image in enumerate(images):
         x = i % columns

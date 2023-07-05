@@ -9,7 +9,7 @@ from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from metpy.units import units
 
-def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
+def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -64,25 +64,15 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
             initial_time = datetime.datetime.strptime(date, "%Y%m%d")
             time_s_hours = (time_s - initial_time).total_seconds()/3600.0
             time_e_hours = (time_e - initial_time).total_seconds()/3600.0
-            print(time_s_hours)
-            print(time_e_hours)
 
             if 'CV' in dir_case:
                 ncfile = Dataset(file_DAWN.rstrip('\n'))
-                lat = ncfile.variables['lat'][:]
-                lon = ncfile.variables['lon'][:]
-                altitude = np.arange(-0.015, 12.980, 0.030)*1000.0
-                ws = ncfile.variables['smoothed_Wind_Speed'][:, :]
-                wd = ncfile.variables['smoothed_Wind_Direction'][:, :]
-                profile_time = ncfile.groups['Date_Time'].variables['Profile_Time'][:]
-                qc_flag = ncfile.groups['Data_Quality'].variables['QC_flag'][:,:]
-                ac_roll = ncfile.groups['Nav_Data'].variables['AC_Roll'][:]
-                ncfile.close()
+                altitude = np.arange(-0.015, 12.980, 0.030)*1000.0     
+                (n_loc, n_hgt) = ncfile.variables['smoothed_Wind_Speed'][:, :].shape
 
-                (n_loc, n_hgt) = ws.shape
-                DAWN_latitude = np.transpose(np.tile(lat, (n_hgt, 1))).flatten('F')
-                DAWN_longitude = np.transpose(np.tile(lon, (n_hgt, 1))).flatten('F')
-                DAWN_time = np.transpose(np.tile(profile_time, (n_hgt, 1))).flatten('F')
+                DAWN_latitude = np.transpose(np.tile(ncfile.variables['lat'][:], (n_hgt, 1))).flatten('F')
+                DAWN_longitude = np.transpose(np.tile(ncfile.variables['lon'][:], (n_hgt, 1))).flatten('F')
+                DAWN_time = np.transpose(np.tile(ncfile.groups['Date_Time'].variables['Profile_Time'][:], (n_hgt, 1))).flatten('F')
                 DAWN_year = np.zeros(n_loc*n_hgt, dtype=int)
                 DAWN_mnth = np.zeros(n_loc*n_hgt, dtype=int)
                 DAWN_days = np.zeros(n_loc*n_hgt, dtype=int)
@@ -102,15 +92,44 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
                 DAWN_altitude = np.tile(altitude, (n_loc, 1)).flatten('F')
                 DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
                 DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
-                DAWN_wind_direction = np.array(wd.flatten('F'))
-                DAWN_wind_speed = np.array(ws.flatten('F'))
-                DAWN_qc_flag = np.array(qc_flag.flatten('F'))
-                DAWN_ac_roll = np.abs(np.transpose(np.tile(ac_roll, (n_hgt, 1))).flatten('F'))
+                DAWN_wind_direction = np.array(ncfile.variables['smoothed_Wind_Direction'][:, :].flatten('F'))
+                DAWN_wind_speed = np.array(ncfile.variables['smoothed_Wind_Speed'][:, :].flatten('F'))
+                DAWN_qc_flag = np.array(ncfile.groups['Data_Quality'].variables['QC_flag'][:,:].flatten('F'))
+                DAWN_ac_roll = np.abs(np.transpose(np.tile(ncfile.groups['Nav_Data'].variables['AC_Roll'][:], (n_hgt, 1))).flatten('F'))
+                ncfile.close()
 
-            index = ~np.isnan(DAWN_wind_speed) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
-                    (DAWN_qc_flag != 1) & (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
+                index = ~np.isnan(DAWN_wind_speed) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
+                        (DAWN_qc_flag != 1) & (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
+            
+            if 'AW' in dir_case:
+                ncfile = Dataset(file_DAWN.rstrip('\n'))
+                altitude = np.arange(np.min(ncfile.variables['Profile_Altitude'][:]), np.max(ncfile.variables['Profile_Altitude'][:])+0.001, 0.033)*1000.0
+                n_loc = len(ncfile.variables['Profile_Latitude'][:])
+                n_hgt = len(ncfile.variables['Profile_Altitude'][:])
+
+                DAWN_latitude = np.tile(ncfile.variables['Profile_Latitude'][:], (n_hgt, 1)).flatten('F')
+                DAWN_longitude = np.tile(ncfile.variables['Profile_Longitude'][:], (n_hgt, 1)).flatten('F')
+                DAWN_time = np.tile(ncfile.variables['Profile_Time'][:], (n_hgt, 1)).flatten('F')
+                DAWN_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in DAWN_time], dtype='int64')
+                DAWN_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in DAWN_time], dtype='int64')
+                DAWN_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in DAWN_time], dtype='int64')
+                DAWN_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in DAWN_time], dtype='int64')
+                DAWN_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in DAWN_time], dtype='int64')
+                DAWN_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in DAWN_time])
+                DAWN_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in DAWN_time])
+                DAWN_seco = DAWN_seco + DAWN_mcse/1000000.0
+                DAWN_altitude = np.transpose(np.tile(altitude, (n_loc, 1))).flatten('F')
+                DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
+                DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
+                DAWN_wind_direction = ncfile.variables['Wind_Direction'][:,:].flatten('F')
+                DAWN_wind_speed = ncfile.variables['Wind_Speed'][:,:].flatten('F')
+                DAWN_ac_roll = np.abs(np.tile(ncfile.variables['AC_Roll'][:], (n_hgt, 1))).flatten('F')
+                ncfile.close()
+                
+                index = (~DAWN_wind_speed.mask) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
+                        (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
+
             n_data = sum(index==True)
-
             if n_data > 0:
 
                 n_total_data += n_data
@@ -163,7 +182,7 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
             np.savetxt(f, WSPD)
         with open(os.path.join(dir_bufr_temp, '16.txt'), 'ab') as f:
             np.savetxt(f, PKWDSP)
-        np.savetxt(dir_bufr_temp + '/0.txt', [n_total_data])
+        np.savetxt(os.path.join(dir_bufr_temp, '0.txt'), [n_total_data])
 
 def create_DAWN_bufr(data_library_name, dir_case, case_name):
 

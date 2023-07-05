@@ -46,7 +46,6 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
             anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
-            forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
             n_time = int(forecast_hours/accumulated_hours)
 
             dir_rainfall = '/'.join([dir_exp, 'rainfall', case_name, exp_name+'_C'+str(da_cycle).zfill(2)])
@@ -170,7 +169,6 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
     cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-    history_interval=attributes[(dir_case, case_name)]['history_interval']
     dir_track_intensity=attributes[(dir_case, case_name)]['dir_track_intensity']
     NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
 
@@ -180,7 +178,6 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
             anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
-            forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
             n_time = int(forecast_hours/accumulated_hours)
 
             for idt in tqdm(range(n_time), desc="Time", leave=False):
@@ -192,7 +189,7 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
 
                 image_files = []
                 dir_rainfall = '/'.join([dir_exp, 'rainfall', case_name, 'Figures'])
-                output_file = dir_rainfall + '/' + '_'.join([time_now_str, 'rainfall', '6h', scheme, 'C'+str(da_cycle).zfill(2), dom+'.png'])
+                output_file = os.path.join(dir_rainfall, '_'.join([time_now_str, 'rainfall', '6h', scheme, 'C'+str(da_cycle).zfill(2), dom+'.png']))
 
                 observations = ['IMERG']
                 n_observations = len(observations)
