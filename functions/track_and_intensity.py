@@ -70,7 +70,7 @@ def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp
             error_df['MWS_Error (Knot)'] = df['MWS (Knot)'] - bt_df_MWS
             error_df.to_csv(dir_track_intensity + '/Error_' + case + '_' + dom + '.csv', index=False)
 
-def compare_track(data_library_scheme):
+def compare_track_scheme(data_library_scheme):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     compare_schemes = getattr(module, 'compare_schemes')
@@ -193,7 +193,7 @@ def compare_track(data_library_scheme):
         image = IPImage(filename=output_file)
         display(image)
 
-def compare_intensity(data_library_name, scheme, variable):
+def compare_intensity_scheme(data_library_name, scheme, variable):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     compare_schemes = getattr(module, 'compare_schemes')
@@ -321,7 +321,7 @@ def compare_intensity(data_library_name, scheme, variable):
         image = IPImage(filename=output_file)
         display(image)
 
-def compare_averaged_RMSE_time_series(data_library_name, scheme, variable):
+def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     compare_schemes = getattr(module, 'compare_schemes')
@@ -422,7 +422,7 @@ def compare_averaged_RMSE_time_series(data_library_name, scheme, variable):
         image = IPImage(filename=pngname)
         display(image)
 
-def compare_averaged_RMSE_each_cycle(data_library_name, scheme, variable):
+def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     compare_schemes = getattr(module, 'compare_schemes')
@@ -519,7 +519,7 @@ def compare_averaged_RMSE_each_cycle(data_library_name, scheme, variable):
         image = IPImage(filename=pngname)
         display(image)
 
-def compare_averaged_RMSE_specific_time_each_cycle(data_library_name, scheme, variable, specific_hours):
+def compare_averaged_RMSE_specific_time_each_cycle_scheme(data_library_name, scheme, variable, specific_hours):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     compare_schemes = getattr(module, 'compare_schemes')

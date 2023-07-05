@@ -139,7 +139,7 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
 
                 ncfile_output.close()
 
-def draw_6h_accumulated_precipitation(data_library_name, scheme):
+def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
 
     accumulated_hours = 6.0
 
@@ -235,7 +235,7 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
 
                         rain_masked = np.ma.masked_where(rain <= 0, rain)
                         #pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
-                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=range(5, 56, 5), cmap='jet', extend='max', zorder=1)
+                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=np.arange(0, 55.1, 1.0), cmap='jet', extend='max', zorder=1)
                         ax.plot([-180.0, 180.0], [TC_lat, TC_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.plot([TC_lon, TC_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.text(TC_lon-4.6, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
@@ -261,8 +261,8 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
                         clb.ax.minorticks_off()
                         #clb.set_ticks(rain_levels)
                         #clb.set_ticklabels(rain_labels)
-                        clb.set_ticks(range(5, 56, 10))
-                        clb.set_ticklabels(range(5, 56, 10))
+                        clb.set_ticks(range(0, 56, 10))
+                        clb.set_ticklabels(range(0, 56, 10))
 
                         plt.tight_layout()
                         plt.savefig(pngname, dpi=600)
@@ -318,7 +318,7 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
 
                         rain_masked = np.ma.masked_where(rain <= 0, rain)
                         #pcm = ax.contourf(rain_lon, rain_lat, rain_masked, locator=ticker.LogLocator(), levels=rain_levels, cmap='jet', extend='max', zorder=1)
-                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=range(5, 56, 5), cmap='jet', extend='max', zorder=1)
+                        pcm = ax.contourf(rain_lon, rain_lat, rain_masked, levels=np.arange(0, 55.1, 1.0), cmap='jet', extend='max', zorder=1)
                         ax.plot([-180.0, 180.0], [TC_lat, TC_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.plot([TC_lon, TC_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                         ax.text(TC_lon-4.6, TC_lat+4.4, extend_label, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
@@ -344,8 +344,8 @@ def draw_6h_accumulated_precipitation(data_library_name, scheme):
                         clb.ax.minorticks_off()
                         #clb.set_ticks(rain_levels)
                         #clb.set_ticklabels(rain_labels)
-                        clb.set_ticks(range(5, 56, 10))
-                        clb.set_ticklabels(range(5, 56, 10))
+                        clb.set_ticks(range(0, 56, 10))
+                        clb.set_ticklabels(range(0, 56, 10))
 
                         plt.tight_layout()
                         plt.savefig(pngname, dpi=600)
