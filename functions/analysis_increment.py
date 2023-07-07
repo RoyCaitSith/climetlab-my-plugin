@@ -182,8 +182,8 @@ def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names
                             clb.set_label(f"{information['lb_title']} of bkg at {lev} hPa", fontsize=10.0, labelpad=4.0)
                             clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                             clb.ax.minorticks_off()
-                            clb.set_ticks(list(map(float, clblabels1)))
-                            clb.set_ticklabels(clblabels1)
+                            clb.set_ticks(list(map(float, clblabels1[0::2])))
+                            clb.set_ticklabels(clblabels1[0::2])
 
                             plt.tight_layout()
                             plt.savefig(pngname, dpi=600)
@@ -220,8 +220,8 @@ def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names
                             clb.set_label(f"{information['lb_title']} of anl at {lev} hPa", fontsize=10.0, labelpad=4.0)
                             clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                             clb.ax.minorticks_off()
-                            clb.set_ticks(list(map(float, clblabels1)))
-                            clb.set_ticklabels(clblabels1)
+                            clb.set_ticks(list(map(float, clblabels1[0::2])))
+                            clb.set_ticklabels(clblabels1[0::2])
 
                             plt.tight_layout()
                             plt.savefig(pngname, dpi=600)
@@ -258,8 +258,8 @@ def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names
                             clb.set_label(f"{information['lb_title']} of inc at {lev} hPa", fontsize=10.0, labelpad=4.0)
                             clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                             clb.ax.minorticks_off()
-                            clb.set_ticks(list(map(float, clblabels2)))
-                            clb.set_ticklabels(clblabels2)
+                            clb.set_ticks(list(map(float, clblabels2[0::2])))
+                            clb.set_ticklabels(clblabels2[0::2])
 
                             plt.tight_layout()
                             plt.savefig(pngname, dpi=600)

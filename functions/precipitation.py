@@ -344,8 +344,8 @@ def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
                         clb.ax.minorticks_off()
                         #clb.set_ticks(rain_levels)
                         #clb.set_ticklabels(rain_labels)
-                        clb.set_ticks(range(0, 56, 10))
-                        clb.set_ticklabels(range(0, 56, 10))
+                        clb.set_ticks(range(0, 56, 20))
+                        clb.set_ticklabels(range(0, 56, 20))
 
                         plt.tight_layout()
                         plt.savefig(pngname, dpi=600)

@@ -349,7 +349,8 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     dir_gefs_wrf_ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
     dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
-    dir_dawn = os.path.join(dir_data, "DAWN")
+    dir_dawn = os.path.join(dir_data, 'DAWN')
+    dir_halo = os.path.join(dir_data, 'HALO')
     dir_scratch_case = os.path.join(dir_scratch, '_'.join([case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}"]))
 
     dir_da = os.path.join(dir_cycling_da, 'da')
@@ -411,6 +412,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 os.makedirs(obs_dir, exist_ok=True)
                 if 'CTRL' not in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
                 if 'DAWN' in exp_name: os.system(f"cp {dir_dawn}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d ")
+                if 'HALO' in exp_name: os.system(f"cp {dir_halo}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.halo.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.halo.tm00.bufr_d ")
 
                 print(f"Create ens folder, and copy wrfout to ens")
                 ens_dir = os.path.join(run_gsi_dir, 'ens')
