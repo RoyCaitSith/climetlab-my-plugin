@@ -1,12 +1,12 @@
 import os
 import glob
 import netCDF4
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from pathlib import Path
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
@@ -39,9 +39,9 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, cygnss_exp_name)
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
-        initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-        anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(total_da_cycles-1))
+        initial_time = datetime(*itime)
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
+        anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(total_da_cycles-1))
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
 
@@ -64,8 +64,8 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, cygnss_exp_name)
             filename = filename.strip('\n')
             time_ST_str = filename[ 0:14]
             time_ET_str = filename[15:29]
-            time_ST = datetime.datetime.strptime(time_ST_str, '%Y%m%d%H%M%S')
-            time_ET = datetime.datetime.strptime(time_ET_str, '%Y%m%d%H%M%S')
+            time_ST = datetime.strptime(time_ST_str, '%Y%m%d%H%M%S')
+            time_ET = datetime.strptime(time_ET_str, '%Y%m%d%H%M%S')
 
             filename = '/'.join([dir_save, filename])
             nc_fid = Dataset(filename, mode='r', format='NETCDF4')

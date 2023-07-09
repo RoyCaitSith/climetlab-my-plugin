@@ -2,10 +2,10 @@ import os
 import re
 import time
 import h5py
-import datetime
 import importlib
 import metpy.calc
 import numpy as np
+from datetime import datetime, timedelta
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from metpy.units import units
@@ -17,11 +17,11 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime.datetime(*itime)
+    initial_time=datetime(*itime)
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    
+
     dir_data = os.path.join(dir_exp, 'data')
     dir_HALO = os.path.join(dir_data, 'HALO')
     dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
@@ -30,9 +30,9 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        anl_end_time = initial_time + datetime.timedelta(hours=cycling_interval*idc)
-        time_s = anl_end_time - datetime.timedelta(hours=cycling_interval/2.0)
-        time_e = anl_end_time + datetime.timedelta(hours=cycling_interval/2.0)
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
+        time_s = anl_end_time - timedelta(hours=cycling_interval/2.0)
+        time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
 
@@ -63,7 +63,7 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
 
         for file_HALO in filenames:
             date = re.search(r"\d{8}", file_HALO).group()
-            initial_time = datetime.datetime.strptime(date, "%Y%m%d")
+            initial_time = datetime.strptime(date, "%Y%m%d")
             time_s_hours = (time_s - initial_time).total_seconds()/3600.0
             time_e_hours = (time_e - initial_time).total_seconds()/3600.0
             print(time_s_hours)
@@ -77,13 +77,13 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
                 HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
                 HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
                 HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
-                HALO_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
-                HALO_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
-                HALO_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
-                HALO_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
-                HALO_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
-                HALO_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in HALO_datetime])
-                HALO_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in HALO_datetime])
+                HALO_year = np.array([(initial_time + timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
+                HALO_mnth = np.array([(initial_time + timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
+                HALO_days = np.array([(initial_time + timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
+                HALO_hour = np.array([(initial_time + timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
+                HALO_minu = np.array([(initial_time + timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
+                HALO_seco = np.array([(initial_time + timedelta(hours = d)).second for d in HALO_datetime])
+                HALO_mcse = np.array([(initial_time + timedelta(hours = d)).microsecond for d in HALO_datetime])
                 HALO_seco = HALO_seco + HALO_mcse/1000000.0
                 HALO_altitude = np.tile(HALO['z'], (n_loc, 1)).flatten()
                 HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
@@ -105,13 +105,13 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
                 HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
                 HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
                 HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
-                HALO_year = np.array([(initial_time + datetime.timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
-                HALO_mnth = np.array([(initial_time + datetime.timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
-                HALO_days = np.array([(initial_time + datetime.timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
-                HALO_hour = np.array([(initial_time + datetime.timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
-                HALO_minu = np.array([(initial_time + datetime.timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
-                HALO_seco = np.array([(initial_time + datetime.timedelta(hours = d)).second for d in HALO_datetime])
-                HALO_mcse = np.array([(initial_time + datetime.timedelta(hours = d)).microsecond for d in HALO_datetime])
+                HALO_year = np.array([(initial_time + timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
+                HALO_mnth = np.array([(initial_time + timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
+                HALO_days = np.array([(initial_time + timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
+                HALO_hour = np.array([(initial_time + timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
+                HALO_minu = np.array([(initial_time + timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
+                HALO_seco = np.array([(initial_time + timedelta(hours = d)).second for d in HALO_datetime])
+                HALO_mcse = np.array([(initial_time + timedelta(hours = d)).microsecond for d in HALO_datetime])
                 HALO_seco = HALO_seco + HALO_mcse/1000000.0
                 HALO_altitude = np.tile(HALO['DataProducts']['Altitude'], (n_loc, 1)).flatten()
                 HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
@@ -122,7 +122,7 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
                 HALO_mixing_ratio = HALO_mixing_ratio/1000.0
                 HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
                 HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
-                HALO.close()                
+                HALO.close()
 
             index = (HALO_datetime >= time_s_hours) & (HALO_datetime <= time_e_hours) & \
                     (~np.isnan(HALO_mixing_ratio)) & (HALO_mixing_ratio > 0) & \
@@ -174,7 +174,7 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
             np.savetxt(f, PRLC)
         with open(os.path.join(dir_bufr_temp, '12.txt'), 'ab') as f:
             np.savetxt(f, GP10)
-        with open(os.path.join(dir_bufr_temp, '13.txt'), 'ab') as f:  
+        with open(os.path.join(dir_bufr_temp, '13.txt'), 'ab') as f:
             np.savetxt(f, QMAT)
         with open(os.path.join(dir_bufr_temp, '14.txt'), 'ab') as f:
             np.savetxt(f, TMDB)
@@ -193,11 +193,11 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime.datetime(*itime)
+    initial_time=datetime(*itime)
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    
+
     dir_data = os.path.join(dir_exp, 'data')
     dir_HALO = os.path.join(dir_data, 'HALO')
     dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
@@ -205,7 +205,7 @@ def create_HALO_bufr(data_library_name, dir_case, case_name):
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        anl_end_time = initial_time + datetime.timedelta(hours=cycling_interval*idc)
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
 

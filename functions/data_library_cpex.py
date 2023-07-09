@@ -6,11 +6,10 @@ sns_bright_cmap = sns.color_palette('bright')
 
 attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN',
-    'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/best_track',
     'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/01_CV_RF07_AEW06_IAN/cycling_da/namelists',
-    'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/best_track/2022_09L_Ian.csv',
-    'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/best_track/ibtracs.ALL.list.v04r00.csv',
+    'NHC_best_track': '2022_09L_Ian.csv',
+    'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2022, 'name': 'IAN'},
     'itime': (2022, 9, 16,  0, 0, 0),
     'forecast_hours': 240,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
@@ -25,7 +24,6 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'boundary_data_deterministic': 'GFS',
     'boundary_data_ensemble': 'GEFS',
     'ensemble_members': 60,
-    'ibtracs_case': 'IAN',
 }
 
 attributes[('/08_CPEX/02_AW_RF01_AEW01', 'AEW01')] = {

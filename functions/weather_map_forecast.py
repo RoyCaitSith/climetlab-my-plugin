@@ -1,10 +1,10 @@
 import os
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 import colormaps as cmaps
+from datetime import datetime, timedelta
 from mpl_toolkits.basemap import Basemap
 from tqdm.notebook import tqdm
 from wrf import getvar
@@ -23,7 +23,7 @@ def draw_sfc_wind_individual(data_library_names, dir_cases, case_names, exp_name
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
         dir_ScientificColourMaps7=attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         itime=attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         history_interval=attributes[(dir_case, case_name)]['history_interval']
@@ -45,9 +45,9 @@ def draw_sfc_wind_individual(data_library_names, dir_cases, case_names, exp_name
 
                 for idt in range(0, int(forecast_hours/history_interval+1)):
 
-                    anl_end_time = initial_time + datetime.timedelta(hours=cycling_interval*da_cycle)
+                    anl_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle)
                     forecast_start_time = anl_end_time
-                    time_now = forecast_start_time + datetime.timedelta(hours = (idt+1)*history_interval)
+                    time_now = forecast_start_time + timedelta(hours = (idt+1)*history_interval)
                     time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
 
                     wrfout = f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:00:00')}"
@@ -78,7 +78,7 @@ def draw_sfc_wind_individual(data_library_names, dir_cases, case_names, exp_name
 
                         space = 20
                         pcm1 = ax.contourf(mlon, mlat, spd, levels=np.arange(0, 30.1, 1.0), cmap=cmaps.hawaii, extend='max', zorder=1)
-                        ax.quiver(mlon[::space, ::space], mlat[::space, ::space], u10[::space, ::space], v10[::space, ::space],                                                                                                                                                                                                                                                                                                
+                        ax.quiver(mlon[::space, ::space], mlat[::space, ::space], u10[::space, ::space], v10[::space, ::space],
                                   width=0.001, headwidth=5.0, headlength=7.5, scale=75.0, scale_units='inches', zorder=1)
 
                         ax.set_xticks(np.arange(-180, 181, 10))
@@ -118,7 +118,7 @@ def draw_slp_rain_individual(data_library_names, dir_cases, case_names, exp_name
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
         dir_ScientificColourMaps7=attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         itime=attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         history_interval=attributes[(dir_case, case_name)]['history_interval']
@@ -140,10 +140,10 @@ def draw_slp_rain_individual(data_library_names, dir_cases, case_names, exp_name
 
                 for idt in range(0, int(forecast_hours/history_interval+1)):
 
-                    anl_end_time = initial_time + datetime.timedelta(hours=cycling_interval*da_cycle)
+                    anl_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle)
                     forecast_start_time = anl_end_time
-                    time_last = forecast_start_time + datetime.timedelta(hours = idt*history_interval)
-                    time_now = forecast_start_time + datetime.timedelta(hours = (idt+1)*history_interval)
+                    time_last = forecast_start_time + timedelta(hours = idt*history_interval)
+                    time_now = forecast_start_time + timedelta(hours = (idt+1)*history_interval)
                     time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
 
                     wrfout_last = f"wrfout_{dom}_{time_last.strftime('%Y-%m-%d_%H:00:00')}"
@@ -187,7 +187,7 @@ def draw_slp_rain_individual(data_library_names, dir_cases, case_names, exp_name
                         mlon, mlat = m(lon, lat)
 
                         space = 20
-                        pcm1 = ax.contourf(mlon, mlat, rain_rate, levels=np.arange(0, 55.1, 1), cmap=cmaps.hawaii, extend='max', zorder=1)
+                        pcm1 = ax.contourf(mlon, mlat, rain_rate, levels=np.arange(0, 55.1, 1), cmap=cmaps.hawaii, extend='both', zorder=1)
                         ax.quiver(mlon[::space, ::space], mlat[::space, ::space], u10[::space, ::space], v10[::space, ::space],                                                                                                                                                                                                                                                                                                
                                   width=0.001, headwidth=5.0, headlength=7.5, scale=75.0, scale_units='inches', zorder=1)
                         ax.contour(mlon, mlat, slp, levels=np.arange(900, 1100.1, 5.0), colors='k', linewidths=1.0, zorder=0)

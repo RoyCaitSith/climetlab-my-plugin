@@ -1,12 +1,12 @@
 import os
 import glob
 import netCDF4
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from pathlib import Path
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
@@ -40,9 +40,9 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
-        initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-        anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(total_da_cycles-1))
+        initial_time = datetime(*itime)
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
+        anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(total_da_cycles-1))
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
 
@@ -61,10 +61,10 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
         output_file = f'{dir_save}/{anl_start_time_str}_{anl_end_time_str}_cygnss_wind_speed_d01.png'
         for da_cycle in tqdm(range(0, total_da_cycles), desc='Cycles', leave=False, unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-            time_now = anl_start_time + datetime.timedelta(hours=cycling_interval*da_cycle)
+            time_now = anl_start_time + timedelta(hours=cycling_interval*da_cycle)
 
-            da_window_ST = time_now - datetime.timedelta(hours=time_window_max)
-            da_window_ET = time_now + datetime.timedelta(hours=time_window_max)
+            da_window_ST = time_now - timedelta(hours=time_window_max)
+            da_window_ET = time_now + timedelta(hours=time_window_max)
             da_window_ST_str = da_window_ST.strftime('%Y%m%d%H%M%S')
             da_window_ET_str = da_window_ET.strftime('%Y%m%d%H%M%S')
 
@@ -81,8 +81,8 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
                 filename = filename.strip('\n')
                 date_st_str = filename[10:25]
                 date_et_str = filename[27:42]
-                time_ST = datetime.datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
-                time_ET = datetime.datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
+                time_ST = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+                time_ET = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
                 da_window_ST_seconds = (da_window_ST-time_ST).total_seconds()
                 da_window_ET_seconds = (da_window_ET-time_ST).total_seconds()
 

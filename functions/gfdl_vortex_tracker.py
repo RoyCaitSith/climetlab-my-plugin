@@ -1,12 +1,14 @@
 import os
 import glob
 import shutil
-import datetime
 import importlib
+from datetime import datetime, timedelta
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 
-def link_wrfout(data_library_name, dir_case, case_name, exp_name):
+def link_wrfout(data_library_name, dir_case, case_name, exp_name, \
+                anl_start_time=datetime(2000, 1, 1, 0, 0, 0), \
+                forecast_end_time=datetime(2000, 1, 1, 0, 0, 0)):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -23,20 +25,27 @@ def link_wrfout(data_library_name, dir_case, case_name, exp_name):
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc="DA Cycle"):
 
         case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         initial_time_str = initial_time.strftime('%Y%m%d%H')
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-        forecast_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
+        if anl_start_time == datetime(2000, 1, 1, 0, 0, 0):
+            anl_start_time = initial_time + timedelta(hours=cycling_interval)
+        if forecast_end_time == datetime(2000, 1, 1, 0, 0, 0):
+            forecast_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle + forecast_hours)
+            print(da_cycle)
+            print(forecast_hours)
         dir_in = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
         dir_out = os.path.join(dir_exp, 'track_intensity', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'wrfprd')
         os.makedirs(dir_out, exist_ok=True)
+
+        print(anl_start_time)
+        print(forecast_end_time)
 
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1
 
         print(f'Link wrfout files from {anl_start_time} to {forecast_end_time}')
         for item in tqdm(range(n_time), desc="Processing files", leave=False):
             for dom in GFDL_domains:
-                forecast_time_now = anl_start_time + datetime.timedelta(hours=history_interval * item)
+                forecast_time_now = anl_start_time + timedelta(hours=history_interval * item)
                 wrfout_time = forecast_time_now.strftime('%Y-%m-%d_%H:00:00')
                 wrfout_name = f'wrfout_{dom}_{wrfout_time}'
                 wrfout = os.path.join(dir_in, wrfout_name)
@@ -110,9 +119,9 @@ def process_gfdl_files(data_library_name, dir_case, case_name, exp_name):
         files_out = os.path.join(files_exp, 'multi')
         dtime = history_interval * 60
 
-        initial_time = datetime.datetime(*itime)
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-        forecast_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
+        initial_time = datetime(*itime)
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
+        forecast_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1) + forecast_hours)
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1
 
         for item in tqdm(range(n_time), desc="Processing files", leave=False):

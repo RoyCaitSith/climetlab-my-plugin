@@ -1,6 +1,6 @@
 import os
-import datetime
 import importlib
+from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from google.cloud import storage
 
@@ -19,10 +19,10 @@ def download_goes_data_specific_days(download_start_time, n_days, data_set, dir_
     bucket = storage_client.bucket(bucket_name)
 
     for idx in tqdm(range(n_days), desc='Day', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
-        time_now = download_start_time + datetime.timedelta(days=idx)
+        time_now = download_start_time + timedelta(days=idx)
         time_str = time_now.strftime('%Y%m%d')
         year = time_now.strftime('%Y').zfill(4)
-        start_time = datetime.datetime(int(year)-1, 12, 31, 0, 0, 0)
+        start_time = datetime(int(year)-1, 12, 31, 0, 0, 0)
         time_dif = time_now - start_time
         day = str(time_dif.days).zfill(3)
         dir_day = f"{dir_GOES}/{time_str}"
@@ -55,10 +55,10 @@ def download_goes_data_cycling_da(data_library_name, dir_case, case_name, data_s
     dir_GOES = os.path.join(dir_data, 'GOES')
 
     for idx in tqdm(range(n_days), desc='Day', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
-        time_now = download_start_time + datetime.timedelta(days=idx)
+        time_now = download_start_time + timedelta(days=idx)
         time_str = time_now.strftime('%Y%m%d')
         year = time_now.strftime('%Y').zfill(4)
-        start_time = datetime.datetime(int(year)-1, 12, 31, 0, 0, 0)
+        start_time = datetime(int(year)-1, 12, 31, 0, 0, 0)
         time_dif = time_now - start_time
         day = str(time_dif.days).zfill(3)
         dir_day = os.path.join(dir_GOES, time_str)

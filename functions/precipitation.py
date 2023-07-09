@@ -1,12 +1,12 @@
 import os
 import h5py
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import pandas as pd
 import cal_polar_to_latlon as clatlon
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from combine_and_show_images import combine_images_grid
 from mpl_toolkits.basemap import Basemap
 from tqdm.notebook import tqdm
@@ -32,7 +32,7 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
         attributes = getattr(module, 'attributes')
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         itime=attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
         dir_data=attributes[(dir_case, case_name)]['dir_data']
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
@@ -43,8 +43,8 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
 
-            anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-            anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+            anl_start_time = initial_time + timedelta(hours=cycling_interval)
+            anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
             n_time = int(forecast_hours/accumulated_hours)
 
@@ -80,7 +80,7 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
 
                 for idt in tqdm(range(n_time), desc="Time", leave=False):
 
-                    time_now = forecast_start_time + datetime.timedelta(hours = idt*6.0)
+                    time_now = forecast_start_time + timedelta(hours = idt*6.0)
 
                     if 'IMERG' in exp_name:
 
@@ -88,7 +88,7 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
 
                         for dh in np.arange(0.0, accumulated_hours, IMERG_time_resolution):
 
-                            time_IMERG = time_now + datetime.timedelta(hours=dh)
+                            time_IMERG = time_now + timedelta(hours=dh)
                             YYMMDD = time_IMERG.strftime('%Y%m%d')
                             HHMMSS = time_IMERG.strftime('%H%M%S')
 
@@ -112,8 +112,8 @@ def calculate_6h_accumulated_precipitation(data_library_names, dir_cases, case_n
 
                         for idx in range(0, int(accumulated_hours), history_interval):
 
-                            time_0 = time_now + datetime.timedelta(hours = idx)
-                            time_1 = time_now + datetime.timedelta(hours = idx+history_interval)
+                            time_0 = time_now + timedelta(hours = idx)
+                            time_1 = time_now + timedelta(hours = idx+history_interval)
 
                             wrfout_0 = dir_wrfout + '/wrfout_' + dom + '_' + time_0.strftime('%Y-%m-%d_%H:%M:00')
                             wrfout_1 = dir_wrfout + '/wrfout_' + dom + '_' + time_1.strftime('%Y-%m-%d_%H:%M:00')
@@ -164,7 +164,7 @@ def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
     labels = compare_schemes[scheme]['labels']
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
@@ -175,15 +175,15 @@ def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
     for dom in tqdm(GFDL_domains, desc='GFDL Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc="Cycles", leave=False):
 
-            anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-            anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+            anl_start_time = initial_time + timedelta(hours=cycling_interval)
+            anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
             forecast_start_time = anl_end_time
             n_time = int(forecast_hours/accumulated_hours)
 
             for idt in tqdm(range(n_time), desc="Time", leave=False):
 
-                time_now = forecast_start_time + datetime.timedelta(hours=idt*accumulated_hours)
-                time_label = time_now + datetime.timedelta(hours=accumulated_hours/2.0)
+                time_now = forecast_start_time + timedelta(hours=idt*accumulated_hours)
+                time_label = time_now + timedelta(hours=accumulated_hours/2.0)
                 time_now_str = time_now.strftime('%Y%m%d%H')
                 time_label_str = time_label.strftime('%H UTC %d %b')
 
@@ -218,9 +218,9 @@ def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
 
                         fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
 
-                        time_end = time_now + datetime.timedelta(hours = accumulated_hours)
+                        time_end = time_now + timedelta(hours = accumulated_hours)
                         for id_TC, TC_date in enumerate(TC_dates):
-                            TC_datetime = datetime.datetime.strptime(TC_date, '%Y-%m-%d %H:%M:%S')
+                            TC_datetime = datetime.strptime(TC_date, '%Y-%m-%d %H:%M:%S')
                             if TC_datetime == time_end:
                                 TC_lat = 0.5*(TC_lats[id_TC] + TC_lats[id_TC-1])
                                 TC_lon = 0.5*(TC_lons[id_TC] + TC_lons[id_TC-1])
@@ -299,9 +299,9 @@ def draw_6h_accumulated_precipitation_tc_scheme(data_library_name, scheme):
 
                         fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
 
-                        time_end = time_now + datetime.timedelta(hours = accumulated_hours)
+                        time_end = time_now + timedelta(hours = accumulated_hours)
                         for id_TC, TC_date in enumerate(TC_dates):
-                            TC_datetime = datetime.datetime.strptime(TC_date, '%Y-%m-%d %H:%M:%S')
+                            TC_datetime = datetime.strptime(TC_date, '%Y-%m-%d %H:%M:%S')
                             if TC_datetime == time_end:
                                 TC_lat = 0.5*(TC_lats[id_TC] + TC_lats[id_TC-1])
                                 TC_lon = 0.5*(TC_lons[id_TC] + TC_lons[id_TC-1])

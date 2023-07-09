@@ -2,11 +2,11 @@ import os
 import re
 import time
 import shutil
-import datetime
 import requests
 import importlib
 import subprocess
 import file_operations as fo
+from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from IPython.display import display
 from IPython.display import Image as IPImage
@@ -19,14 +19,14 @@ def check_file_existence(time_start, time_end, directories, file_format, domains
             file_name = file_format.format(dom=dom, ctime=ctime)
             if not any(os.path.exists(os.path.join(directory, file_name)) for directory in directories):
                 return False
-        ctime = ctime + datetime.timedelta(hours=history_interval)
+        ctime = ctime + timedelta(hours=history_interval)
     return True
 
 def copy_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_format_dst, domains, history_interval):
 
     n_time = int((time_end-time_start).total_seconds()/3600/history_interval+1)
     for idt in tqdm(range(n_time), desc='Time', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
-        ctime = time_start + datetime.timedelta(hours=idt*history_interval)
+        ctime = time_start + timedelta(hours=idt*history_interval)
         for dom in domains:
             file_name_src = file_format_src.format(dom=dom, ctime=ctime)
             file_name_dst = file_format_dst.format(dom=dom, ctime=ctime)
@@ -38,7 +38,7 @@ def move_files(time_start, time_end, dir_src, file_format_src, dir_dst, file_for
 
     n_time = int((time_end-time_start).total_seconds()/3600/history_interval+1)
     for idt in tqdm(range(n_time), desc='Time', unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
-        ctime = time_start + datetime.timedelta(hours=idt*history_interval)
+        ctime = time_start + timedelta(hours=idt*history_interval)
         for dom in domains:
             file_name_src = file_format_src.format(dom=dom, ctime=ctime)
             file_name_dst = file_format_dst.format(dom=dom, ctime=ctime)
@@ -171,10 +171,10 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         fo.create_new_case_folder(folder_dir)
         print(folder_dir)
 
-        initial_time     = datetime.datetime(*itime)
+        initial_time     = datetime(*itime)
         initial_time_str = initial_time.strftime('%Y%m%d%H')
-        anl_start_time   = initial_time + datetime.timedelta(hours=cycling_interval)
-        anl_end_time     = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+        anl_start_time   = initial_time + timedelta(hours=cycling_interval)
+        anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
         analysis_hours   = da_cycle*cycling_interval
 
         if period == 'cycling_da':
@@ -186,7 +186,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
             max_dom = len(forecast_domains)
             start_date = anl_end_time
             total_hours = forecast_hours + wps_interval
-        end_date = start_date + datetime.timedelta(hours = total_hours)
+        end_date = start_date + timedelta(hours = total_hours)
         print(f"domains of {period} period: {max_dom}")
         print(f"start_date: {start_date}")
         print(f"end_date: {end_date}")
@@ -263,7 +263,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         print('Copy the boundary condition data into Boundary_Condition_Data')
 
         for idth in range(0, total_hours + wps_interval, wps_interval):
-            time_now = initial_time + datetime.timedelta(hours = idth)
+            time_now = initial_time + timedelta(hours = idth)
             if period == 'cycling_da': fhours = 0
             if period == 'forecast':
                 time_now = anl_end_time
@@ -370,14 +370,14 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     for option_file in option_filelist:
         os.system(f"cp {dir_namelists}/{option_file} {dir_option}/{option_file}")
 
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     initial_time_YYYYMMDDHH = initial_time.strftime('%Y%m%d%H')
     time_last = initial_time
     time_last_YYYYMMDDHH = initial_time_YYYYMMDDHH
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='DA Cycle', unit="files", bar_format="{desc}: {n}/{total} DA Cycles | {elapsed}<{remaining}"):
 
-        time_now = initial_time + datetime.timedelta(hours=idc*cycling_interval)
+        time_now = initial_time + timedelta(hours=idc*cycling_interval)
         time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
         time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
         time_now_HH = time_now.strftime('%H')
@@ -459,7 +459,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                     os._exit(0)
 
         time_last = time_now
-        time_now = time_now + datetime.timedelta(hours = cycling_interval)
+        time_now = time_now + timedelta(hours = cycling_interval)
         time_last_YYYYMMDDHH = time_last.strftime('%Y%m%d%H')
         time_now_YYYYMMDDHH  = time_now.strftime('%Y%m%d%H')
 
@@ -551,16 +551,16 @@ def prepare_wrf_forecast(data_library_name, dir_case, case_name, exp_name):
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
-    initial_time = datetime.datetime(*itime)
-    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-    anl_end_time = anl_start_time + datetime.timedelta(hours=(total_da_cycles-1)*cycling_interval)
+    initial_time = datetime(*itime)
+    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+    anl_end_time = anl_start_time + timedelta(hours=(total_da_cycles-1)*cycling_interval)
     dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_da_in = os.path.join(dir_cycling_da, 'da')
     dir_bkg_in = os.path.join(dir_cycling_da, 'bkg')
 
     for idc in tqdm(range(1, total_da_cycles), desc='DA Cycle', unit="files", bar_format="{desc}: {n}/{total} DA Cycles | {elapsed}<{remaining}"):
 
-        anl_end_time = anl_start_time + datetime.timedelta(hours=(idc-1)*cycling_interval)
+        anl_end_time = anl_start_time + timedelta(hours=(idc-1)*cycling_interval)
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(idc).zfill(2)}")
         dir_da_out = os.path.join(dir_cycling_da, 'da')
         dir_bkg_out = os.path.join(dir_cycling_da, 'bkg')
@@ -603,12 +603,12 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
 
     case = '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'Forecast'])
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
-    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+    anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
     time_start = anl_end_time
-    time_end = time_start + datetime.timedelta(hours=forecast_hours+wps_interval)
+    time_end = time_start + timedelta(hours=forecast_hours+wps_interval)
     dir_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'da')
     dir_bkg = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
     dir_scratch_case = os.path.join(dir_scratch, case)

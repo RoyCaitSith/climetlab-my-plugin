@@ -1,12 +1,12 @@
 import os
 import math
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import pandas as pd
 import climetlab as cml
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from combine_and_show_images import combine_images_grid
 from tqdm.notebook import tqdm
 from geopy.distance import great_circle
@@ -15,6 +15,35 @@ from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 from IPython.display import Image as IPImage
 
+def display_ibtracs_climetlab(data_library_name, dir_case, case_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
+    ibtracs=attributes[(dir_case, case_name)]['ibtracs']
+    dir_best_track=os.path.join(dir_exp, 'track_intensity', 'best_track')
+
+    ibtracs_cml = cml.load_source('file', os.path.join(dir_best_track, ibtracs['filename']))
+    ibtracs_pd = ibtracs_cml.to_pandas()
+    ibtracs_pd = ibtracs_pd[(ibtracs_pd.NAME == ibtracs['name']) & (ibtracs_pd.SEASON == ibtracs['season'])]
+    cml.plot_map(ibtracs_pd, style="cyclone-track")
+    print(ibtracs_pd)
+
+def display_NHC_best_track_climetlab(data_library_name, dir_case, case_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
+    NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
+    dir_best_track=os.path.join(dir_exp, 'track_intensity', 'best_track')
+
+    NHC_cml = cml.load_source('file', os.path.join(dir_best_track, NHC_best_track))
+    NHC_pd = NHC_cml.to_pandas()
+    cml.plot_map(NHC_pd, style="cyclone-track")
+    print(NHC_pd)
+
 def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp_name):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -22,7 +51,7 @@ def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp
 
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
     itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime.datetime(*itime)
+    initial_time=datetime(*itime)
     forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
     dir_exp=attributes[(dir_case, case_name)]['dir_exp']
     GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
@@ -43,20 +72,20 @@ def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp
             df.columns = ['Initial_Time', 'Forecast_Hour', 'LAT', 'LON', 'MWS (Knot)', 'MSLP (hPa)']
             df.drop_duplicates(subset=['Forecast_Hour'], keep='last', inplace=True)
 
-            df.insert(loc=0, column='Date_Time', value=df.apply(lambda row: datetime.datetime.strptime(str(row['Initial_Time']), '%Y%m%d%H') +
-                                                     datetime.timedelta(hours=row['Forecast_Hour'] / 100.0), axis=1))
+            df.insert(loc=0, column='Date_Time', value=df.apply(lambda row: datetime.strptime(str(row['Initial_Time']), '%Y%m%d%H') +
+                                                     timedelta(hours=row['Forecast_Hour'] / 100.0), axis=1))
             df.drop(columns=['Initial_Time', 'Forecast_Hour'], inplace=True)
             df['LAT'] = df['LAT'].str.extract('(\d+\.?\d*)N', expand=False).astype(float) * 0.1
             df['LON'] = df['LON'].str.extract('(\d+\.?\d*)W', expand=False).astype(float) * -0.1
             df.reset_index(drop=True, inplace=True)
             df.to_csv(dir_track_intensity + '/' + case + '_' + dom + '.csv', index=False)
 
-            anl_start_time = datetime.datetime(*itime) + datetime.timedelta(hours=cycling_interval)
+            anl_start_time = datetime(*itime) + timedelta(hours=cycling_interval)
             total_simulation_hours = forecast_hours + cycling_interval*(int(da_cycle-1))
             n_lead_time = df.shape[0]
             error_df = pd.DataFrame(0.0, index=np.arange(n_lead_time), columns=['Forecast_Hour', 'Track_Error (km)', 'MSLP_Error (hPa)', 'MWS_Error (Knot)'])
-            error_df['Forecast_Hour'] = df['Date_Time'].apply(lambda x: (datetime.datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
-            bt_df_Forecast_Hour = bt_df['Date_Time'].apply(lambda x: (datetime.datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
+            error_df['Forecast_Hour'] = df['Date_Time'].apply(lambda x: (datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
+            bt_df_Forecast_Hour = bt_df['Date_Time'].apply(lambda x: (datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
 
             bt_df_lat = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['LAT']))
             bt_df_lon = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['LON']))
@@ -106,15 +135,15 @@ def compare_track_scheme(data_library_scheme):
                 history_interval = attributes[(dir_case, case_name)]['history_interval']
                 dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
-                initial_time = datetime.datetime(*itime)
-                anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-                anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+                initial_time = datetime(*itime)
+                anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
                 forecast_start_time = anl_end_time
-                forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
+                forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
 
                 NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
                 df = pd.read_csv(NHC_best_track)
-                index = [idx for idx, Date_Time in enumerate(df['Date_Time']) if forecast_start_time <= datetime.datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S') <= forecast_end_time]
+                index = [idx for idx, Date_Time in enumerate(df['Date_Time']) if forecast_start_time <= datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S') <= forecast_end_time]
                 lat = list(df['LAT'][index])
                 lon = list(df['LON'][index])
                 dt = list(df['Date_Time'][index])
@@ -142,11 +171,11 @@ def compare_track_scheme(data_library_scheme):
                     history_interval = attributes[(dir_case, case_name)]['history_interval']
                     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
-                    initial_time = datetime.datetime(*itime)
-                    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-                    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+                    initial_time = datetime(*itime)
+                    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                    anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
                     forecast_start_time = anl_end_time
-                    forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
+                    forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
 
                     case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
                     filename = f"{dir_track_intensity}/{case}_{dom}.csv"
@@ -155,8 +184,8 @@ def compare_track_scheme(data_library_scheme):
                     time_now = forecast_start_time
                     while time_now <= forecast_end_time:
                         for idx, Date_Time in enumerate(df['Date_Time']):
-                            if time_now == datetime.datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S'): index.append(idx)
-                        time_now = time_now + datetime.timedelta(hours=history_interval)
+                            if time_now == datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S'): index.append(idx)
+                        time_now = time_now + timedelta(hours=history_interval)
                     lat = list(df['LAT'][index])
                     lon = list(df['LON'][index])
 
@@ -230,11 +259,11 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
                 forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
                 cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
 
-                initial_time = datetime.datetime(*itime)
-                anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-                anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+                initial_time = datetime(*itime)
+                anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
                 forecast_start_time = anl_end_time
-                forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
+                forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
 
                 NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
                 df = pd.read_csv(NHC_best_track)
@@ -242,7 +271,7 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
                 index = []
                 formatted_date_labels = []
                 for idx, Date_Time in enumerate(df['Date_Time']):
-                    time_now = datetime.datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S')
+                    time_now = datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S')
                     if time_now >= forecast_start_time and time_now <= forecast_end_time:
                         index.append(idx)
                         #formatted_date_labels.append(time_now.strftime("%H UTC\n%d %b"))
@@ -268,11 +297,11 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
                     history_interval = attributes[(dir_case, case_name)]['history_interval']
                     dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
-                    initial_time = datetime.datetime(*itime)
-                    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-                    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+                    initial_time = datetime(*itime)
+                    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                    anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
                     forecast_start_time = anl_end_time
-                    forecast_end_time = forecast_start_time + datetime.timedelta(hours=forecast_hours)
+                    forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
 
                     case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
                     filename = f"{dir_track_intensity}/{case}_{dom}.csv"
@@ -281,8 +310,8 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
                     time_now = forecast_start_time
                     while time_now <= forecast_end_time:
                         for idx, Date_Time in enumerate(df['Date_Time']):
-                            if time_now == datetime.datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S'): index.append(idx)
-                        time_now = time_now + datetime.timedelta(hours=history_interval)
+                            if time_now == datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S'): index.append(idx)
+                        time_now = time_now + timedelta(hours=history_interval)
                     var = list(df[variable][index])
 
                     idx_forecast_start_time = int(int((24-float(forecast_start_time.strftime('%H')))%24/6)*(6/history_interval))

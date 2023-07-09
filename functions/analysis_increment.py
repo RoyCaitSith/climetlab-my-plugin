@@ -1,10 +1,10 @@
 import os
-import datetime
 import importlib
 import subprocess
 import numpy as np
 import colormaps as cmaps
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from set_parameters import set_variables
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
@@ -26,11 +26,11 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
         dir_exp=attributes[(dir_case, case_name)]['dir_exp']
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         itime=attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         da_domains=attributes[(dir_case, case_name)]['da_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
 
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
         dir_increment = os.path.join(dir_exp, 'increment')
         specific_case = '_'.join([case_name, exp_name, 'C'+str(total_da_cycles).zfill(2)])
@@ -50,7 +50,7 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
 
                 for idt in range(0, total_da_cycles):
 
-                    time_now = anl_start_time + datetime.timedelta(hours = idt*cycling_interval)
+                    time_now = anl_start_time + timedelta(hours = idt*cycling_interval)
                     # print(time_now)
 
                     wrfout_bkg = f"{dir_cycling_da}/{specific_case}/bkg/wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:00:00')}"
@@ -102,7 +102,6 @@ def calculate_analysis_increment(data_library_names, dir_cases, case_names, exp_
                             for idl in range(len(levels)):
                                 ncfile_output.variables[var][idt,idl,0,:,:] = temp_bkg[idl,:,:]
                                 ncfile_output.variables[var][idt,idl,1,:,:] = temp_anl[idl,:,:]
-                        
                     else:
 
                         ncfile_output.variables[var][idt,:,:,:,:] = 0.0
@@ -122,12 +121,12 @@ def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names
         dir_ScientificColourMaps7=attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
         total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
         itime=attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime.datetime(*itime)
+        initial_time = datetime(*itime)
         da_domains=attributes[(dir_case, case_name)]['da_domains']
         cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
 
-        anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
         dir_increment = os.path.join(dir_exp, 'increment')
         specific_case = '_'.join([case_name, exp_name, 'C'+str(total_da_cycles).zfill(2)])
         dir_increment_case = os.path.join(dir_increment, specific_case)
@@ -145,9 +144,9 @@ def draw_analysis_increment(data_library_names, dir_cases, case_names, exp_names
                 fig_width = 2.75*np.abs(lon[-1,-1]-lon[0,0])/np.abs(lat[-1,-1]-lat[0,0])
                 fig_height = 2.75+0.75
                 clb_aspect = 25*np.abs(lon[-1,-1]-lon[0,0])/np.abs(lat[-1,-1]-lat[0,0])
-                
+
                 for idt in range(0, total_da_cycles):
-                    time_now = anl_start_time + datetime.timedelta(hours = idt*cycling_interval)
+                    time_now = anl_start_time + timedelta(hours = idt*cycling_interval)
                     time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
                     image_files = []
                     output_file = os.path.join(dir_increment_case, '_'.join([time_now_YYYYMMDDHH, var, dom+'.png']))

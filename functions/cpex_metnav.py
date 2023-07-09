@@ -1,12 +1,12 @@
 import os
 import re
 import glob
-import datetime
 import importlib
 import subprocess
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from netCDF4 import Dataset
 from tqdm.notebook import tqdm
 from matplotlib.backends.backend_pdf import PdfPages
@@ -37,7 +37,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
                 #Get the date
                 line = lines[6:7][0].rstrip('\n')
                 items = line.split(',')
-                day = datetime.datetime(int(items[0]), int(items[1]), int(items[2]), 0, 0, 0)
+                day = datetime(int(items[0]), int(items[1]), int(items[2]), 0, 0, 0)
                 day_str = day.strftime('%Y%m%d')
 
                 time_list = []
@@ -46,7 +46,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
                 for line in lines[first_line:]:
                     line = line.rstrip('\n')
                     items = line.split(',')
-                    time_now = day + datetime.timedelta(seconds = float(items[0]))
+                    time_now = day + timedelta(seconds = float(items[0]))
                     time_now_str = int(time_now.strftime('%Y%m%d%H%M%S'))
                     time_list += [time_now_str]
                     lat_list += [float(items[2])]
@@ -138,7 +138,7 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
     attributes = getattr(module, 'attributes')
 
     itime = attributes[(dir_case, case_name)]['itime']
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_data = attributes[(dir_case, case_name)]['dir_data']
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']

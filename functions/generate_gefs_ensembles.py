@@ -1,9 +1,9 @@
 import os
 import shutil
-import datetime
 import importlib
 import subprocess
 import file_operations as fo
+from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from cycling_da import submit_job, check_file_existence, copy_files
 
@@ -16,10 +16,10 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     itime = attributes[(dir_case, case_name)]['itime']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-    initial_time = datetime.datetime(*itime)
-    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
-    anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(total_da_cycles-1))
-    download_stime = initial_time - datetime.timedelta(hours=cycling_interval)
+    initial_time = datetime(*itime)
+    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+    anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(total_da_cycles-1))
+    download_stime = initial_time - timedelta(hours=cycling_interval)
     download_etime = anl_end_time
     n_download_time = int((download_etime - download_stime).total_seconds()/cycling_interval/3600 + 1)
     dir_data = os.path.join(dir_exp, 'data')
@@ -33,7 +33,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     n_ensemble = 30
 
     for idx in tqdm(range(n_download_time), desc='Time', unit="files", bar_format="{desc}: {n}/{total} cycling_interval | {elapsed}<{remaining}"):
-        download_ntime = download_stime + datetime.timedelta(hours = idx*cycling_interval)
+        download_ntime = download_stime + timedelta(hours = idx*cycling_interval)
         YYYYMMDD = download_ntime.strftime('%Y%m%d')
         HH = download_ntime.strftime('%H')
         dir_download = '/'.join([dir_GEFS, YYYYMMDD])
@@ -107,7 +107,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
-    
+
     dir_data = os.path.join(dir_exp, 'data')
     dir_GEFS = os.path.join(dir_data, 'GEFS')
 
@@ -130,14 +130,14 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
                 fo.create_new_case_folder(folder_dir)
                 #print(folder_dir)
 
-                initial_time     = datetime.datetime(*itime)
+                initial_time     = datetime(*itime)
                 initial_time_str = initial_time.strftime('%Y%m%d%H')
-                anl_start_time   = initial_time + datetime.timedelta(hours=cycling_interval)
-                anl_end_time     = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+                anl_start_time   = initial_time + timedelta(hours=cycling_interval)
+                anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
 
                 max_dom = len(da_domains)
                 wps_interval = cycling_interval
-                start_date = anl_end_time - datetime.timedelta(hours = ens_hours)
+                start_date = anl_end_time - timedelta(hours = ens_hours)
                 end_date = anl_end_time
                 #print(f"domains: {max_dom}")
                 #print(f"start_date: {start_date}")
@@ -264,9 +264,9 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, whether_wait, 
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
-    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+    anl_start_time = initial_time + timedelta(hours=cycling_interval)
 
     ensemble_forecast_hours = [6, 12]
     for da_cycle in range(1, total_da_cycles+1):
@@ -275,8 +275,8 @@ def run_wrf_forecast_gefs(data_library_name, dir_case, case_name, whether_wait, 
 
                 # Set the folder name of the new case
                 case = '_'.join([case_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
-                anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
-                time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
+                anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
+                time_start = anl_end_time - timedelta(hours = ens_hours)
                 time_end = anl_end_time
                 dir_case = os.path.join(dir_scratch, case)
                 print(dir_case)
@@ -327,14 +327,14 @@ def move_wrf_forecast_gefs(data_library_name, dir_case, case_name):
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_GEFS_WRF_Ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
-    initial_time = datetime.datetime(*itime)
+    initial_time = datetime(*itime)
     initial_time_str = initial_time.strftime('%Y%m%d%H')
-    anl_start_time = initial_time + datetime.timedelta(hours=cycling_interval)
+    anl_start_time = initial_time + timedelta(hours=cycling_interval)
 
     ensemble_forecast_hours = [6, 12]
     for da_cycle in range(1, total_da_cycles+1):
 
-        anl_end_time = anl_start_time + datetime.timedelta(hours=cycling_interval*(da_cycle-1))
+        anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
         dir_ens = os.path.join(dir_GEFS_WRF_Ensemble, anl_end_time_YYYYMMDD, anl_end_time_HH)
@@ -344,7 +344,7 @@ def move_wrf_forecast_gefs(data_library_name, dir_case, case_name):
             for idens in range(1, int(ensemble_members/2)+1):
 
                 # Set the folder name of the new case
-                time_start = anl_end_time - datetime.timedelta(hours = ens_hours)
+                time_start = anl_end_time - timedelta(hours = ens_hours)
                 time_end = anl_end_time
                 case = '_'.join([case_name, 'C'+str(da_cycle).zfill(2), 'GEFS', f'f{str(ens_hours).zfill(3)}', f'mem{str(idens).zfill(2)}'])
                 dir_case = os.path.join(dir_scratch, case)
