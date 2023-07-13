@@ -66,8 +66,6 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
             initial_time = datetime.strptime(date, "%Y%m%d")
             time_s_hours = (time_s - initial_time).total_seconds()/3600.0
             time_e_hours = (time_e - initial_time).total_seconds()/3600.0
-            print(time_s_hours)
-            print(time_e_hours)
 
             if 'CV' in dir_case:
                 HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
