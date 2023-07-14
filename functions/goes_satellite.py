@@ -71,7 +71,7 @@ def download_goes_case(data_library_names, dir_cases, case_names, data_sets=['AB
         os.makedirs(dir_GOES, exist_ok=True)
 
         anl_start_time = initial_time + timedelta(hours=cycling_interval)
-        n_time = (cycling_interval*(total_da_cycles-1) + forecast_hours + 6)/history_interval + 1
+        n_time = int((cycling_interval*(total_da_cycles-1) + forecast_hours + 6)/history_interval + 1)
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='DA Cycles', leave=False, unit="files", bar_format="{desc}: {n}/{total} da cycles | {elapsed}<{remaining}"):
             
@@ -99,8 +99,6 @@ def download_goes_case(data_library_names, dir_cases, case_names, data_sets=['AB
                         # Download the file from GCS to the local machine
                         with open(local_path, "wb") as f:
                             blob.download_to_file(f)
-        
-        print(maio)
 
         for idt in tqdm(range(n_time), desc='Forecasts', leave=False, unit="files", bar_format="{desc}: {n}/{total} forecasts | {elapsed}<{remaining}"):
             
