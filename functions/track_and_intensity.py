@@ -20,9 +20,9 @@ def display_ibtracs_climetlab(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    ibtracs=attributes[(dir_case, case_name)]['ibtracs']
-    dir_best_track=os.path.join(dir_exp, 'track_intensity', 'best_track')
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    ibtracs = attributes[(dir_case, case_name)]['ibtracs']
+    dir_best_track = os.path.join(dir_exp, 'track_intensity', 'best_track')
 
     ibtracs_cml = cml.load_source('file', os.path.join(dir_best_track, ibtracs['filename']))
     ibtracs_pd = ibtracs_cml.to_pandas()
@@ -35,9 +35,9 @@ def display_NHC_best_track_climetlab(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
-    dir_best_track=os.path.join(dir_exp, 'track_intensity', 'best_track')
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
+    dir_best_track = os.path.join(dir_exp, 'track_intensity', 'best_track')
 
     NHC_cml = cml.load_source('file', os.path.join(dir_best_track, NHC_best_track))
     NHC_pd = NHC_cml.to_pandas()
@@ -49,12 +49,12 @@ def calculate_track_intensity_errors(data_library_name, dir_case, case_name, exp
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime(*itime)
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
-    NHC_best_track=attributes[(dir_case, case_name)]['NHC_best_track']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
 
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
@@ -140,7 +140,7 @@ def compare_track_scheme(data_library_name, scheme):
                 anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
                 forecast_start_time = anl_end_time
                 forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
-                
+
                 df = pd.read_csv(os.path.join(dir_best_track, NHC_best_track))
                 index = [idx for idx, Date_Time in enumerate(df['Date_Time']) if forecast_start_time <= datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S') <= forecast_end_time]
                 lat = list(df['LAT'][index])

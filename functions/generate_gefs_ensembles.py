@@ -28,7 +28,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
     aws_s3_cp = 'aws s3 cp --no-sign-request '
     aws_s3_bucket = 's3://noaa-gefs-pds/'
-    forecast_interval = cycling_interval
+    forecast_interval = 3
     forecast_period = 12
     n_ensemble = 30
 
@@ -107,6 +107,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     da_domains = attributes[(dir_case, case_name)]['da_domains']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
+    boundary_data_deterministic = attributes[(dir_case, case_name)]['boundary_data_deterministic']
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_GEFS = os.path.join(dir_data, 'GEFS')
@@ -136,7 +137,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
                 anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
 
                 max_dom = len(da_domains)
-                wps_interval = cycling_interval
+                wps_interval = 3
                 start_date = anl_end_time - timedelta(hours = ens_hours)
                 end_date = anl_end_time
                 #print(f"domains: {max_dom}")

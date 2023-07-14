@@ -14,13 +14,13 @@ def link_wrfout(data_library_name, dir_case, case_name, exp_name, \
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    itime=attributes[(dir_case, case_name)]['itime']
-    forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-    history_interval=attributes[(dir_case, case_name)]['history_interval']
-    GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    history_interval = attributes[(dir_case, case_name)]['history_interval']
+    GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
 
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc="DA Cycle"):
 
@@ -60,8 +60,8 @@ def setup_gfdl_folder(data_library_name, dir_case, case_name, exp_name, copy_exp
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
 
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc="DA Cycle"):
         case = '_'.join([case_name, exp_name, 'C' + str(da_cycle).zfill(2)])
@@ -103,14 +103,14 @@ def process_gfdl_files(data_library_name, dir_case, case_name, exp_name, \
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    itime=attributes[(dir_case, case_name)]['itime']
-    forecast_hours=attributes[(dir_case, case_name)]['forecast_hours']
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    GFDL_domains=attributes[(dir_case, case_name)]['GFDL_domains']
-    cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-    history_interval=attributes[(dir_case, case_name)]['history_interval']
-    hwrf_header=attributes[(dir_case, case_name)]['hwrf_header']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    history_interval = attributes[(dir_case, case_name)]['history_interval']
+    hwrf_header = attributes[(dir_case, case_name)]['hwrf_header']
     initial_time = datetime(*itime)
     dtime = history_interval * 60
 
@@ -119,7 +119,7 @@ def process_gfdl_files(data_library_name, dir_case, case_name, exp_name, \
         files_exp = os.path.join(dir_exp, 'track_intensity', case)
         files_dir = os.path.join(files_exp, 'postprd')
         files_out = os.path.join(files_exp, 'multi')
-        
+
         if input_anl_start_time == datetime(2000, 1, 1, 0, 0, 0):
             anl_start_time = initial_time + timedelta(hours=cycling_interval)
         else:

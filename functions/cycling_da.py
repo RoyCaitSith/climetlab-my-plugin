@@ -181,11 +181,11 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
             max_dom = len(da_domains)
             start_date = initial_time
             total_hours = analysis_hours
-            wps_interval = cycling_interval
+            if boundary_data_deterministic == 'GFS': wps_interval = 6
         if period == 'forecast':
             max_dom = len(forecast_domains)
             start_date = anl_end_time
-            total_hours = forecast_hours + wps_interval
+            total_hours = forecast_hours + 6
         end_date = start_date + timedelta(hours = total_hours)
         print(f"domains of {period} period: {max_dom}")
         print(f"start_date: {start_date}")
@@ -601,6 +601,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     history_interval = attributes[(dir_case, case_name)]['history_interval']
     wps_interval = attributes[(dir_case, case_name)]['wps_interval']
+    boundary_data_deterministic = attributes[(dir_case, case_name)]['boundary_data_deterministic']
 
     case = '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'Forecast'])
     initial_time = datetime(*itime)
@@ -608,7 +609,8 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
     anl_start_time = initial_time + timedelta(hours=cycling_interval)
     anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
     time_start = anl_end_time
-    time_end = time_start + timedelta(hours=forecast_hours+wps_interval)
+    if boundary_data_deterministic == 'GFS': time_end = time_start + timedelta(hours=forecast_hours+6)
+
     dir_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'da')
     dir_bkg = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
     dir_scratch_case = os.path.join(dir_scratch, case)

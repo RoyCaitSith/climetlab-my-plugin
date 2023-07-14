@@ -14,12 +14,12 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime(*itime)
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_DAWN = os.path.join(dir_data, 'DAWN')
@@ -125,7 +125,7 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
                 DAWN_wind_speed = ncfile.variables['Wind_Speed'][:,:].flatten('F')
                 DAWN_ac_roll = np.abs(np.tile(ncfile.variables['AC_Roll'][:], (n_hgt, 1))).flatten('F')
                 ncfile.close()
-                
+
                 index = (~DAWN_wind_speed.mask) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
                         (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
 
@@ -189,12 +189,12 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
 
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
-    itime=attributes[(dir_case, case_name)]['itime']
-    initial_time=datetime(*itime)
-    dir_exp=attributes[(dir_case, case_name)]['dir_exp']
-    cycling_interval=attributes[(dir_case, case_name)]['cycling_interval']
-    total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_DAWN = os.path.join(dir_data, 'DAWN')

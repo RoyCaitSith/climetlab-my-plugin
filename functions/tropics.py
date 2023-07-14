@@ -216,7 +216,7 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names):
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
-    pdfname = os.path.join(dir_save, 'total_precipitable_water_cdf.pdf') 
+    pdfname = os.path.join(dir_save, 'total_precipitable_water_cdf.pdf')
     pngname = os.path.join(dir_save, 'total_precipitable_water_cdf.png')
 
     with PdfPages(pdfname) as pdf:

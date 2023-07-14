@@ -46,7 +46,7 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
 
-        wrfout_format='wrfout_d01_{ctime:%Y-%m-%d_%H:%M:00}'
+        wrfout_format = 'wrfout_d01_{ctime:%Y-%m-%d_%H:%M:00}'
         file_wrfout_d01 = '/'.join([dir_wrfout, wrfout_format.format(ctime=initial_time)])
 
         wrfout_d01 = Dataset(file_wrfout_d01)
