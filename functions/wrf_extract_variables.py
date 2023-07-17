@@ -125,6 +125,8 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                                     IMERG_lat   = np.tile(f['Grid']['lat'][:], (3600, 1))
                                     IMERG_lon   = np.transpose(np.tile(f['Grid']['lon'][:], (1800, 1)))
+                                    IMERG_lon[IMERG_lon > 180.0] = IMERG_lon[IMERG_lon > 180.0] - 360.0
+
                                     IMERG_index = (IMERG_lat < np.array(lat[-1, -1]) + 15.0) & (IMERG_lat > np.array(lat[0, 0]) - 15.0) & \
                                                   (IMERG_lon < np.array(lon[-1, -1]) + 15.0) & (IMERG_lon > np.array(lon[0, 0]) - 15.0)
                                     f.close()
@@ -133,6 +135,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 IMERG_lat_1d  = IMERG_lat[IMERG_index]
                                 IMERG_lon_1d  = IMERG_lon[IMERG_index]
                                 ncfile_output.variables[var][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
+                                ncfile_output.close()
 
                             elif 'CMORPH' in exp_name:
 
@@ -150,21 +153,21 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     file_CMORPH = info[0].strip()
                                     f = Dataset(file_CMORPH)
                                     CMORPH_prep = CMORPH_prep + CMORPH_time_resolution*f['cmorph'][mm_index,:,:]
+                                    print(np.max(CMORPH_time_resolution*f['cmorph'][mm_index,:,:]))
                                     
                                     CMORPH_lat_1 = f['lat_bounds'][:,0]
                                     CMORPH_lat_2 = f['lat_bounds'][:,1]
                                     CMORPH_lat   = np.transpose(np.tile((CMORPH_lat_1 + CMORPH_lat_2)/2.0, (4948, 1)))
                                     CMORPH_lon_1 = f['lon_bounds'][:,0]
                                     CMORPH_lon_2 = f['lon_bounds'][:,1]
+                                    print(f['lon_bounds'][:,:])
                                     CMORPH_lon   = np.tile((CMORPH_lon_1 + CMORPH_lon_2)/2.0, (1649, 1))
                                     CMORPH_lon[CMORPH_lon > 180.0] = CMORPH_lon[CMORPH_lon > 180.0] - 360.0
+
                                     CMORPH_index = (CMORPH_lat < np.array(lat[-1, -1]) + 15.0) & (CMORPH_lat > np.array(lat[0, 0]) - 15.0) & \
                                                    (CMORPH_lon < np.array(lon[-1, -1]) + 15.0) & (CMORPH_lon > np.array(lon[0, 0]) - 15.0)
                                     f.close()
 
-                                print(CMORPH_index)
-                                print(CMORPH_lat)
-                                print(CMORPH_lon)
                                 CMORPH_prep_1d = CMORPH_prep[CMORPH_index]
                                 CMORPH_lat_1d  = CMORPH_lat[CMORPH_index]
                                 CMORPH_lon_1d  = CMORPH_lon[CMORPH_index]
