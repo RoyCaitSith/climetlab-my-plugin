@@ -5,13 +5,14 @@ import numpy as np
 from set_parameters import set_variables
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
-from wrf import getvar, latlon_coords
+from wrf import getvar, latlon_coords, interplevel
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 
 def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['ua']):
 
     time_interval = 6
+    accumulated_hours = 6.0
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -34,6 +35,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
         dir_data = os.path.join(dir_exp, 'data')
         dir_ERA5 = os.path.join(dir_data, 'ERA5')
         dir_GFS = os.path.join(dir_data, 'GFS')
+        dir_CMORPH = os.path.join(dir_data, 'CMORPH')
         dir_IMERG = os.path.join(dir_data, 'IMERG')
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
         dir_weather_map = os.path.join(dir_exp, 'weather_map')
@@ -57,7 +59,10 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
             for dom in tqdm(domains, desc='Domains', leave=False):
 
-                if 'IMERG' in exp_name or 'GFS' in exp_name or 'ERA5' in exp_name:
+                if 'IMERG'  in exp_name or \
+                   'CMORPH' in exp_name or \
+                   'GFS'    in exp_name or \
+                   'ERA5'   in exp_name:
                     dir_wrfout = os.path.join(dir_cycling_da, f"{case_name}_{ref_exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
                 else:
                     dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'bkg')
@@ -97,22 +102,19 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                     for idt in tqdm(range(n_time), desc='Times', leave=False):
 
                         time_now = anl_start_time + timedelta(hours = idt*time_interval)
-                        print(time_now)
                         ncfile_output.variables['time'][idt] = int(time_now.strftime('%Y%m%d%H%M00'))
 
+                        # To Calculate 6-hr accumulated precipitation
                         if 'rain_6h' in var:
-
-                            accumulated_hours = 6.0
 
                             if 'IMERG' in exp_name:
 
                                 IMERG_time_resolution = 0.5
                                 IMERG_prep = np.zeros((3600, 1800), dtype=float)
 
-                                for dh in np.arange(IMERG_time_resolution, accumulated_hours+0.5*IMERG_time_resolution, IMERG_time_resolution):
+                                for dh in np.arange(0, accumulated_hours, IMERG_time_resolution):
 
                                     time_IMERG = time_now + timedelta(hours=dh)
-                                    print(time_IMERG)
                                     YYMMDD = time_IMERG.strftime('%Y%m%d')
                                     HHMMSS = time_IMERG.strftime('%H%M%S')
 
@@ -121,16 +123,52 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     f = h5py.File(file_IMERG)
                                     IMERG_prep = IMERG_prep + IMERG_time_resolution*f['Grid']['precipitationCal'][0,:,:]
 
-                                    IMERG_prep  = IMERG_prep
                                     IMERG_lat   = np.tile(f['Grid']['lat'][:], (3600, 1))
                                     IMERG_lon   = np.transpose(np.tile(f['Grid']['lon'][:], (1800, 1)))
                                     IMERG_index = (IMERG_lat < np.array(lat[-1, -1]) + 15.0) & (IMERG_lat > np.array(lat[0, 0]) - 15.0) & \
                                                   (IMERG_lon < np.array(lon[-1, -1]) + 15.0) & (IMERG_lon > np.array(lon[0, 0]) - 15.0)
+                                    f.close()
 
                                 IMERG_prep_1d = IMERG_prep[IMERG_index]
                                 IMERG_lat_1d  = IMERG_lat[IMERG_index]
                                 IMERG_lon_1d  = IMERG_lon[IMERG_index]
                                 ncfile_output.variables[var][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
+
+                            elif 'CMORPH' in exp_name:
+
+                                CMORPH_time_resolution = 0.5
+                                CMORPH_prep = np.zeros((1649, 4948), dtype=float)
+
+                                for dh in np.arange(0, accumulated_hours, CMORPH_time_resolution):
+
+                                    time_CMORPH = time_now + timedelta(hours=dh)
+                                    YYMMDD = time_CMORPH.strftime('%Y%m%d')
+                                    YYMMDDHH = time_CMORPH.strftime('%Y%m%d%H')
+                                    mm_index = int(int(time_CMORPH.strftime('%M'))/30)
+
+                                    info = os.popen(f'ls {dir_CMORPH}/{YYMMDD}/CMORPH*30min*{YYMMDDHH}.nc').readlines()
+                                    file_CMORPH = info[0].strip()
+                                    f = Dataset(file_CMORPH)
+                                    CMORPH_prep = CMORPH_prep + CMORPH_time_resolution*f['cmorph'][mm_index,:,:]
+                                    
+                                    CMORPH_lat_1 = f['lat_bounds'][:,0]
+                                    CMORPH_lat_2 = f['lat_bounds'][:,1]
+                                    CMORPH_lat   = np.transpose(np.tile((CMORPH_lat_1 + CMORPH_lat_2)/2.0, (4948, 1)))
+                                    CMORPH_lon_1 = f['lon_bounds'][:,0]
+                                    CMORPH_lon_2 = f['lon_bounds'][:,1]
+                                    CMORPH_lon   = np.tile((CMORPH_lon_1 + CMORPH_lon_2)/2.0, (1649, 1))
+                                    CMORPH_lon[CMORPH_lon > 180.0] = CMORPH_lon[CMORPH_lon > 180.0] - 360.0
+                                    CMORPH_index = (CMORPH_lat < np.array(lat[-1, -1]) + 15.0) & (CMORPH_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                   (CMORPH_lon < np.array(lon[-1, -1]) + 15.0) & (CMORPH_lon > np.array(lon[0, 0]) - 15.0)
+                                    f.close()
+
+                                print(CMORPH_index)
+                                print(CMORPH_lat)
+                                print(CMORPH_lon)
+                                CMORPH_prep_1d = CMORPH_prep[CMORPH_index]
+                                CMORPH_lat_1d  = CMORPH_lat[CMORPH_index]
+                                CMORPH_lon_1d  = CMORPH_lon[CMORPH_index]
+                                ncfile_output.variables[var][idt,0,:,:] = griddata((CMORPH_lon_1d, CMORPH_lat_1d), CMORPH_prep_1d, (lon, lat), method='linear')
 
                             else:
 
@@ -143,28 +181,27 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                                     time_0 = time_now + timedelta(hours = idx)
                                     time_1 = time_now + timedelta(hours = idx+history_interval)
-                                    print(time_0)
-                                    print(time_1)
 
                                     wrfout_0 = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_0.strftime('%Y-%m-%d_%H:%M:00')}")
                                     wrfout_1 = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_1.strftime('%Y-%m-%d_%H:%M:00')}")
 
-                                    ncfile   = Dataset(wrfout_0)
-                                    RAINNC_0 = getvar(ncfile, 'RAINNC')
-                                    RAINC_0  = getvar(ncfile, 'RAINC')
-                                    ncfile.close()
+                                    if os.path.exists(wrfout_0) and os.path.exists(wrfout_1):
+                                        ncfile   = Dataset(wrfout_0)
+                                        RAINNC_0 = getvar(ncfile, 'RAINNC')
+                                        RAINC_0  = getvar(ncfile, 'RAINC')
+                                        ncfile.close()
 
-                                    ncfile   = Dataset(wrfout_1)
-                                    RAINNC_1 = getvar(ncfile, 'RAINNC')
-                                    RAINC_1  = getvar(ncfile, 'RAINC')
-                                    ncfile.close()
+                                        ncfile   = Dataset(wrfout_1)
+                                        RAINNC_1 = getvar(ncfile, 'RAINNC')
+                                        RAINC_1  = getvar(ncfile, 'RAINC')
+                                        ncfile.close()
 
-                                    if time_0 <= anl_end_time:
-                                        RAINNC_0 = 0.0
-                                        RAINC_0 = 0.0
+                                        if time_0 <= anl_end_time:
+                                            RAINNC_0 = 0.0
+                                            RAINC_0 = 0.0
 
-                                    rainfall = RAINNC_1 + RAINC_1 - RAINNC_0 - RAINC_0
-                                    ncfile_output.variables[var][idt,0,:,:] = ncfile_output.variables[var][idt,0,:,:] + rainfall
+                                        rainfall = RAINNC_1 + RAINC_1 - RAINNC_0 - RAINC_0
+                                        ncfile_output.variables[var][idt,0,:,:] = ncfile_output.variables[var][idt,0,:,:] + rainfall
 
                         else:
 
@@ -190,9 +227,9 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     ncfile.close()
 
                                 if 9999 in levels:
-                                    ncfile_output.variables[var][idt,0,0,:,:] = var_value
+                                    ncfile_output.variables[var][idt,0,:,:] = var_value
                                 else:
-                                    temp_var_value = interplevel(var_bkg, p_bkg, list(levels.keys()))
-                                    ncfile_output.variables[var][idt,idl,:,:] = temp_var_value
+                                    temp_var_value = interplevel(var_value, p, list(levels.keys()))
+                                    ncfile_output.variables[var][idt,:,:,:] = temp_var_value
 
                     ncfile_output.close()
