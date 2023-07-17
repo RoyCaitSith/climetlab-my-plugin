@@ -4,13 +4,14 @@ import importlib
 import numpy as np
 from set_parameters import set_variables
 from datetime import datetime, timedelta
-from mpl_toolkits.basemap import Basemap
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 
-def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['ua']):
+def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['ua']):
+
+    time_interval = 6
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -42,7 +43,8 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
 
             anl_start_time = initial_time + timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
-            n_time = total_da_cycles + int(forecast_hours/history_interval)
+            n_time = (total_da_cycles-1)*cycling_interval/time_interval + int(forecast_hours/history_interval) + 1
+            n_time = int(n_time)
 
             specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
             dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
@@ -92,17 +94,11 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                     ncfile_output.variables['lon'][:,:] = lon
                     ncfile_output.variables[var][:,:,:,:] = 0.0
 
-                    print(list(levels.keys()))
+                    for idt in tqdm(range(n_time), desc='Times', leave=False):
 
-                    time_now = anl_start_time
-                    idt = 0
-                    while idt < n_time:
-
+                        time_now = anl_start_time + timedelta(hours = idt*time_interval)
+                        print(time_now)
                         ncfile_output.variables['time'][idt] = int(time_now.strftime('%Y%m%d%H%M00'))
-                        if time_now < anl_end_time:
-                            time_interval = cycling_interval
-                        else:
-                            time_interval = history_interval
 
                         if 'rain_6h' in var:
 
@@ -113,13 +109,14 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                                 IMERG_time_resolution = 0.5
                                 IMERG_prep = np.zeros((3600, 1800), dtype=float)
 
-                                for dh in np.arange(0.0, accumulated_hours, IMERG_time_resolution):
+                                for dh in np.arange(IMERG_time_resolution, accumulated_hours+0.5*IMERG_time_resolution, IMERG_time_resolution):
 
                                     time_IMERG = time_now + timedelta(hours=dh)
+                                    print(time_IMERG)
                                     YYMMDD = time_IMERG.strftime('%Y%m%d')
                                     HHMMSS = time_IMERG.strftime('%H%M%S')
 
-                                    info = os.popen(f'ls {dir_IMERG}/{YYMMDD}/3B-HHR.MS.MRG.3IMERG.{YYMMDD}-S{HHMMSS}*').readlines()
+                                    info = os.popen(f'ls {dir_IMERG}/{YYMMDD}/*3IMERG.{YYMMDD}-S{HHMMSS}*').readlines()
                                     file_IMERG = info[0].strip()
                                     f = h5py.File(file_IMERG)
                                     IMERG_prep = IMERG_prep + IMERG_time_resolution*f['Grid']['precipitationCal'][0,:,:]
@@ -133,14 +130,21 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                                 IMERG_prep_1d = IMERG_prep[IMERG_index]
                                 IMERG_lat_1d  = IMERG_lat[IMERG_index]
                                 IMERG_lon_1d  = IMERG_lon[IMERG_index]
-                                ncfile_output.variables['rainfall'][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
+                                ncfile_output.variables[var][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
 
                             else:
 
-                                for idx in range(0, int(accumulated_hours), time_interval):
+                                if time_now < anl_end_time:
+                                    time_resolution = cycling_interval
+                                else:
+                                    time_resolution = history_interval
+
+                                for idx in range(0, int(accumulated_hours), time_resolution):
 
                                     time_0 = time_now + timedelta(hours = idx)
                                     time_1 = time_now + timedelta(hours = idx+history_interval)
+                                    print(time_0)
+                                    print(time_1)
 
                                     wrfout_0 = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_0.strftime('%Y-%m-%d_%H:%M:00')}")
                                     wrfout_1 = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_1.strftime('%Y-%m-%d_%H:%M:00')}")
@@ -155,7 +159,7 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                                     RAINC_1  = getvar(ncfile, 'RAINC')
                                     ncfile.close()
 
-                                    if time_0 < anl_end_time:
+                                    if time_0 <= anl_end_time:
                                         RAINNC_0 = 0.0
                                         RAINC_0 = 0.0
 
@@ -175,7 +179,7 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                                     dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'da')
                                     wrfout = os.path.join(dir_wrfout, f"wrf_inout.{time_now.strftime('%Y%m%d%H')}.{dom}")
 
-                                if not ('anl' in var and time_now > anl_end_time):
+                                if ('anl' in var and time_now <= anl_end_time) or ('anl' not in var):
 
                                     ncfile = Dataset(wrfout)
                                     p = getvar(ncfile, 'pressure')
@@ -190,8 +194,5 @@ def wrf_extract_variables(data_library_names, dir_cases, case_names, exp_names, 
                                 else:
                                     temp_var_value = interplevel(var_bkg, p_bkg, list(levels.keys()))
                                     ncfile_output.variables[var][idt,idl,:,:] = temp_var_value
-
-                        time_now = time_now + timedelta(hours = time_interval)
-                        idt += 1
 
                     ncfile_output.close()
