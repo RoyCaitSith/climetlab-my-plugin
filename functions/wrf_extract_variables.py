@@ -43,7 +43,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
             anl_start_time = initial_time + timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
-            n_time = (total_da_cycles-1)*cycling_interval/time_interval + int(forecast_hours/history_interval) + 1
+            n_time = (da_cycle-1)*cycling_interval/time_interval + int(forecast_hours/history_interval) + 1
             n_time = int(n_time)
 
             specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
