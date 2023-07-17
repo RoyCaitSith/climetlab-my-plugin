@@ -135,7 +135,6 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 IMERG_lat_1d  = IMERG_lat[IMERG_index]
                                 IMERG_lon_1d  = IMERG_lon[IMERG_index]
                                 ncfile_output.variables[var][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
-                                ncfile_output.close()
 
                             elif 'CMORPH' in exp_name:
 
