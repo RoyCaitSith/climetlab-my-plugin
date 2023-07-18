@@ -32,13 +32,14 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
         history_interval = attributes[(dir_case, case_name)]['history_interval']
         initial_time = datetime(*itime)
 
+        dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
+        dir_weather_map = os.path.join(dir_exp, 'weather_map')
         dir_data = os.path.join(dir_exp, 'data')
         dir_ERA5 = os.path.join(dir_data, 'ERA5')
         dir_GFS = os.path.join(dir_data, 'GFS')
         dir_CMORPH = os.path.join(dir_data, 'CMORPH')
         dir_IMERG = os.path.join(dir_data, 'IMERG')
-        dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
-        dir_weather_map = os.path.join(dir_exp, 'weather_map')
+        dir_GSMaP = os.path.join(dir_data, 'GSMaP')
         os.makedirs(dir_weather_map, exist_ok=True)
 
         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
@@ -61,6 +62,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                 if 'IMERG'  in exp_name or \
                    'CMORPH' in exp_name or \
+                   'GSMaP'  in exp_name or \
                    'GFS'    in exp_name or \
                    'ERA5'   in exp_name:
                     dir_wrfout = os.path.join(dir_cycling_da, f"{case_name}_{ref_exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
@@ -123,8 +125,8 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     f = h5py.File(file_IMERG)
                                     IMERG_prep = IMERG_prep + IMERG_time_resolution*f['Grid']['precipitationCal'][0,:,:]
 
-                                    IMERG_lat   = np.tile(f['Grid']['lat'][:], (3600, 1))
-                                    IMERG_lon   = np.transpose(np.tile(f['Grid']['lon'][:], (1800, 1)))
+                                    IMERG_lat = np.tile(f['Grid']['lat'][:], (3600, 1))
+                                    IMERG_lon = np.transpose(np.tile(f['Grid']['lon'][:], (1800, 1)))
                                     IMERG_lon[IMERG_lon > 180.0] = IMERG_lon[IMERG_lon > 180.0] - 360.0
 
                                     IMERG_index = (IMERG_lat < np.array(lat[-1, -1]) + 15.0) & (IMERG_lat > np.array(lat[0, 0]) - 15.0) & \
@@ -169,6 +171,35 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 CMORPH_lat_1d  = CMORPH_lat[CMORPH_index]
                                 CMORPH_lon_1d  = CMORPH_lon[CMORPH_index]
                                 ncfile_output.variables[var][idt,0,:,:] = griddata((CMORPH_lon_1d, CMORPH_lat_1d), CMORPH_prep_1d, (lon, lat), method='linear')
+
+                            elif 'GSMaP' in exp_name:
+
+                                GSMaP_time_resolution = 1.0
+                                GSMaP_prep = np.zeros((3600, 1800), dtype=float)
+
+                                for dh in np.arange(0, accumulated_hours, GSMaP_time_resolution):
+
+                                    time_GSMaP = time_now + timedelta(hours=dh)
+                                    YYMMDD = time_GSMaP.strftime('%Y%m%d')
+                                    YYMMDDHHMM = time_GSMaP.strftime('%Y%m%d%H%M')
+                                    
+                                    info = os.popen(f'ls {dir_GSMaP}/{YYMMDD}/GPMMRG*{YYMMDDHHMM[2:]}*05A.h5').readlines()
+                                    file_GSMaP = info[0].strip()
+                                    f = h5py.File(file_GSMaP)
+                                    GSMaP_prep = GSMaP_prep + GSMaP_time_resolution*f['Grid']['hourlyPrecipRateGC'][:,:]
+
+                                    GSMaP_lat = f['Grid']['Latitude'][:,:]
+                                    GSMaP_lon = f['Grid']['Longitude'][:,:]
+                                    GSMaP_lon[GSMaP_lon > 180.0] = GSMaP_lon[GSMaP_lon > 180.0] - 360.0
+
+                                    GSMaP_index = (GSMaP_lat < np.array(lat[-1, -1]) + 15.0) & (GSMaP_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                  (GSMaP_lon < np.array(lon[-1, -1]) + 15.0) & (GSMaP_lon > np.array(lon[0, 0]) - 15.0)
+                                    f.close()
+
+                                GSMaP_prep_1d = GSMaP_prep[GSMaP_index]
+                                GSMaP_lat_1d  = GSMaP_lat[GSMaP_index]
+                                GSMaP_lon_1d  = GSMaP_lon[GSMaP_index]
+                                ncfile_output.variables[var][idt,0,:,:] = griddata((GSMaP_lon_1d, GSMaP_lat_1d), GSMaP_prep_1d, (lon, lat), method='linear')         
 
                             else:
 
@@ -231,5 +262,6 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 else:
                                     temp_var_value = interplevel(var_value, p, list(levels.keys()))
                                     ncfile_output.variables[var][idt,:,:,:] = temp_var_value
+                                ncfile_out.close()
 
                     ncfile_output.close()
