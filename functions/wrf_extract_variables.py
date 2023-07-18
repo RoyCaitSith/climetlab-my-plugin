@@ -1,6 +1,8 @@
 import os
 import h5py
 import importlib
+import requests
+import pygrib
 import numpy as np
 from set_parameters import set_variables
 from datetime import datetime, timedelta
@@ -46,7 +48,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
             anl_start_time = initial_time + timedelta(hours=cycling_interval)
             anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
-            n_time = (da_cycle-1)*cycling_interval/time_interval + int(forecast_hours/history_interval) + 1
+            n_time = da_cycle*cycling_interval/time_interval + int(forecast_hours/history_interval) + 1
             n_time = int(n_time)
 
             specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
@@ -103,7 +105,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                     for idt in tqdm(range(n_time), desc='Times', leave=False):
 
-                        time_now = anl_start_time + timedelta(hours = idt*time_interval)
+                        time_now = initial_time + timedelta(hours = idt*time_interval)
                         ncfile_output.variables['time'][idt] = int(time_now.strftime('%Y%m%d%H%M00'))
 
                         # To Calculate 6-hr accumulated precipitation
@@ -234,34 +236,75 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                         rainfall = RAINNC_1 + RAINC_1 - RAINNC_0 - RAINC_0
                                         ncfile_output.variables[var][idt,0,:,:] = ncfile_output.variables[var][idt,0,:,:] + rainfall
 
+                        elif 'inc' in var:
+
+                            var_bkg = var.replace('_inc', '')
+                            var_anl = var.replace('_inc', '_anl')
+                            filename_bkg = filename.replace('_inc', '')
+                            filename_anl = filename.replace('_inc', '_anl')
+
+                            ncfile_bkg = Dataset(filename_bkg)
+                            ncfile_anl = Dataset(filename_anl)
+                            ncfile_output.variables[var][idt,:,:,:] = ncfile_anl.variables[var_anl][idt,:,:,:] - ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                            ncfile_bkg.close()
+                            ncfile_anl.close()
+                        
                         else:
 
                             if 'GFS' in exp_name:
 
-                                wrfout = '1'
+                                YYYY = time_now.strftime('%Y')
+                                YYMMDDHH = time_now.strftime('%Y%m%d%H')
+                                YYYYMMDD = time_now.strftime('%Y%m%d')
+                                
+                                dir_rda = 'https://data.rda.ucar.edu/ds084.1'
+                                GFS_filename = f"gfs.0p25.{YYMMDDHH}.f000.grib2"
+                                GFS_file = os.path.join(dir_GFS, GFS_filename)
+
+                                if not os.path.exists(GFS_file):
+                                    GFS_rda_filename = os.path.join(dir_rda, YYYY, YYYYMMDD, GFS_filename)
+                                    response = requests.get(GFS_rda_filename, stream=True)
+                                    with open(GFS_file, "wb") as f:
+                                        f.write(response.content)
+
+                                GFS_pygrib = pygrib.open(GFS_file)
+                                for idl, lev in enumerate(levels):
+
+                                    GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
+                                    GFS_lat, GFS_lon = GFS_temp.latlons()
+                                    GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
+                                    GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
+                                    
+                                    GFS_lat_1d = GFS_lat[GFS_index]
+                                    GFS_lon_1d = GFS_lon[GFS_index]
+                                    GFS_temp_1d = GFS_temp.values[GFS_index]
+                                    ncfile_output.variables[var][idt,idl,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
+
+                                GFS_pygrib.close()
 
                             else:
 
                                 wrfout = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:%M:00')}")
+
                                 if 'anl' in var:
                                     dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'da')
                                     wrfout = os.path.join(dir_wrfout, f"wrf_inout.{time_now.strftime('%Y%m%d%H')}.{dom}")
 
-                                if ('anl' in var and time_now <= anl_end_time) or ('anl' not in var):
+                                if ('anl' in var and time_now >= anl_start_time and time_now <= anl_end_time) or ('anl' not in var):
 
                                     ncfile = Dataset(wrfout)
                                     p = getvar(ncfile, 'pressure')
                                     if information['unit'] == 'null':
-                                        var_value = getvar(ncfile, var)
+                                        var_value = getvar(ncfile, information['name'])
                                     else:
-                                        var_value = getvar(ncfile, var, units=information['unit'])
+                                        var_value = getvar(ncfile, information['name'], units=information['unit'])
                                     ncfile.close()
 
-                                if 9999 in levels:
-                                    ncfile_output.variables[var][idt,0,:,:] = var_value
-                                else:
-                                    temp_var_value = interplevel(var_value, p, list(levels.keys()))
-                                    ncfile_output.variables[var][idt,:,:,:] = temp_var_value
-                                ncfile_out.close()
+                                    if 9999 in levels:
+                                        ncfile_output.variables[var][idt,0,:,:] = var_value
+                                    else:
+                                        temp_var_value = interplevel(var_value, p, list(levels.keys()))
+                                        ncfile_output.variables[var][idt,:,:,:] = temp_var_value
 
                     ncfile_output.close()
