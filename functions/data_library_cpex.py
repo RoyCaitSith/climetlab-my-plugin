@@ -9,6 +9,7 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/01_CV_RF07_AEW06_IAN/cycling_da/namelists',
     'NHC_best_track': '2022_09L_Ian.csv',
+    'AEW_best_track': '2022_AEW06.csv',
     'hwrf_header': 'hwrf.18x18.AL092022.2022092218',
     'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2022, 'name': 'IAN'},
     'itime': (2022, 9, 16,  0, 0, 0),

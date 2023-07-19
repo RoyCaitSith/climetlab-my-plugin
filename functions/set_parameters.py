@@ -56,7 +56,7 @@ def set_variables(var):
         information = {}
         information.update({'name': 'QVAPOR'})
         information.update({'unit': 'null'})
-        information.update({'lb_title': 'Mixing ratio of water vapor ($\mathregular{gkg^{-1}}$)'})
+        information.update({'lb_title': 'MR of WV ($\mathregular{gkg^{-1}}$)'})
         information.update({'factor': 1000.0})
         information.update({'extend': 'max'})
 
@@ -123,11 +123,11 @@ def set_variables(var):
         information = {}
         information.update({'name': ['RAINNC', 'RAINC']})
         information.update({'unit': 'null'})
-        information.update({'lb_title': 'Six hour accumulated precipitation (mm)'})
+        information.update({'lb_title': '6-h accumulated rainfall (mm)'})
         information.update({'factor': 1.0})
         information.update({'extend': 'max'})
 
         levels = {}
-        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 6)], cmaps.imola, [f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.cork]})
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 6)], cmaps.prcp_2, [f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.cork]})
 
     return (information, levels)

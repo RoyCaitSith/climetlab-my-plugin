@@ -59,6 +59,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                 domains = forecast_domains
             else:
                 domains = da_domains
+            # domains = ['d02']
 
             for dom in tqdm(domains, desc='Domains', leave=False):
 
@@ -219,6 +220,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     wrfout_1 = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_1.strftime('%Y-%m-%d_%H:%M:00')}")
 
                                     if os.path.exists(wrfout_0) and os.path.exists(wrfout_1):
+
                                         ncfile   = Dataset(wrfout_0)
                                         RAINNC_0 = getvar(ncfile, 'RAINNC')
                                         RAINC_0  = getvar(ncfile, 'RAINC')
@@ -291,7 +293,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'da')
                                     wrfout = os.path.join(dir_wrfout, f"wrf_inout.{time_now.strftime('%Y%m%d%H')}.{dom}")
 
-                                if ('anl' in var and time_now >= anl_start_time and time_now <= anl_end_time) or ('anl' not in var):
+                                if os.path.exists(wrfout):
 
                                     ncfile = Dataset(wrfout)
                                     p = getvar(ncfile, 'pressure')
