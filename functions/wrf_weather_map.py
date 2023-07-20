@@ -151,9 +151,9 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
                 mlon, mlat = m(lon, lat)
                 (contourf_information, contourf_levels) = set_variables(contourf_var)
-                (contourf_labels1, contourf_cmap1, contourf_labels2, contourf_cmap2) = contourf_levels[contourf_var_level]
+                (contourf_labels, contourf_cmap) = contourf_levels[contourf_var_level]
                 pcm = ax.contourf(mlon, mlat, contourf_information['factor']*contourf_var_value, \
-                                  levels=list(map(float, contourf_labels1)), cmap=contourf_cmap1, extend=contourf_information['extend'], zorder=1)
+                                  levels=list(map(float, contourf_labels)), cmap=contourf_cmap, extend=contourf_information['extend'], zorder=1)
                 
                 (contour_information, contour_levels) = set_variables(contour_var)
                 (quiver_1_information, quiver_1_levels) = set_variables(quiver_var_1)
@@ -171,8 +171,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 else:
                     ax.plot([-180.0, 180.0], [bt_lat, bt_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                     ax.plot([bt_lon, bt_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                    ax.text(bt_lon-4.6, bt_lat+4.4, exp_name, ha='left', va='center', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
-
+                    
                     lat_polar = np.zeros((len(radii), len(angles)))
                     lon_polar = np.zeros((len(radii), len(angles)))
                     for idr in range(0, len(radii)):
@@ -185,6 +184,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
                     ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
 
+                ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
@@ -196,8 +196,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     clb.set_label(f"{contourf_information['lb_title']} on {contourf_var_level} hPa", fontsize=10.0, labelpad=4.0)
                 clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                 clb.ax.minorticks_off()
-                clb.set_ticks(list(map(float, contourf_labels1[0::2])))
-                clb.set_ticklabels(contourf_labels1[0::2])
+                clb.set_ticks(list(map(float, contourf_labels[0::2])))
+                clb.set_ticklabels(contourf_labels[0::2])
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)

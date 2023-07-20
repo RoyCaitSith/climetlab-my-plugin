@@ -115,6 +115,9 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                             if 'IMERG' in exp_name:
 
                                 IMERG_time_resolution = 0.5
+                                IMERG_version = attributes[(dir_case, case_name)]['IMERG_version']
+                                IMERG_version_run = IMERG_version['run']
+                                IMERG_version_version = IMERG_version['version']
                                 IMERG_prep = np.zeros((3600, 1800), dtype=float)
 
                                 for dh in np.arange(0, accumulated_hours, IMERG_time_resolution):
@@ -123,7 +126,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     YYMMDD = time_IMERG.strftime('%Y%m%d')
                                     HHMMSS = time_IMERG.strftime('%H%M%S')
 
-                                    info = os.popen(f'ls {dir_IMERG}/{YYMMDD}/*3IMERG.{YYMMDD}-S{HHMMSS}*').readlines()
+                                    info = os.popen(f'ls {dir_IMERG}/{YYMMDD}/*{IMERG_version_run}*{YYMMDD}-S{HHMMSS}*{IMERG_version_version}.HDF5').readlines()
                                     file_IMERG = info[0].strip()
                                     f = h5py.File(file_IMERG)
                                     IMERG_prep = IMERG_prep + IMERG_time_resolution*f['Grid']['precipitationCal'][0,:,:]
@@ -144,6 +147,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                             elif 'CMORPH' in exp_name:
 
                                 CMORPH_time_resolution = 0.5
+                                CMORPH_version = attributes[(dir_case, case_name)]['CMORPH_version']
                                 CMORPH_prep = np.zeros((1649, 4948), dtype=float)
 
                                 for dh in np.arange(0, accumulated_hours, CMORPH_time_resolution):
@@ -153,7 +157,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     YYMMDDHH = time_CMORPH.strftime('%Y%m%d%H')
                                     mm_index = int(int(time_CMORPH.strftime('%M'))/30)
 
-                                    info = os.popen(f'ls {dir_CMORPH}/{YYMMDD}/CMORPH*30min*{YYMMDDHH}.nc').readlines()
+                                    info = os.popen(f'ls {dir_CMORPH}/{YYMMDD}/*{CMORPH_version}_{YYMMDDHH}.nc').readlines()
                                     file_CMORPH = info[0].strip()
                                     f = Dataset(file_CMORPH)
                                     CMORPH_prep = CMORPH_prep + CMORPH_time_resolution*f['cmorph'][mm_index,:,:]
@@ -178,6 +182,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                             elif 'GSMaP' in exp_name:
 
                                 GSMaP_time_resolution = 1.0
+                                GSMaP_version = attributes[(dir_case, case_name)]['GSMaP_version']
                                 GSMaP_prep = np.zeros((3600, 1800), dtype=float)
 
                                 for dh in np.arange(0, accumulated_hours, GSMaP_time_resolution):
@@ -186,7 +191,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     YYMMDD = time_GSMaP.strftime('%Y%m%d')
                                     YYMMDDHHMM = time_GSMaP.strftime('%Y%m%d%H%M')
                                     
-                                    info = os.popen(f'ls {dir_GSMaP}/{YYMMDD}/GPMMRG*{YYMMDDHHMM[2:]}*05A.h5').readlines()
+                                    info = os.popen(f'ls {dir_GSMaP}/{YYMMDD}/*{YYMMDDHHMM[2:]}*{GSMaP_version}.h5').readlines()
                                     file_GSMaP = info[0].strip()
                                     f = h5py.File(file_GSMaP)
                                     GSMaP_prep = GSMaP_prep + GSMaP_time_resolution*f['Grid']['hourlyPrecipRateGC'][:,:]
