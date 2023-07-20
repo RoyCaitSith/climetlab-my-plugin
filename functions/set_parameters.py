@@ -238,3 +238,5 @@ def set_variables(var):
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+    
+    return (information, levels)

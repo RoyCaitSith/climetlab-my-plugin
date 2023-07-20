@@ -302,10 +302,16 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                                     ncfile = Dataset(wrfout)
                                     p = getvar(ncfile, 'pressure')
-                                    if information['unit'] == 'null':
-                                        var_value = getvar(ncfile, information['name'])
+                                    if 'index' in information.keys():
+                                        if information['unit'] == 'null':
+                                            var_value = getvar(ncfile, information['name'])[information['index']]
+                                        else:
+                                            var_value = getvar(ncfile, information['name'], units=information['unit'])[information['index']]
                                     else:
-                                        var_value = getvar(ncfile, information['name'], units=information['unit'])
+                                        if information['unit'] == 'null':
+                                            var_value = getvar(ncfile, information['name'])
+                                        else:
+                                            var_value = getvar(ncfile, information['name'], units=information['unit'])
                                     ncfile.close()
 
                                     if 9999 in levels:
