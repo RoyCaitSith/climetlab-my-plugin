@@ -155,10 +155,13 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 pcm = ax.contourf(mlon, mlat, contourf_information['factor']*contourf_var_value, \
                                   levels=list(map(float, contourf_labels)), cmap=contourf_cmap, extend=contourf_information['extend'], zorder=1)
                 
-                (contour_information, contour_levels) = set_variables(contour_var)
-                (quiver_1_information, quiver_1_levels) = set_variables(quiver_var_1)
-                (quiver_2_information, quiver_2_levels) = set_variables(quiver_var_2)
+                if 'null' not in contour_var:
+                    (contour_information, contour_levels) = set_variables(contour_var)
+
                 if 'null' not in quiver_vars:
+
+                    (quiver_1_information, quiver_1_levels) = set_variables(quiver_var_1)
+                    (quiver_2_information, quiver_2_levels) = set_variables(quiver_var_2)
                     ax.quiver(mlon[::quiver_var_space, ::quiver_var_space], mlat[::quiver_var_space, ::quiver_var_space], \
                               quiver_var_1_value[::quiver_var_space, ::quiver_var_space], quiver_var_2_value[::quiver_var_space, ::quiver_var_space], \
                               width=0.001, headwidth=5.0, headlength=7.5, scale=75.0, scale_units='inches', zorder=1)
