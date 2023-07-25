@@ -11,7 +11,7 @@ from wrf import getvar, latlon_coords, interplevel
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 
-def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['ua']):
+def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['u']):
 
     time_interval = 6
     accumulated_hours = 6.0

@@ -4,10 +4,13 @@ import time
 import importlib
 import metpy.calc
 import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta
 from netCDF4 import Dataset
+from scipy.interpolate import griddata
 from tqdm.notebook import tqdm
 from metpy.units import units
+from wrf import getvar, latlon_coords, interplevel
 
 def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
 
@@ -251,3 +254,181 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
                 print(file_size)
 
             os.system(f"mv {file_fortran_bufr} {file_DAWN_bufr}")
+
+def wrf_extract_dawn(data_library_names, dir_cases, case_names, exp_names):
+
+    for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        # Import the necessary library
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
+        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        itime = attributes[(dir_case, case_name)]['itime']
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        da_domains = attributes[(dir_case, case_name)]['da_domains']
+        cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+        initial_time = datetime(*itime)
+
+        dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
+        dir_cross_section = os.path.join(dir_exp, 'cross_section')
+        dir_data = os.path.join(dir_exp, 'data')
+        dir_DAWN = os.path.join(dir_data, 'DAWN')
+        dir_DAWN_bufr_temp = os.path.join(dir_DAWN, 'bufr_temp')
+        os.makedirs(dir_cross_section, exist_ok=True)
+
+        for dom in tqdm(da_domains, desc='Domains', leave=False): 
+            for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
+
+                anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                n_time = int(da_cycle)
+                specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+                dir_cross_section_case = os.path.join(dir_cross_section, specific_case)
+                os.makedirs(dir_cross_section_case, exist_ok=True)
+
+                for idt in tqdm(range(n_time), desc='Times', leave=False):
+
+                    time_now = anl_start_time + timedelta(hours = idt*cycling_interval)
+                    time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
+                    time_now_HH = time_now.strftime('%H')
+                    time_now_YYYYMMDDHH = time_now.strftime('%Y%m%d%H')
+                    dir_bufr_temp = os.path.join(dir_DAWN_bufr_temp, time_now_YYYYMMDD)
+                    dir_bufr_temp = os.path.join(dir_bufr_temp, time_now_HH)
+
+                    with open(os.path.join(dir_bufr_temp, '0.txt'), 'r') as f:
+                        n_time = int(float(f.read().strip()))
+                    
+                    if n_time > 0:
+
+                        filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_DAWN_{dom}.nc")
+                        os.system(f"rm -rf {filename}")
+
+                        ncfile_output = Dataset(filename, 'w', format='NETCDF4')
+                        ncfile_output.createDimension('n_time', n_time)
+                        ncfile_output.createVariable('year',   'f8', ('n_time'))
+                        ncfile_output.createVariable('month',  'f8', ('n_time'))
+                        ncfile_output.createVariable('days',   'f8', ('n_time'))
+                        ncfile_output.createVariable('hour',   'f8', ('n_time'))
+                        ncfile_output.createVariable('minute', 'f8', ('n_time'))
+                        ncfile_output.createVariable('second', 'f8', ('n_time'))
+                        ncfile_output.createVariable('lat',    'f8', ('n_time'))
+                        ncfile_output.createVariable('lon',    'f8', ('n_time'))
+                        ncfile_output.createVariable('geopt',  'f8', ('n_time'))
+                        ncfile_output.createVariable('u_obs',  'f8', ('n_time'))
+                        ncfile_output.createVariable('v_obs',  'f8', ('n_time'))
+                        ncfile_output.createVariable('u_bkg',  'f8', ('n_time'))
+                        ncfile_output.createVariable('v_bkg',  'f8', ('n_time'))
+                        ncfile_output.createVariable('u_anl',  'f8', ('n_time'))
+                        ncfile_output.createVariable('v_anl',  'f8', ('n_time'))
+                        ncfile_output.createVariable('u_OmB',  'f8', ('n_time'))
+                        ncfile_output.createVariable('v_OmB',  'f8', ('n_time'))
+                        ncfile_output.createVariable('u_OmA',  'f8', ('n_time'))
+                        ncfile_output.createVariable('v_OmA',  'f8', ('n_time'))
+                        
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '1.txt'), header=None)
+                        year = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '2.txt'), header=None)
+                        month = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '3.txt'), header=None)
+                        days = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '4.txt'), header=None)
+                        hour = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '5.txt'), header=None)
+                        minute = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '6.txt'), header=None)
+                        second = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp,  '9.txt'), header=None)
+                        lat = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '10.txt'), header=None)
+                        lon = np.array(df[0])
+
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '12.txt'), header=None)
+                        geopt = units.Quantity(np.array(df[0]), 'm^2/s^2')
+                        height = np.array(metpy.calc.geopotential_to_height(geopt))
+                        levels = np.unique(height)
+                        n_levels = len(levels)
+
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '14.txt'), header=None)
+                        wdir = units.Quantity(np.array(df[0]), units.deg)
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '15.txt'), header=None)
+                        wspd = units.Quantity(np.array(df[0]), 'm/s')
+                        (u, v) = metpy.calc.wind_components(wspd, wdir)
+                        u = np.array(u)
+                        v = np.array(v)
+
+                        ncfile_output.variables['year'][:] = year
+                        ncfile_output.variables['month'][:] = month
+                        ncfile_output.variables['days'][:] = days
+                        ncfile_output.variables['hour'][:] = hour
+                        ncfile_output.variables['minute'][:] = minute
+                        ncfile_output.variables['second'][:] = second
+                        ncfile_output.variables['lat'][:] = lat
+                        ncfile_output.variables['lon'][:] = lon
+                        ncfile_output.variables['geopt'][:] = height
+                        ncfile_output.variables['u_obs'][:] = u
+                        ncfile_output.variables['v_obs'][:] = v
+
+                        dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'bkg')
+                        wrfout = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:%M:00')}")
+                        ncfile = Dataset(wrfout)
+                        bkg_z = getvar(ncfile, 'height', units='m')
+                        bkg_p = getvar(ncfile, 'pressure')
+                        (bkg_u, bkg_v) = getvar(ncfile, 'uvmet', units='ms-1')
+                        ncfile.close()
+
+                        dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'da')
+                        wrfout = os.path.join(dir_wrfout, f"wrf_inout.{time_now.strftime('%Y%m%d%H')}.{dom}")
+                        ncfile = Dataset(wrfout)
+                        anl_z = getvar(ncfile, 'height', units='m')
+                        anl_p = getvar(ncfile, 'pressure')
+                        (anl_u, anl_v) = getvar(ncfile, 'uvmet', units='ms-1')
+                        ncfile.close()
+
+                        bkg_u_levels = interplevel(bkg_u, bkg_z, levels)
+                        bkg_v_levels = interplevel(bkg_v, bkg_z, levels)
+                        anl_u_levels = interplevel(anl_u, anl_z, levels)
+                        anl_v_levels = interplevel(anl_v, anl_z, levels)
+
+                        bkg_lat, bkg_lon = latlon_coords(bkg_p)
+                        bkg_lat = np.array(bkg_lat)
+                        bkg_lon = np.array(bkg_lon)
+                        bkg_index = (bkg_lat < np.max(lat) + 15.0) & (bkg_lat > np.min(lat) - 15.0) & \
+                                    (bkg_lon < np.max(lon) + 15.0) & (bkg_lon > np.min(lon) - 15.0)
+                        bkg_lat_1d = bkg_lat[bkg_index]
+                        bkg_lon_1d = bkg_lon[bkg_index]
+
+                        anl_lat, anl_lon = latlon_coords(anl_p)
+                        anl_lat = np.array(anl_lat)
+                        anl_lon = np.array(anl_lon)
+                        anl_index = (anl_lat < np.max(lat) + 15.0) & (anl_lat > np.min(lat) - 15.0) & \
+                                    (anl_lon < np.max(lon) + 15.0) & (anl_lon > np.min(lon) - 15.0)
+                        anl_lat_1d = anl_lat[anl_index]
+                        anl_lon_1d = anl_lon[anl_index]
+                        
+                        for idl in tqdm(range(n_levels), desc='Levels', leave=False):
+
+                            bkg_u_level = np.array(bkg_u_levels[idl,:,:])
+                            bkg_v_level = np.array(bkg_v_levels[idl,:,:])
+                            anl_u_level = np.array(anl_u_levels[idl,:,:])
+                            anl_v_level = np.array(anl_v_levels[idl,:,:])
+
+                            index_level = (height == levels[idl])
+                            idx_level = np.where(index_level)[0]
+                            lat_level = lat[index_level]
+                            lon_level = lon[index_level]
+
+                            ncfile_output.variables['u_bkg'][idx_level] = griddata((bkg_lon_1d, bkg_lat_1d), bkg_u_level[bkg_index], \
+                                                                                   (lon_level, lat_level), method='linear')
+                            ncfile_output.variables['v_bkg'][idx_level] = griddata((bkg_lon_1d, bkg_lat_1d), bkg_v_level[bkg_index], \
+                                                                                   (lon_level, lat_level), method='linear')
+                            ncfile_output.variables['u_anl'][idx_level] = griddata((anl_lon_1d, anl_lat_1d), anl_u_level[anl_index], \
+                                                                                   (lon_level, lat_level), method='linear')
+                            ncfile_output.variables['v_anl'][idx_level] = griddata((anl_lon_1d, anl_lat_1d), anl_v_level[anl_index], \
+                                                                                   (lon_level, lat_level), method='linear')
+
+                        ncfile_output.variables['u_OmB'][:] = ncfile_output.variables['u_obs'][:] - ncfile_output.variables['u_bkg'][:]
+                        ncfile_output.variables['v_OmB'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_bkg'][:]
+                        ncfile_output.variables['u_OmA'][:] = ncfile_output.variables['u_obs'][:] - ncfile_output.variables['u_anl'][:]
+                        ncfile_output.variables['v_OmA'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_anl'][:]
+                        ncfile_output.close()
