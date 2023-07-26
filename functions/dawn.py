@@ -255,7 +255,7 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
 
             os.system(f"mv {file_fortran_bufr} {file_DAWN_bufr}")
 
-def wrf_extract_dawn(data_library_names, dir_cases, case_names, exp_names):
+def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -407,6 +407,7 @@ def wrf_extract_dawn(data_library_names, dir_cases, case_names, exp_names):
                         anl_lon_1d = anl_lon[anl_index]
                         
                         for idl in tqdm(range(n_levels), desc='Levels', leave=False):
+                        # for idl in tqdm(range(1), desc='Levels', leave=False):
 
                             bkg_u_level = np.array(bkg_u_levels[idl,:,:])
                             bkg_v_level = np.array(bkg_v_levels[idl,:,:])
@@ -430,5 +431,116 @@ def wrf_extract_dawn(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['u_OmB'][:] = ncfile_output.variables['u_obs'][:] - ncfile_output.variables['u_bkg'][:]
                         ncfile_output.variables['v_OmB'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_bkg'][:]
                         ncfile_output.variables['u_OmA'][:] = ncfile_output.variables['u_obs'][:] - ncfile_output.variables['u_anl'][:]
-                        ncfile_output.variables['v_OmA'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_anl'][:]
+                        ncfile_output.variables['v_OmA'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_anl'][:]           
                         ncfile_output.close()
+
+def draw_DAWN_normalized_comparison(data_library_names, dir_cases, case_names, exp_names, \
+                                    domains=['d01'], da_cycle=1, var_time=20000101010000):
+    
+    obs_error_DAWN = 2.0
+
+    # Import the necessary library
+    (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    time_window_max = attributes[(dir_case, case_name)]['time_window_max']
+    dir_cross_section = os.path.join(dir_exp, 'cross_section')
+    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
+    start_time = float(var_time_datetime.strftime('%H')) - time_window_max
+    end_time = float(var_time_datetime.strftime('%H')) + time_window_max
+
+    for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        
+        image_files = []
+        dir_save = os.path.join(dir_cross_section, 'figures')
+        output_filename = (
+            f"{str(var_time)}_DAWN_normalized_comparison_"
+            f"{dom}_C{str(da_cycle).zfill(2)}"
+        )
+        output_file = os.path.join(dir_save, output_filename+'.png')
+
+        for idc in tqdm(range(len(dir_cases)), desc='Cases', leave=False):
+
+            # Import the necessary library
+            (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+            specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+            dir_cross_section_case = os.path.join(dir_cross_section, specific_case)
+            
+            filename = (
+                f"{str(var_time)}_DAWN_normalized_comparison_"
+                f"{dom}_C{str(da_cycle).zfill(2)}"
+            )
+            pdfname = os.path.join(dir_cross_section_case, filename+'.pdf')
+            pngname = os.path.join(dir_cross_section_case, filename+'.png')
+            image_files.append(pngname)
+
+            filename = os.path.join(dir_cross_section_case, f"{str(var_time)[0:10]}_DAWN_{dom}.nc")
+            ncfile = Dataset(filename)
+            hour = ncfile.variables['hour'][:]
+            minute = ncfile.variables['minute'][:]
+            second = ncfile.variables['second'][:]
+            geopt = ncfile.variables['geopt'][:]
+            u_obs = ncfile.variables['u_obs'][:]
+            v_obs = ncfile.variables['v_obs'][:]
+            u_bkg = ncfile.variables['u_bkg'][:]
+            v_bkg = ncfile.variables['v_bkg'][:]
+            u_anl = ncfile.variables['u_anl'][:]
+            v_anl = ncfile.variables['v_anl'][:]
+            u_OmB = ncfile.variables['u_OmB'][:]
+            v_OmB = ncfile.variables['v_OmB'][:]
+            u_OmA = ncfile.variables['u_OmA'][:]
+            v_OmA = ncfile.variables['v_OmA'][:]
+            ncfile.close()
+
+            time = hour + minute/60.0 + second/3600.0
+            normalized_u_OmB = u_OmB/obs_error_DAWN
+            normalized_v_OmB = v_OmB/obs_error_DAWN
+            normalized_u_OmA = u_OmA/obs_error_DAWN
+            normalized_v_OmA = v_OmA/obs_error_DAWN
+
+            fig_width = 2.75*1.6
+            fig_height = 2.75+0.75
+            clb_aspect = 25*1.6
+
+            with PdfPages(pdfname) as pdf:
+
+                fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
+                ax = axs
+
+                pcm = ax.scatter(time, geopt, marker='s', s=5.0, linewidths=0.0, c=normalized_u_OmB, vmin=-2, vmax=2, cmap=cmaps.vik, zorder=0)
+
+                ax.set_xticks(np.arange(start_time, end_time + 0.1, 1.0))
+                ax.set_yticks(np.arange(0, 15000, 3000))
+                ax.text(start_time+1.0, np.max(geopt)-1000.0, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.axis(extent)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
+                clb.set_label(f"Normalized OmB of u ($\mathregular{ms^{-1}}$)", fontsize=10.0, labelpad=4.0)
+                clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                clb.ax.minorticks_off()
+                clb.set_ticks(range(-2, 3, 1))
+                clb.set_ticklabels(range(-2, 3, 1))
+
+                plt.tight_layout()
+                plt.savefig(pngname, dpi=600)
+                pdf.savefig(fig)
+                plt.cla()
+                plt.clf()
+                plt.close()
+
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
+            print(miao)
+
+        combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
+        image = IPImage(filename=output_file)
+        display(image)
