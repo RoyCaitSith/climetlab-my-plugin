@@ -524,7 +524,7 @@ def draw_DAWN_comparison(data_library_names, dir_cases, case_names, exp_names, s
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
-                clb.set_label('OmA of u ($\mathregular{ms^{-1}}$)', fontsize=10.0, labelpad=4.0)
+                clb.set_label(f"{scatter_var}" + " ($\mathregular{ms^{-1}}$)", fontsize=10.0, labelpad=4.0)
                 clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                 clb.ax.minorticks_off()
                 clb.set_ticks(scatter_levels)
