@@ -20,8 +20,10 @@ from IPython.display import display
 
 def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         contourf_var, contourf_var_level,
-                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='GFS',
-                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='GFS', quiver_var_space=10,
+                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='GFS', 
+                        contour_positive_clabel=False, contour_positive_levels=[0.75],
+                        contour_negative_clabel=False, contour_negative_levels=[-0.75],
+                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='GFS', quiver_var_space=10, quiver_var_scale=25,
                         domains=['d01'], da_cycle=1, var_time=20000101010000, region='null'):
 
     radii = [150.0, 300.0, 450.0]
@@ -157,14 +159,24 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 
                 if 'null' not in contour_var:
                     (contour_information, contour_levels) = set_variables(contour_var)
+                    (contour_labels, contour_cmap) = contour_levels[contour_var_level]
+                    if contour_positive_clabel == True:
+                        CS1 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
+                                         levels=contour_positive_levels, linestyles='solid',  colors='k', linewidths=1.0, zorder=1)
+                        ax.clabel(CS1, inline=True, fontsize=5.0)
+                    if contour_negative_clabel == True:
+                        CS2 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
+                                         levels=contour_negative_levels, linestyles='dashed',  colors='k', linewidths=1.0, zorder=1)
+                        ax.clabel(CS2, inline=True, fontsize=5.0)
 
                 if 'null' not in quiver_vars:
 
                     (quiver_1_information, quiver_1_levels) = set_variables(quiver_var_1)
                     (quiver_2_information, quiver_2_levels) = set_variables(quiver_var_2)
                     ax.quiver(mlon[::quiver_var_space, ::quiver_var_space], mlat[::quiver_var_space, ::quiver_var_space], \
-                              quiver_var_1_value[::quiver_var_space, ::quiver_var_space], quiver_var_2_value[::quiver_var_space, ::quiver_var_space], \
-                              width=0.001, headwidth=5.0, headlength=7.5, scale=75.0, scale_units='inches', zorder=1)
+                              quiver_1_information['factor']*quiver_var_1_value[::quiver_var_space, ::quiver_var_space], \
+                              quiver_2_information['factor']*quiver_var_2_value[::quiver_var_space, ::quiver_var_space], \
+                              width=0.0025, headwidth=5.0, headlength=7.5, scale=quiver_var_scale, scale_units='inches', zorder=1)
                 
                 if 'null' in region:
                     ax.set_xticks(np.arange(-180, 181, 10))

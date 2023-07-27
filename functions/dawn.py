@@ -2,15 +2,22 @@ import os
 import re
 import time
 import importlib
+import subprocess
 import metpy.calc
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import colormaps as cmaps
 from datetime import datetime, timedelta
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 from tqdm.notebook import tqdm
 from metpy.units import units
+from IPython.display import display
+from IPython.display import Image as IPImage
 from wrf import getvar, latlon_coords, interplevel
+from matplotlib.backends.backend_pdf import PdfPages
+from combine_and_show_images import combine_images_grid
 
 def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
 
@@ -279,7 +286,8 @@ def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
         os.makedirs(dir_cross_section, exist_ok=True)
 
         for dom in tqdm(da_domains, desc='Domains', leave=False): 
-            for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
+            # for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
+            for da_cycle in tqdm(range(4, 5, 1), desc='Cycles', leave=False):
 
                 anl_start_time = initial_time + timedelta(hours=cycling_interval)
                 n_time = int(da_cycle)
@@ -314,6 +322,7 @@ def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.createVariable('second', 'f8', ('n_time'))
                         ncfile_output.createVariable('lat',    'f8', ('n_time'))
                         ncfile_output.createVariable('lon',    'f8', ('n_time'))
+                        ncfile_output.createVariable('p',      'f8', ('n_time'))
                         ncfile_output.createVariable('geopt',  'f8', ('n_time'))
                         ncfile_output.createVariable('u_obs',  'f8', ('n_time'))
                         ncfile_output.createVariable('v_obs',  'f8', ('n_time'))
@@ -342,6 +351,8 @@ def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
                         lat = np.array(df[0])
                         df = pd.read_csv(os.path.join(dir_bufr_temp, '10.txt'), header=None)
                         lon = np.array(df[0])
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '11.txt'), header=None)
+                        p = np.array(df[0])/100.0
 
                         df = pd.read_csv(os.path.join(dir_bufr_temp, '12.txt'), header=None)
                         geopt = units.Quantity(np.array(df[0]), 'm^2/s^2')
@@ -365,6 +376,7 @@ def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['second'][:] = second
                         ncfile_output.variables['lat'][:] = lat
                         ncfile_output.variables['lon'][:] = lon
+                        ncfile_output.variables['p'][:] = p
                         ncfile_output.variables['geopt'][:] = height
                         ncfile_output.variables['u_obs'][:] = u
                         ncfile_output.variables['v_obs'][:] = v
@@ -434,8 +446,8 @@ def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['v_OmA'][:] = ncfile_output.variables['v_obs'][:] - ncfile_output.variables['v_anl'][:]           
                         ncfile_output.close()
 
-def draw_DAWN_normalized_comparison(data_library_names, dir_cases, case_names, exp_names, \
-                                    domains=['d01'], da_cycle=1, var_time=20000101010000):
+def draw_DAWN_comparison(data_library_names, dir_cases, case_names, exp_names, scatter_var, scatter_levels, \
+                         domains=['d01'], da_cycle=1, var_time=20000101010000):
     
     obs_error_DAWN = 2.0
 
@@ -459,7 +471,7 @@ def draw_DAWN_normalized_comparison(data_library_names, dir_cases, case_names, e
         image_files = []
         dir_save = os.path.join(dir_cross_section, 'figures')
         output_filename = (
-            f"{str(var_time)}_DAWN_normalized_comparison_"
+            f"{str(var_time)}_DAWN_{scatter_var}_"
             f"{dom}_C{str(da_cycle).zfill(2)}"
         )
         output_file = os.path.join(dir_save, output_filename+'.png')
@@ -471,62 +483,52 @@ def draw_DAWN_normalized_comparison(data_library_names, dir_cases, case_names, e
             specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
             dir_cross_section_case = os.path.join(dir_cross_section, specific_case)
             
+            filename = os.path.join(dir_cross_section_case, f"{str(var_time)[0:10]}_DAWN_{dom}.nc")
+            ncfile = Dataset(filename, 'r')
+            hour = ncfile.variables['hour'][:]
+            minute = ncfile.variables['minute'][:]
+            second = ncfile.variables['second'][:]
+            geopt = ncfile.variables['geopt'][:]/1000.0
+            temp = ncfile.variables[scatter_var][:]
+            ncfile.close()
+
+            time = hour + minute/60.0 + second/3600.0
+
+            fig_width = 2.75*1.6
+            fig_height = 2.75+0.75
+            clb_aspect = 25*1.6
+
             filename = (
-                f"{str(var_time)}_DAWN_normalized_comparison_"
+                f"{str(var_time)}_DAWN_{scatter_var}_"
                 f"{dom}_C{str(da_cycle).zfill(2)}"
             )
             pdfname = os.path.join(dir_cross_section_case, filename+'.pdf')
             pngname = os.path.join(dir_cross_section_case, filename+'.png')
             image_files.append(pngname)
 
-            filename = os.path.join(dir_cross_section_case, f"{str(var_time)[0:10]}_DAWN_{dom}.nc")
-            ncfile = Dataset(filename)
-            hour = ncfile.variables['hour'][:]
-            minute = ncfile.variables['minute'][:]
-            second = ncfile.variables['second'][:]
-            geopt = ncfile.variables['geopt'][:]
-            u_obs = ncfile.variables['u_obs'][:]
-            v_obs = ncfile.variables['v_obs'][:]
-            u_bkg = ncfile.variables['u_bkg'][:]
-            v_bkg = ncfile.variables['v_bkg'][:]
-            u_anl = ncfile.variables['u_anl'][:]
-            v_anl = ncfile.variables['v_anl'][:]
-            u_OmB = ncfile.variables['u_OmB'][:]
-            v_OmB = ncfile.variables['v_OmB'][:]
-            u_OmA = ncfile.variables['u_OmA'][:]
-            v_OmA = ncfile.variables['v_OmA'][:]
-            ncfile.close()
-
-            time = hour + minute/60.0 + second/3600.0
-            normalized_u_OmB = u_OmB/obs_error_DAWN
-            normalized_v_OmB = v_OmB/obs_error_DAWN
-            normalized_u_OmA = u_OmA/obs_error_DAWN
-            normalized_v_OmA = v_OmA/obs_error_DAWN
-
-            fig_width = 2.75*1.6
-            fig_height = 2.75+0.75
-            clb_aspect = 25*1.6
-
             with PdfPages(pdfname) as pdf:
 
                 fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
                 ax = axs
 
-                pcm = ax.scatter(time, geopt, marker='s', s=5.0, linewidths=0.0, c=normalized_u_OmB, vmin=-2, vmax=2, cmap=cmaps.vik, zorder=0)
+                pcm = ax.scatter(time, geopt, marker='s', s=1.0, linewidths=0.0, c=temp, \
+                                 vmin=np.min(scatter_levels), vmax=np.max(scatter_levels), cmap=cmaps.vik, zorder=0)
 
+                extent = [start_time, end_time, 0, 15]
+                ax.set_ylabel('Geopotential height (km)', fontsize=10.0)
                 ax.set_xticks(np.arange(start_time, end_time + 0.1, 1.0))
-                ax.set_yticks(np.arange(0, 15000, 3000))
-                ax.text(start_time+1.0, np.max(geopt)-1000.0, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                ax.set_yticks(np.arange(0, 16, 3))
+                ax.text(start_time+0.1, 14.5, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
-                clb.set_label(f"Normalized OmB of u ($\mathregular{ms^{-1}}$)", fontsize=10.0, labelpad=4.0)
+                clb.set_label('OmA of u ($\mathregular{ms^{-1}}$)', fontsize=10.0, labelpad=4.0)
                 clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
                 clb.ax.minorticks_off()
-                clb.set_ticks(range(-2, 3, 1))
-                clb.set_ticklabels(range(-2, 3, 1))
+                clb.set_ticks(scatter_levels)
+                clb.set_ticklabels(scatter_levels)
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)
@@ -534,11 +536,10 @@ def draw_DAWN_normalized_comparison(data_library_names, dir_cases, case_names, e
                 plt.cla()
                 plt.clf()
                 plt.close()
-
+                
             command = f"convert {pngname} -trim {pngname}"
             subprocess.run(command, shell=True)
-            print(miao)
-
+            
         combine_images_grid(image_files, output_file)
         command = f"convert {output_file} -trim {output_file}"
         subprocess.run(command, shell=True)

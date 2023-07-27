@@ -3,15 +3,23 @@ import re
 import time
 import h5py
 import importlib
+import subprocess
 import metpy.calc
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import colormaps as cmaps
 from datetime import datetime, timedelta
 from netCDF4 import Dataset
+from scipy.interpolate import griddata
 from tqdm.notebook import tqdm
 from metpy.units import units
 from scipy.interpolate import griddata
+from IPython.display import display
+from IPython.display import Image as IPImage
 from wrf import getvar, latlon_coords, interplevel
+from matplotlib.backends.backend_pdf import PdfPages
+from combine_and_show_images import combine_images_grid
 
 def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
 
@@ -302,7 +310,7 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                     
                     if n_time > 0:
 
-                        filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_DAWN_{dom}.nc")
+                        filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_HALO_{dom}.nc")
                         os.system(f"rm -rf {filename}")
 
                         ncfile_output = Dataset(filename, 'w', format='NETCDF4')
@@ -417,3 +425,101 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['q_OmB'][:] = ncfile_output.variables['q_obs'][:] - ncfile_output.variables['q_bkg'][:]
                         ncfile_output.variables['q_OmA'][:] = ncfile_output.variables['q_obs'][:] - ncfile_output.variables['q_anl'][:]
                         ncfile_output.close()
+
+def draw_HALO_comparison(data_library_names, dir_cases, case_names, exp_names, scatter_var, scatter_levels, \
+                         domains=['d01'], da_cycle=1, var_time=20000101010000):
+
+    # Import the necessary library
+    (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    time_window_max = attributes[(dir_case, case_name)]['time_window_max']
+    dir_cross_section = os.path.join(dir_exp, 'cross_section')
+    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
+    start_time = float(var_time_datetime.strftime('%H')) - time_window_max
+    end_time = float(var_time_datetime.strftime('%H')) + time_window_max
+
+    for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        
+        image_files = []
+        dir_save = os.path.join(dir_cross_section, 'figures')
+        output_filename = (
+            f"{str(var_time)}_HALO_{scatter_var}_"
+            f"{dom}_C{str(da_cycle).zfill(2)}"
+        )
+        output_file = os.path.join(dir_save, output_filename+'.png')
+
+        for idc in tqdm(range(len(dir_cases)), desc='Cases', leave=False):
+
+            # Import the necessary library
+            (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+            specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+            dir_cross_section_case = os.path.join(dir_cross_section, specific_case)
+            
+            filename = os.path.join(dir_cross_section_case, f"{str(var_time)[0:10]}_HALO_{dom}.nc")
+            ncfile = Dataset(filename, 'r')
+            hour = ncfile.variables['hour'][:]
+            minute = ncfile.variables['minute'][:]
+            second = ncfile.variables['second'][:]
+            geopt = ncfile.variables['geopt'][:]/1000.0
+            temp = ncfile.variables[scatter_var][:]*10000.0
+            ncfile.close()
+
+            time = hour + minute/60.0 + second/3600.0
+
+            fig_width = 2.75*1.6
+            fig_height = 2.75+0.75
+            clb_aspect = 25*1.6
+
+            filename = (
+                f"{str(var_time)}_HALO_{scatter_var}_"
+                f"{dom}_C{str(da_cycle).zfill(2)}"
+            )
+            pdfname = os.path.join(dir_cross_section_case, filename+'.pdf')
+            pngname = os.path.join(dir_cross_section_case, filename+'.png')
+            image_files.append(pngname)
+
+            with PdfPages(pdfname) as pdf:
+
+                fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
+                ax = axs
+
+                pcm = ax.scatter(time, geopt, marker='s', s=1.0, linewidths=0.0, c=temp, \
+                                 vmin=np.min(scatter_levels), vmax=np.max(scatter_levels), cmap=cmaps.imola, zorder=0)
+
+                extent = [start_time, end_time, 0, 15]
+                ax.set_ylabel('Geopotential height (km)', fontsize=10.0)
+                ax.set_xticks(np.arange(start_time, end_time + 0.1, 1.0))
+                ax.set_yticks(np.arange(0, 16, 3))
+                ax.text(start_time+0.1, 14.5, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.axis(extent)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
+                clb.set_label('OmA of q ($\mathregular{ms^{-1}}$)', fontsize=10.0, labelpad=4.0)
+                clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                clb.ax.minorticks_off()
+                clb.set_ticks(scatter_levels)
+                clb.set_ticklabels(scatter_levels)
+
+                plt.tight_layout()
+                plt.savefig(pngname, dpi=600)
+                pdf.savefig(fig)
+                plt.cla()
+                plt.clf()
+                plt.close()
+                
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
+            
+        combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
+        image = IPImage(filename=output_file)
+        display(image)
