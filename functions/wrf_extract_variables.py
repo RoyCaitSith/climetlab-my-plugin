@@ -7,7 +7,7 @@ import numpy as np
 from set_parameters import set_variables
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
-from wrf import getvar, latlon_coords, interplevel
+from wrf import getvar, latlon_coords, interplevel, g_geoht
 from netCDF4 import Dataset
 from scipy.interpolate import griddata
 
@@ -110,7 +110,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                         ncfile_output.variables['time'][idt] = int(time_now.strftime('%Y%m%d%H%M00'))
 
                         # To Calculate 6-hr accumulated precipitation
-                        if 'rain_6h' in var:
+                        if var == 'rain_6h':
 
                             if 'IMERG' in exp_name:
 
@@ -275,6 +275,9 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                         f.write(response.content)
 
                                 GFS_pygrib = pygrib.open(GFS_file)
+                                # for grb in GFS_pygrib:
+                                #     print(grb)
+
                                 for idl, lev in enumerate(levels):
 
                                     GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
@@ -286,6 +289,9 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     GFS_lat_1d = GFS_lat[GFS_index]
                                     GFS_lon_1d = GFS_lon[GFS_index]
                                     GFS_temp_1d = GFS_temp.values[GFS_index]
+                                    if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
+                                    if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
+
                                     ncfile_output.variables[var][idt,idl,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
 
                                 GFS_pygrib.close()
@@ -310,6 +316,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     else:
                                         if information['unit'] == 'null':
                                             var_value = getvar(ncfile, information['name'])
+                                            if var == 'geopt': var_value = g_geoht.get_height(ncfile, msl=True) 
                                         else:
                                             var_value = getvar(ncfile, information['name'], units=information['unit'])
                                     ncfile.close()
