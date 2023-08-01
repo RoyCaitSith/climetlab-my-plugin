@@ -198,13 +198,13 @@ def set_variables(var):
         information.update({'unit': 'null'})
         information.update({'lb_title': 'Relative humidity (%)'})
         information.update({'factor': 1.0})
-        information.update({'extend': 'max'})
+        information.update({'extend': 'both'})
         information.update({'GFS': 'Relative humidity'})
 
         levels = {}
-        levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
-        levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
-        levels.update({700: [[f'{float(i/  2):.0f}' for i in range(0, 25, 3)], cmaps.imola]})
+        levels.update({925: [[f'{float(i/  1):.0f}' for i in range(30, 101, 5)], cmaps.div3_green_brown_r]})
+        levels.update({850: [[f'{float(i/  1):.0f}' for i in range(30, 101, 5)], cmaps.div3_green_brown_r]})
+        levels.update({700: [[f'{float(i/  1):.0f}' for i in range(30, 101, 5)], cmaps.div3_green_brown_r]})
         levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})

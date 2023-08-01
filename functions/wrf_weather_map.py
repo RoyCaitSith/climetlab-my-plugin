@@ -23,8 +23,10 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='GFS', 
                         contour_positive_clabel=False, contour_positive_levels=[0.75],
                         contour_negative_clabel=False, contour_negative_levels=[-0.75],
-                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='GFS', quiver_var_space=10, quiver_var_scale=25,
-                        domains=['d01'], da_cycle=1, var_time=20000101010000, region='null'):
+                        contour_var_color='w',
+                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='GFS',
+                        quiver_var_color='w', quiver_var_space=10, quiver_var_scale=25,
+                        domains=['d01'], da_cycle=1, var_time=20000101010000, region_type='d02'):
 
     radii = [150.0, 300.0, 450.0]
     angles = np.arange(0.0, 360.0, 2.0)
@@ -36,11 +38,12 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
     dir_weather_map = os.path.join(dir_exp, 'weather_map')
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
-    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))    
 
     for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         
@@ -50,7 +53,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             f"{str(var_time)}_{contourf_var}_{str(contour_var_level)}_"
             f"{contour_var}_{str(contour_var_level)}_"
             f"{quiver_var_1}_{quiver_var_2}_{str(quiver_var_level)}_"
-            f"{region}_{dom}_C{str(da_cycle).zfill(2)}"
+            f"{region_type}_{dom}_C{str(da_cycle).zfill(2)}"
         )
         output_file = os.path.join(dir_save, output_filename+'.png')
 
@@ -65,7 +68,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 f"{str(var_time)}_{contourf_var}_{str(contour_var_level)}_"
                 f"{contour_var}_{str(contour_var_level)}_"
                 f"{quiver_var_1}_{quiver_var_2}_{str(quiver_var_level)}_"
-                f"{region}_{dom}_C{str(da_cycle).zfill(2)}"
+                f"{region_type}_{dom}_C{str(da_cycle).zfill(2)}"
             )
             pdfname = os.path.join(dir_weather_map_case, filename+'.pdf')
             pngname = os.path.join(dir_weather_map_case, filename+'.png')
@@ -80,6 +83,18 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             lat = contourf_var_ncfile.variables['lat'][:,:]
             lon = contourf_var_ncfile.variables['lon'][:,:]
             contourf_var_value = contourf_var_ncfile.variables[contourf_var][idt,idl,:,:]
+            contourf_var_ncfile.close()
+
+            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_d01.nc")
+            contourf_var_ncfile = Dataset(contourf_var_filename)
+            lat_d01 = contourf_var_ncfile.variables['lat'][:,:]
+            lon_d01 = contourf_var_ncfile.variables['lon'][:,:]
+            contourf_var_ncfile.close()
+
+            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_d02.nc")
+            contourf_var_ncfile = Dataset(contourf_var_filename)
+            lat_d02 = contourf_var_ncfile.variables['lat'][:,:]
+            lon_d02 = contourf_var_ncfile.variables['lon'][:,:]
             contourf_var_ncfile.close()
 
             if 'null' not in contour_var:
@@ -120,11 +135,11 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 quiver_var_2_value = quiver_var_2_ncfile.variables[quiver_var_2][idt,idl,:,:]
                 quiver_var_2_ncfile.close()
 
-            if 'null' in region:
-                extent = [lon[0,0], lon[-1,-1], lat[0,0], lat[-1,-1]]
-            else:
-                if 'tc' in region: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
-                if 'aew' in region: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
+            if 'd01' in region_type: extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
+            if 'd02' in region_type: extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
+            if 'tc' in region_type or 'aew' in region_type:
+                if 'tc' in region_type: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
+                if 'aew' in region_type: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
 
                 df = pd.read_csv(best_track)
                 bt_lats = list(df['LAT'][:])
@@ -156,18 +171,22 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 (contourf_labels, contourf_cmap) = contourf_levels[contourf_var_level]
                 pcm = ax.contourf(mlon, mlat, contourf_information['factor']*contourf_var_value, \
                                   levels=list(map(float, contourf_labels)), cmap=contourf_cmap, extend=contourf_information['extend'], zorder=1)
+                print(np.nanmax(contourf_var_value))
+                print(np.nanmin(contourf_var_value))
                 
                 if 'null' not in contour_var:
                     (contour_information, contour_levels) = set_variables(contour_var)
                     (contour_labels, contour_cmap) = contour_levels[contour_var_level]
                     if contour_positive_clabel == True:
                         CS1 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
-                                         levels=contour_positive_levels, linestyles='solid',  colors='k', linewidths=1.0, zorder=1)
+                                         levels=contour_positive_levels, linestyles='solid',  colors=contour_var_color, linewidths=1.0, zorder=1)
                         ax.clabel(CS1, inline=True, fontsize=5.0)
                     if contour_negative_clabel == True:
                         CS2 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
-                                         levels=contour_negative_levels, linestyles='dashed',  colors='k', linewidths=1.0, zorder=1)
+                                         levels=contour_negative_levels, linestyles='dashed',  colors=contour_var_color, linewidths=1.0, zorder=1)
                         ax.clabel(CS2, inline=True, fontsize=5.0)
+                print(np.nanmax(contour_var_value))
+                print(np.nanmin(contour_var_value))
 
                 if 'null' not in quiver_vars:
 
@@ -176,9 +195,10 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     ax.quiver(mlon[::quiver_var_space, ::quiver_var_space], mlat[::quiver_var_space, ::quiver_var_space], \
                               quiver_1_information['factor']*quiver_var_1_value[::quiver_var_space, ::quiver_var_space], \
                               quiver_2_information['factor']*quiver_var_2_value[::quiver_var_space, ::quiver_var_space], \
-                              width=0.0025, headwidth=5.0, headlength=7.5, scale=quiver_var_scale, scale_units='inches', zorder=1)
+                              width=0.0025, headwidth=5.0, headlength=7.5, \
+                              color=quiver_var_color, scale=quiver_var_scale, scale_units='inches', zorder=1)
                 
-                if 'null' in region:
+                if 'd01' in region_type or 'd02' in region_type:
                     ax.set_xticks(np.arange(-180, 181, 10))
                     ax.set_yticks(np.arange(-90, 91, 10))
                     ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])

@@ -127,10 +127,10 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
         max_flight_lon  = np.max(flight_lon)
 
         if wrf_domain:
-            domain = 'wrf'
+            domain = 'd01_d02'
             extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
         else:
-            domain = 'highlight'
+            domain = 'auto'
             clon = 5*(min_flight_lon + max_flight_lon)/2.0//5
             clat = 5*(min_flight_lat + max_flight_lat)/2.0//5
             half_extent = np.max([5*abs(max_flight_lon - clon)//5+5, 5*abs(max_flight_lat - clat)//5+5, 15])

@@ -6,7 +6,7 @@ sns_bright_cmap = sns.color_palette('bright')
 
 attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN',
-    'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/01_CV_RF07_AEW06_IAN/cycling_da/namelists',
     'NHC_best_track': '2022_09L_Ian.csv',
     'AEW_best_track': '2022_AEW06.csv',
@@ -33,7 +33,7 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
 
 attributes[('/08_CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/02_AW_RF01_AEW01',
-    'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/02_AW_RF01_AEW01/cycling_da/namelists',
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
     'CMORPH_version': '8km-30min',
@@ -56,7 +56,7 @@ attributes[('/08_CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
 
 attributes[('/08_CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/03_AW_RF02_AEW02',
-    'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/03_AW_RF02_AEW02/cycling_da/namelists',
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
     'CMORPH_version': '8km-30min',
@@ -79,7 +79,7 @@ attributes[('/08_CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
 
 attributes[('/08_CPEX/04_AW_RF07_Larry', 'Larry')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/04_AW_RF07_Larry',
-    'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/04_AW_RF07_Larry/cycling_da/namelists',
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
     'CMORPH_version': '8km-30min',
