@@ -515,7 +515,7 @@ def draw_DAWN_comparison(data_library_names, dir_cases, case_names, exp_names, s
                                  vmin=np.min(scatter_levels), vmax=np.max(scatter_levels), cmap=cmaps.vik, zorder=0)
 
                 extent = [start_time, end_time, 0, 15]
-                ax.set_ylabel('Geopotential height (km)', fontsize=10.0)
+                ax.set_ylabel('Height (km)', fontsize=10.0)
                 ax.set_xticks(np.arange(start_time, end_time + 0.1, 1.0))
                 ax.set_yticks(np.arange(0, 16, 3))
                 ax.text(start_time+0.1, 14.5, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)

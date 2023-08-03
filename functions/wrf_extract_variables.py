@@ -3,15 +3,17 @@ import h5py
 import importlib
 import requests
 import pygrib
+import metpy.calc
 import numpy as np
 from set_parameters import set_variables
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords, interplevel, g_geoht
-from netCDF4 import Dataset
+from netCDF4 import Dataset, num2date
 from scipy.interpolate import griddata
+from metpy.units import units
 
-def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CONV', variables=['u']):
+def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CTRL', variables=['u']):
 
     time_interval = 6
     accumulated_hours = 6.0
@@ -260,41 +262,113 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                             if 'GFS' in exp_name:
 
-                                YYYY = time_now.strftime('%Y')
-                                YYMMDDHH = time_now.strftime('%Y%m%d%H')
-                                YYYYMMDD = time_now.strftime('%Y%m%d')
-                                
-                                dir_rda = 'https://data.rda.ucar.edu/ds084.1'
-                                GFS_filename = f"gfs.0p25.{YYMMDDHH}.f000.grib2"
-                                GFS_file = os.path.join(dir_GFS, GFS_filename)
-
-                                if not os.path.exists(GFS_file):
-                                    GFS_rda_filename = os.path.join(dir_rda, YYYY, YYYYMMDD, GFS_filename)
-                                    response = requests.get(GFS_rda_filename, stream=True)
-                                    with open(GFS_file, "wb") as f:
-                                        f.write(response.content)
-
-                                GFS_pygrib = pygrib.open(GFS_file)
-                                # for grb in GFS_pygrib:
-                                #     print(grb)
-
-                                for idl, lev in enumerate(levels):
-
-                                    GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
-                                    GFS_lat, GFS_lon = GFS_temp.latlons()
-                                    GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
-                                    GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
-                                                (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
+                                if 'anl' in var:
                                     
-                                    GFS_lat_1d = GFS_lat[GFS_index]
-                                    GFS_lon_1d = GFS_lon[GFS_index]
-                                    GFS_temp_1d = GFS_temp.values[GFS_index]
-                                    if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
-                                    if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
+                                    var_bkg = var.replace('_anl', '')
+                                    filename_bkg = filename.replace('_anl', '')
 
-                                    ncfile_output.variables[var][idt,idl,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
+                                    ncfile_bkg = Dataset(filename_bkg)
+                                    ncfile_output.variables[var][idt,:,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                                    ncfile_bkg.close()
+                                
+                                else:
 
-                                GFS_pygrib.close()
+                                    YYYY = time_now.strftime('%Y')
+                                    YYMMDDHH = time_now.strftime('%Y%m%d%H')
+                                    YYYYMMDD = time_now.strftime('%Y%m%d')
+                                
+                                    dir_rda = 'https://data.rda.ucar.edu/ds084.1'
+                                    GFS_filename = f"gfs.0p25.{YYMMDDHH}.f000.grib2"
+                                    GFS_file = os.path.join(dir_GFS, GFS_filename)
+
+                                    if not os.path.exists(GFS_file):
+                                        GFS_rda_filename = os.path.join(dir_rda, YYYY, YYYYMMDD, GFS_filename)
+                                        response = requests.get(GFS_rda_filename, stream=True)
+                                        with open(GFS_file, "wb") as f:
+                                            f.write(response.content)
+
+                                    GFS_pygrib = pygrib.open(GFS_file)
+                                    # for grb in GFS_pygrib:
+                                    #     print(grb)
+
+                                    if 9999 in levels:
+                                        GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
+                                        GFS_lat, GFS_lon = GFS_temp.latlons()
+                                        GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
+                                        GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                    (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
+                                    
+                                        GFS_lat_1d = GFS_lat[GFS_index]
+                                        GFS_lon_1d = GFS_lon[GFS_index]
+                                        GFS_temp_1d = GFS_temp.values[GFS_index]
+                                        ncfile_output.variables[var][idt,0,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
+                                    else:
+                                        for idl, lev in enumerate(levels):
+
+                                            GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
+                                            GFS_lat, GFS_lon = GFS_temp.latlons()
+                                            GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
+                                            GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                        (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
+                                    
+                                            GFS_lat_1d = GFS_lat[GFS_index]
+                                            GFS_lon_1d = GFS_lon[GFS_index]
+                                            GFS_temp_1d = GFS_temp.values[GFS_index]
+                                            if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
+                                            if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
+
+                                            ncfile_output.variables[var][idt,idl,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
+
+                                    GFS_pygrib.close()
+
+                            elif 'ERA5' in exp_name:
+
+                                if 'anl' in var:
+                                    
+                                    var_bkg = var.replace('_anl', '')
+                                    filename_bkg = filename.replace('_anl', '')
+
+                                    ncfile_bkg = Dataset(filename_bkg)
+                                    ncfile_output.variables[var][idt,:,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                                    ncfile_bkg.close()
+                                
+                                else:
+
+                                    if 9999 in levels:
+                                        ERA5_filename = os.path.join(dir_ERA5, 'ERA5_single_level.nc')
+                                        ERA5_ncfile = Dataset(ERA5_filename)
+                                    else:
+                                        ERA5_filename = os.path.join(dir_ERA5, 'ERA5_pressure_levels.nc')
+                                        ERA5_ncfile = Dataset(ERA5_filename)
+                                        for idl, lev in enumerate(levels):
+                                        
+                                            ERA5_hour = ERA5_ncfile.variables['time']
+                                            ERA5_level = ERA5_ncfile.variables['level'][:]
+                                            ERA5_time = num2date(ERA5_hour, ERA5_hour.units, ERA5_hour.calendar)
+                                            ERA5_idt = np.where(ERA5_time == time_now)[0][0]
+                                            ERA5_idl = np.where(ERA5_level == lev)[0][0]
+                                            ERA5_temp = ERA5_ncfile.variables[information['ERA5']][ERA5_idt,ERA5_idl,:,:]
+
+                                            ERA5_lat = np.transpose(np.tile(ERA5_ncfile.variables['latitude'][:], (1440, 1)))
+                                            ERA5_lon = np.tile(ERA5_ncfile.variables['longitude'][:], (721, 1))
+                                            ERA5_lon[ERA5_lon>180.0] = ERA5_lon[ERA5_lon>180.0] - 360.0
+                                            ERA5_index = (ERA5_lat < np.array(lat[-1, -1]) + 15.0) & (ERA5_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                         (ERA5_lon < np.array(lon[-1, -1]) + 15.0) & (ERA5_lon > np.array(lon[0, 0]) - 15.0)
+                                    
+                                            ERA5_lat_1d = ERA5_lat[ERA5_index]
+                                            ERA5_lon_1d = ERA5_lon[ERA5_index]
+                                            ERA5_temp_1d = ERA5_temp[ERA5_index]
+                                            if var == 'q': ERA5_temp_1d = ERA5_temp_1d/(1.0-ERA5_temp_1d)
+                                            if var == 'avo':
+                                                ERA5_coriolis_parameter = metpy.calc.coriolis_parameter(np.deg2rad(ERA5_lat_1d))
+                                                ERA5_temp_1d = ERA5_temp_1d+ERA5_coriolis_parameter
+                                                ERA5_temp_1d = ERA5_temp_1d*100000.0
+                                            if var == 'geopt':
+                                                ERA5_temp_1d = ERA5_temp_1d/9.80665
+
+                                        ncfile_output.variables[var][idt,idl,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
+
+                                    ERA5_ncfile.close()
 
                             else:
 
@@ -316,7 +390,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     else:
                                         if information['unit'] == 'null':
                                             var_value = getvar(ncfile, information['name'])
-                                            if var == 'geopt': var_value = g_geoht.get_height(ncfile, msl=True) 
+                                            if var == 'geopt': var_value = g_geoht.get_height(ncfile, msl=True)
                                         else:
                                             var_value = getvar(ncfile, information['name'], units=information['unit'])
                                     ncfile.close()

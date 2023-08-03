@@ -28,8 +28,13 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         quiver_var_color='w', quiver_var_space=10, quiver_var_scale=25,
                         domains=['d01'], da_cycle=1, var_time=20000101010000, region_type='d02'):
 
-    radii = [150.0, 300.0, 450.0]
-    angles = np.arange(0.0, 360.0, 2.0)
+    if region_type == 'tc':
+        radii = [150.0, 300.0, 450.0]
+        angles = np.arange(0.0, 360.0, 2.0)
+    if region_type == 'aew':
+        radii = [100.0, 200.0, 300.0]
+        angles = np.arange(0.0, 360.0, 2.0)
+
     quiver_var_1 = quiver_vars[0]
     quiver_var_2 = quiver_vars[1]
 
@@ -135,12 +140,11 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 quiver_var_2_value = quiver_var_2_ncfile.variables[quiver_var_2][idt,idl,:,:]
                 quiver_var_2_ncfile.close()
 
-            if 'd01' in region_type: extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
-            if 'd02' in region_type: extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
-            if 'tc' in region_type or 'aew' in region_type:
-                if 'tc' in region_type: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
-                if 'aew' in region_type: best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
-
+            if region_type == 'd01': extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
+            if region_type == 'd02': extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
+            
+            if region_type == 'tc':
+                best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
                 df = pd.read_csv(best_track)
                 bt_lats = list(df['LAT'][:])
                 bt_lons = list(df['LON'][:])
@@ -154,6 +158,22 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         bt_lat = bt_lats[id_bt]
                         bt_lon = bt_lons[id_bt]
                         extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
+
+            if region_type == 'aew':
+                best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
+                df = pd.read_csv(best_track)
+                bt_lats = list(df['LAT'][:])
+                bt_lons = list(df['LON'][:])
+                bt_dates = list(df['Date_Time'][:])
+                del df
+
+                var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
+                for id_bt, bt_date in enumerate(bt_dates):
+                    bt_datetime = datetime.strptime(bt_date, '%Y-%m-%d %H:%M:%S')
+                    if bt_datetime == var_time_datetime:
+                        bt_lat = bt_lats[id_bt]
+                        bt_lon = bt_lons[id_bt]
+                        extent = [bt_lon-3.0, bt_lon+3.0, bt_lat-3.0, bt_lat+3.0]
 
             fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
             fig_height = 2.75+0.75
@@ -171,8 +191,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 (contourf_labels, contourf_cmap) = contourf_levels[contourf_var_level]
                 pcm = ax.contourf(mlon, mlat, contourf_information['factor']*contourf_var_value, \
                                   levels=list(map(float, contourf_labels)), cmap=contourf_cmap, extend=contourf_information['extend'], zorder=1)
-                print(np.nanmax(contourf_var_value))
-                print(np.nanmin(contourf_var_value))
+                # print(np.nanmax(contourf_var_value))
+                # print(np.nanmin(contourf_var_value))
                 
                 if 'null' not in contour_var:
                     (contour_information, contour_levels) = set_variables(contour_var)
@@ -185,8 +205,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         CS2 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
                                          levels=contour_negative_levels, linestyles='dashed',  colors=contour_var_color, linewidths=1.0, zorder=1)
                         ax.clabel(CS2, inline=True, fontsize=5.0)
-                print(np.nanmax(contour_var_value))
-                print(np.nanmin(contour_var_value))
+                # print(np.nanmax(contour_var_value))
+                # print(np.nanmin(contour_var_value))
 
                 if 'null' not in quiver_vars:
 
@@ -198,11 +218,12 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                               width=0.0025, headwidth=5.0, headlength=7.5, \
                               color=quiver_var_color, scale=quiver_var_scale, scale_units='inches', zorder=1)
                 
-                if 'd01' in region_type or 'd02' in region_type:
+                if region_type == 'd01' or region_type == 'd02':
                     ax.set_xticks(np.arange(-180, 181, 10))
                     ax.set_yticks(np.arange(-90, 91, 10))
                     ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
                     ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                    ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 else:
                     ax.plot([-180.0, 180.0], [bt_lat, bt_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                     ax.plot([bt_lon, bt_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
@@ -213,13 +234,21 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         for ida in range(0, len(angles)):
                             lat_polar[idr,ida], lon_polar[idr,ida] = clatlon.Cal_LatLon(bt_lat, bt_lon, radii[idr], angles[ida])
                         ax.plot(lon_polar[idr,:], lat_polar[idr,:], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    
+                    if region_type == 'tc':
+                        ax.set_xticks(np.arange(-180, 181, 5))
+                        ax.set_yticks(np.arange(-90, 91, 5))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+                        ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
-                    ax.set_xticks(np.arange(-180, 181, 5))
-                    ax.set_yticks(np.arange(-90, 91, 5))
-                    ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
-                    ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+                    if region_type == 'aew':
+                        ax.set_xticks(np.arange(-180, 181, 3))
+                        ax.set_yticks(np.arange(-90, 91, 3))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
+                        ax.text(extent[0]+0.2, extent[3]-0.2, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
-                ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])

@@ -11,6 +11,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'U component of wind'})
+        information.update({'ERA5': 'u'})
         
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -26,6 +27,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'U component of wind'})
+        information.update({'ERA5': 'u'})
 
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
@@ -35,7 +37,7 @@ def set_variables(var):
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
     
-    if var == 'u10':
+    if var == 'u10' or var == 'u10_anl':
         information = {}
         information.update({'name': 'uvmet10'})
         information.update({'unit': 'ms-1'})
@@ -44,6 +46,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': '10 metre U wind component'})
+        information.update({'ERA5': 'u10'})
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -57,6 +60,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'V component of wind'})
+        information.update({'ERA5': 'v'})
 
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -72,6 +76,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'V component of wind'})
+        information.update({'ERA5': 'v'})
 
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
@@ -81,7 +86,7 @@ def set_variables(var):
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
 
-    if var == 'v10':
+    if var == 'v10' or var == 'v10_anl':
         information = {}
         information.update({'name': 'uvmet10'})
         information.update({'unit': 'ms-1'})
@@ -90,11 +95,12 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': '10 metre V wind component'})
+        information.update({'ERA5': 'v10'})
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
 
-    if var == 'wspd10':
+    if var == 'wspd10' or var == 'wspd10':
         information = {}
         information.update({'name': 'uvmet10_wspd_wdir'})
         information.update({'unit': 'ms-1'})
@@ -103,6 +109,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'max'})
         information.update({'GFS': ['10 metre U wind component', '10 metre V wind component']})
+        information.update({'ERA5': ['u10', 'v10']})
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 33, 4)], cmaps.vik]})
@@ -115,6 +122,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Temperature'})
+        information.update({'ERA5': 't'})
         
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
@@ -132,6 +140,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Temperature'})
+        information.update({'ERA5': 't'})
 
         levels = {}
         levels.update({925: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
@@ -149,6 +158,7 @@ def set_variables(var):
         information.update({'factor': 1000.0})
         information.update({'extend': 'max'})
         information.update({'GFS': 'Specific humidity'})
+        information.update({'ERA5': 'q'})
 
         levels = {}
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
@@ -166,6 +176,7 @@ def set_variables(var):
         information.update({'factor': 1000.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Specific humidity'})
+        information.update({'ERA5': 'q'})
 
         levels = {}
         levels.update({925: [[f'{float(i/ 10):.1f}' for i in range(-32, 33, 8)], cmaps.cork]})
@@ -175,7 +186,7 @@ def set_variables(var):
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(-4,   5, 1)], cmaps.cork]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(-4,   5, 1)], cmaps.cork]})
 
-    if var == 'avo':
+    if var == 'avo' or var == 'avo_anl':
         information = {}
         information.update({'name': 'avo'})
         information.update({'unit': 'null'})
@@ -183,6 +194,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
+        information.update({'ERA5': 'vo'})
 
         levels = {}
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -192,7 +204,7 @@ def set_variables(var):
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
-    if var == 'rh':
+    if var == 'rh' or var == 'rh_anl':
         information = {}
         information.update({'name': 'rh'})
         information.update({'unit': 'null'})
@@ -200,6 +212,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Relative humidity'})
+        information.update({'ERA5': 'r'})
 
         levels = {}
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(30, 101, 5)], cmaps.div3_green_brown_r]})
@@ -209,7 +222,7 @@ def set_variables(var):
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
 
-    if var == 'geopt':
+    if var == 'geopt' or var == 'geopt_anl':
         information = {}
         information.update({'name': 'geopt'})
         information.update({'unit': 'null'})
@@ -217,6 +230,7 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Geopotential Height'})
+        information.update({'ERA5': 'z'})
 
         levels = {}
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
@@ -234,18 +248,20 @@ def set_variables(var):
         information.update({'factor': 1.0})
         information.update({'extend': 'max'})
         information.update({'GFS': 'Precipitation rate'})
+        information.update({'ERA5': 'tp'})
 
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 6)], cmaps.prcp_2]})
 
-    if var == 'slp':
+    if var == 'slp' or var == 'slp_anl':
         information = {}
         information.update({'name': 'slp'})
         information.update({'unit': 'ms-1'})
         information.update({'lb_title': 'Slp (hPa)'})
         information.update({'factor': 1.0})
         information.update({'extend': 'max'})
-        information.update({'GFS': 'Surface pressure'})
+        information.update({'GFS': 'Mean sea level pressure'})
+        information.update({'ERA5': 'msl'})
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
