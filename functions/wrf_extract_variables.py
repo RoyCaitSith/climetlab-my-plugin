@@ -365,8 +365,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                                 ERA5_temp_1d = ERA5_temp_1d*100000.0
                                             if var == 'geopt':
                                                 ERA5_temp_1d = ERA5_temp_1d/9.80665
-
-                                        ncfile_output.variables[var][idt,idl,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
+                                            ncfile_output.variables[var][idt,idl,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
 
                                     ERA5_ncfile.close()
 

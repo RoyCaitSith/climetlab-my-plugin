@@ -20,11 +20,10 @@ from IPython.display import display
 
 def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         contourf_var, contourf_var_level,
-                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='GFS', 
-                        contour_positive_clabel=False, contour_positive_levels=[0.75],
-                        contour_negative_clabel=False, contour_negative_levels=[-0.75],
-                        contour_var_color='w',
-                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='GFS',
+                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='ERA5', 
+                        contour_positive_clabel=False, contour_positive_levels=[0.75], contour_positive_color='w',
+                        contour_negative_clabel=False, contour_negative_levels=[-0.75], contour_negative_color='w',
+                        quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='ERA5',
                         quiver_var_color='w', quiver_var_space=10, quiver_var_scale=25,
                         domains=['d01'], da_cycle=1, var_time=20000101010000, region_type='d02'):
 
@@ -199,11 +198,13 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     (contour_labels, contour_cmap) = contour_levels[contour_var_level]
                     if contour_positive_clabel == True:
                         CS1 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
-                                         levels=contour_positive_levels, linestyles='solid',  colors=contour_var_color, linewidths=1.0, zorder=1)
+                                         levels=contour_positive_levels, linestyles='solid',  \
+                                         colors=contour_positive_color, linewidths=1.0, zorder=1)
                         ax.clabel(CS1, inline=True, fontsize=5.0)
                     if contour_negative_clabel == True:
                         CS2 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
-                                         levels=contour_negative_levels, linestyles='dashed',  colors=contour_var_color, linewidths=1.0, zorder=1)
+                                         levels=contour_negative_levels, linestyles='dashed',  \
+                                         colors=contour_negative_color, linewidths=1.0, zorder=1)
                         ax.clabel(CS2, inline=True, fontsize=5.0)
                 # print(np.nanmax(contour_var_value))
                 # print(np.nanmin(contour_var_value))
@@ -223,7 +224,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     ax.set_yticks(np.arange(-90, 91, 10))
                     ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
                     ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
-                    ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                    ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 else:
                     ax.plot([-180.0, 180.0], [bt_lat, bt_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                     ax.plot([bt_lon, bt_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
@@ -240,14 +241,14 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         ax.set_yticks(np.arange(-90, 91, 5))
                         ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
                         ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
-                        ax.text(extent[0]+0.4, extent[3]-0.4, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                        ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                     if region_type == 'aew':
                         ax.set_xticks(np.arange(-180, 181, 3))
                         ax.set_yticks(np.arange(-90, 91, 3))
                         ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
                         ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
-                        ax.text(extent[0]+0.2, extent[3]-0.2, exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                        ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
