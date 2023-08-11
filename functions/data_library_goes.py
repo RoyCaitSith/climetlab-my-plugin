@@ -17,7 +17,6 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'cycling_interval': 6,
     'history_interval': 6,
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
-    'dir_track_intensity': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/track_intensity/best_track',
     'NHC_best_track': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/2020_13L_Laura.csv',
     'ibtracs': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/best_track/ibtracs.ALL.list.v04r00.csv',
     'ibtracs_case': 'LAURA',
@@ -40,13 +39,14 @@ compare_schemes['GOES_Laura_scheme_01'] = {
 compare_schemes['GOES_Laura_scheme_02'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_08'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/Laura/Figures',
-    'labels': ['NPB_ASRBC4CLD_CLD_ALL', 'NPB', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10'],
-    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
-    'linestyles': ['-', '-', '-', '-', '-'],
+    'labels': ['NPB_ASRBC4CLD_CLD_ALL', 'NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5]],
+    'linestyles': ['-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_03'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \

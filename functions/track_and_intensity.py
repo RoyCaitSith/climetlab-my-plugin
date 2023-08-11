@@ -366,10 +366,13 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
     history_interval = attributes[(dir_case, case_name)]['history_interval']
-    dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
 
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
@@ -386,7 +389,7 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
         n_lead_time = int((forecast_hours-6.0)/history_interval+1)
         RMSE_ref = np.zeros(n_lead_time)
         for da_cycle in range(0, total_da_cycles):
-            filename = f"{dir_track_intensity}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
+            filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
             mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
             RMSE_ref += np.square(df.loc[mask, variable].to_numpy())
@@ -408,11 +411,10 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
                 itime = attributes[(dir_case, case_name)]['itime']
                 forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
                 history_interval = attributes[(dir_case, case_name)]['history_interval']
-                dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
                 RMSE = np.zeros(n_lead_time)
                 for da_cycle in range(total_da_cycles):
-                    filename = f"{dir_track_intensity}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
+                    filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
                     df = pd.read_csv(filename)
                     mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
                     RMSE += np.square(df.loc[mask, variable].to_numpy())
@@ -466,11 +468,13 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
 
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-    history_interval = attributes[(dir_case, case_name)]['history_interval']
-    dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
 
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
@@ -486,7 +490,7 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
 
         RMSE_ref = np.zeros(total_da_cycles)
         for da_cycle in range(0, total_da_cycles):
-            filename = f"{dir_track_intensity}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
+            filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
             mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
             RMSE_ref[da_cycle] = np.sqrt(np.average(np.square(df.loc[mask, variable].to_numpy())))
@@ -507,11 +511,10 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
                 itime = attributes[(dir_case, case_name)]['itime']
                 forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
                 history_interval = attributes[(dir_case, case_name)]['history_interval']
-                dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
 
                 RMSE = np.zeros(total_da_cycles)
                 for da_cycle in range(total_da_cycles):
-                    filename = f"{dir_track_intensity}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
+                    filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
                     df = pd.read_csv(filename)
                     mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
                     RMSE[da_cycle] = np.sqrt(np.average(np.square(df.loc[mask, variable].to_numpy())))
@@ -567,10 +570,13 @@ def compare_averaged_RMSE_specific_time_each_cycle_scheme(data_library_name, sch
 
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-    dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
     dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+
+    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
 
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
@@ -599,8 +605,7 @@ def compare_averaged_RMSE_specific_time_each_cycle_scheme(data_library_name, sch
                 for idc, (dir_case, case_name, exp_name) in enumerate(compare_schemes[scheme]['cases']):
 
                     itime = attributes[(dir_case, case_name)]['itime']
-                    dir_track_intensity = attributes[(dir_case, case_name)]['dir_track_intensity']
-                    filename = f"{dir_track_intensity}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
+                    filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
                     df = pd.read_csv(filename)
                     mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + specific_hours) & (df['Forecast_Hour']%6 == 0)
                     if idc == 0:
