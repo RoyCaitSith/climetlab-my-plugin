@@ -260,7 +260,7 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names):
         ax.tick_params('both', direction='in', labelsize=10.0)
         ax.axis([0, xmax, 0, 1.2])
         ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-        ax.legend(loc='upper left', fontsize=5.0, handlelength=2.5).set_zorder(102)
+        ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
         plt.tight_layout()
         plt.savefig(pngname, dpi=600)

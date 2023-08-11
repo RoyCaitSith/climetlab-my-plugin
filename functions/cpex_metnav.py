@@ -176,7 +176,7 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
             ax.tick_params('both', direction='in', labelsize=10.0)
             ax.axis(extent)
             ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-            ax.legend(loc='upper right', fontsize=5.0, handlelength=2.5).set_zorder(102)
+            ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
             plt.tight_layout()
             plt.savefig(pngname, dpi=600)

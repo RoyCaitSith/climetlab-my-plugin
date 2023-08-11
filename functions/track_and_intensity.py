@@ -201,7 +201,7 @@ def compare_track_scheme(data_library_name, scheme):
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-                ax.legend(loc='upper right', fontsize=5.0, handlelength=2.5).set_zorder(102)
+                ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)
@@ -328,8 +328,8 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-                if 'MSLP' in variable: ax.legend(loc='lower left', fontsize=5.0, handlelength=2.5).set_zorder(102)
-                if 'MWS' in variable:  ax.legend(loc='upper left', fontsize=5.0, handlelength=2.5).set_zorder(102)
+                if 'MSLP' in variable: ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
+                if 'MWS' in variable:  ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)
@@ -441,7 +441,7 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
             ax.tick_params('both', direction='in', labelsize=10.0)
             ax.axis([-0.5, n_lead_time-0.5, ymin, ymax])
             ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-            ax.legend(loc='upper left', fontsize=5.0, handlelength=2.5).set_zorder(102)
+            ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
             plt.tight_layout()
             plt.savefig(pngname, dpi=600)
@@ -539,7 +539,7 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
             ax.tick_params('both', direction='in', labelsize=10.0)
             ax.axis([-0.5, total_da_cycles-0.5, ymin, ymax])
             ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-            ax.legend(loc='upper left', fontsize=5.0, handlelength=2.5).set_zorder(102)
+            ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
             plt.tight_layout()
             plt.savefig(pngname, dpi=600)
@@ -634,7 +634,7 @@ def compare_averaged_RMSE_specific_time_each_cycle_scheme(data_library_name, sch
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis([0.5, n_cases-0.5, ymin, ymax])
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-                ax.legend(loc='lower left', fontsize=5.0, handlelength=2.5).set_zorder(102)
+                ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)

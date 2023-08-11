@@ -302,7 +302,7 @@ def draw_goes_images(data_library_name, dir_case, case_name, channel=8, goes_lev
             ax.tick_params('both', direction='in', labelsize=10.0)
             ax.axis(extent)
             ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-            ax.legend(loc='upper right', fontsize=5.0, handlelength=2.5).set_zorder(102)
+            ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
             # if tc_track:
             #     clb1 = fig.colorbar(pcm, ax=axs, ticks=np.arange(190, 250.1, 5.0), orientation='horizontal', pad=-0.025, aspect=50, shrink=1.00)
