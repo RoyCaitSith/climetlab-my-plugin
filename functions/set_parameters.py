@@ -17,9 +17,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
     if var == 'u_inc':
         information = {}
@@ -33,9 +36,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
     
     if var == 'u10' or var == 'u10_anl':
         information = {}
@@ -66,9 +72,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(-12, 13, 3)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-12, 13, 3)], cmaps.vik]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(-12, 13, 3)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
 
     if var == 'v_inc':
         information = {}
@@ -82,9 +91,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
 
     if var == 'v10' or var == 'v10_anl':
         information = {}
@@ -128,9 +140,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(274, 291, 2)], cmaps.lajolla]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(274, 291, 2)], cmaps.lajolla]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(262, 270, 1)], cmaps.lajolla]})
+        levels.update({400: [[f'{float(i/2):.1f}' for i in range(464, 489, 3)], cmaps.lajolla]})
         levels.update({300: [[f'{float(i/2):.1f}' for i in range(464, 489, 3)], cmaps.lajolla]})
         levels.update({200: [[f'{float(i/2):.1f}' for i in range(424, 449, 3)], cmaps.lajolla]})
+        levels.update({100: [[f'{float(i/2):.1f}' for i in range(424, 449, 3)], cmaps.lajolla]})
 
     if var == 't_inc':
         information = {}
@@ -146,9 +161,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/10):.1f}' for i in range(-12, 13, 3)], cmaps.vik]})
         levels.update({850: [[f'{float(i/10):.1f}' for i in range(-12, 13, 3)], cmaps.vik]})
         levels.update({700: [[f'{float(i/10):.1f}' for i in range(-12, 13, 3)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/10):.1f}' for i in range(-12, 13, 3)], cmaps.vik]})
         levels.update({500: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
         levels.update({300: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
         levels.update({200: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
 
     if var == 'q' or var == 'q_anl':
         information = {}
@@ -164,9 +182,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
         levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
         levels.update({700: [[f'{float(i/  2):.0f}' for i in range(0, 25, 3)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/  2):.0f}' for i in range(0, 25, 3)], cmaps.imola]})
         levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
 
     if var == 'q_inc':
         information = {}
@@ -182,9 +203,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/ 10):.1f}' for i in range(-32, 33, 8)], cmaps.cork]})
         levels.update({850: [[f'{float(i/ 10):.1f}' for i in range(-20, 21, 5)], cmaps.cork]})
         levels.update({700: [[f'{float(i/ 10):.1f}' for i in range(-16, 17, 4)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/ 10):.1f}' for i in range(-16, 17, 4)], cmaps.cork]})
         levels.update({500: [[f'{float(i/ 10):.1f}' for i in range(-8,   9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(-4,   5, 1)], cmaps.cork]})
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(-4,   5, 1)], cmaps.cork]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(-4,   5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(-4,   5, 1)], cmaps.cork]})
 
     if var == 'avo' or var == 'avo_anl':
         information = {}
@@ -200,9 +224,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
         levels.update({700: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
         levels.update({500: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({300: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
     if var == 'rh' or var == 'rh_anl':
         information = {}
@@ -218,9 +245,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
         levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
         levels.update({700: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
+        levels.update({600: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
         levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
 
     if var == 'geopt' or var == 'geopt_anl':
         information = {}
@@ -236,9 +266,12 @@ def set_variables(var):
         levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
         levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
         levels.update({700: [[f'{float(i/  2):.0f}' for i in range(0, 25, 3)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/  2):.0f}' for i in range(0, 25, 3)], cmaps.imola]})
         levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
 
     if var == 'rain_6h':
         information = {}
