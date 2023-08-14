@@ -210,11 +210,221 @@ def set_variables(var):
         levels.update({200: [[f'{float(i/100):.2f}' for i in range(-4,   5, 1)], cmaps.cork]})
         levels.update({100: [[f'{float(i/100):.2f}' for i in range(-4,   5, 1)], cmaps.cork]})
 
+    if var == 'qc' or var == 'qc_anl':
+        information = {}
+        information.update({'name': 'QCLOUD'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'MR of cloud ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/  1):.0f}' for i in range(0, 33, 4)], cmaps.imola]})
+        levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 33, 4)], cmaps.imola]})
+        levels.update({700: [[f'{float(i/  1):.0f}' for i in range(0, 33, 4)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/  1):.0f}' for i in range(0, 33, 4)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+
+    if var == 'qc_inc':
+        information = {}
+        information.update({'name': 'QCLOUD'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of cloud MR ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({850: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({700: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({500: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({300: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({200: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+
+    if var == 'qr' or var == 'qr_anl':
+        information = {}
+        information.update({'name': 'QRAIN'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'MR of rain ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({300: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({200: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+
+    if var == 'qr_inc':
+        information = {}
+        information.update({'name': 'QRAIN'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of rain MR ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({850: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({700: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({500: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({300: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({200: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+
+    if var == 'qg' or var == 'qg_anl':
+        information = {}
+        information.update({'name': 'QGRAUP'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'MR of graupel ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({300: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({200: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+
+    if var == 'qg_inc':
+        information = {}
+        information.update({'name': 'QGRAUP'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of graupel MR ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({850: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({700: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({500: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({300: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({200: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+
+    if var == 'qs' or var == 'qs_anl':
+        information = {}
+        information.update({'name': 'QSNOW'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'MR of snow ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({300: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({200: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+
+    if var == 'qs_inc':
+        information = {}
+        information.update({'name': 'QSNOW'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of snow MR ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({850: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({700: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({500: [[f'{float(i/100):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({300: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({200: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/100):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+
+    if var == 'qi' or var == 'qi_anl':
+        information = {}
+        information.update({'name': 'QICE'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'MR of ice ($\mathregular{10^{-3} gkg^{-1}}$)'})
+        information.update({'factor': 1000000.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({300: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({200: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(0, 9, 1)], cmaps.imola]})
+
+    if var == 'qi_inc':
+        information = {}
+        information.update({'name': 'QICE'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of ice MR ($\mathregular{10^{-3} gkg^{-1}}$)'})
+        information.update({'factor': 1000000.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': ''})
+        information.update({'ERA5': ''})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({850: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({700: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({600: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({500: [[f'{float(i/10):.1f}' for i in range(-8, 9, 2)], cmaps.cork]})
+        levels.update({400: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({300: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({200: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+        levels.update({100: [[f'{float(i/10):.1f}' for i in range(-4, 5, 1)], cmaps.cork]})
+
     if var == 'avo' or var == 'avo_anl':
         information = {}
         information.update({'name': 'avo'})
         information.update({'unit': 'null'})
-        information.update({'lb_title': 'Absolute vorticity ($\mathregular{10^{-5}s^{-1}}$)'})
+        information.update({'lb_title': 'Abs. vor. ($\mathregular{10^{-5}s^{-1}}$)'})
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
@@ -231,6 +441,27 @@ def set_variables(var):
         levels.update({200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
+    if var == 'avo_inc':
+        information = {}
+        information.update({'name': 'avo'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of Abs. vor. ($\mathregular{10^{-5}s^{-1}}$)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': 'Absolute vorticity'})
+        information.update({'ERA5': 'vo'})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({400: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({300: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({200: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({100: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+
     if var == 'rh' or var == 'rh_anl':
         information = {}
         information.update({'name': 'rh'})
@@ -246,11 +477,32 @@ def set_variables(var):
         levels.update({850: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
         levels.update({700: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
         levels.update({600: [[f'{float(i/  1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
-        levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,  9, 1)], cmaps.imola]})
-        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
-        levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,  9, 1)], cmaps.imola]})
-        levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
-        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,  9, 1)], cmaps.imola]})
+        levels.update({500: [[f'{float(i/  1):.0f}' for i in range(0,   9,  1)], cmaps.div3_green_brown_r]})
+        levels.update({400: [[f'{float(i/ 10):.1f}' for i in range(0,   9,  1)], cmaps.div3_green_brown_r]})
+        levels.update({300: [[f'{float(i/ 10):.1f}' for i in range(0,   9,  1)], cmaps.div3_green_brown_r]})
+        levels.update({200: [[f'{float(i/100):.2f}' for i in range(0,   9,  1)], cmaps.div3_green_brown_r]})
+        levels.update({100: [[f'{float(i/100):.2f}' for i in range(0,   9,  1)], cmaps.div3_green_brown_r]})
+
+    if var == 'rh_inc':
+        information = {}
+        information.update({'name': 'rh'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of RH (%)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': 'Relative humidity'})
+        information.update({'ERA5': 'r'})
+
+        levels = {}
+        levels.update({925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({700: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({600: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({500: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({400: [[f'{float(i/1):.1f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({300: [[f'{float(i/1):.1f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({200: [[f'{float(i/1):.2f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
+        levels.update({100: [[f'{float(i/1):.2f}' for i in range(-16, 17, 4)], cmaps.div3_green_brown_r]})
 
     if var == 'geopt' or var == 'geopt_anl':
         information = {}

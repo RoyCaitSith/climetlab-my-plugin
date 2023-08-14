@@ -13,7 +13,8 @@ from netCDF4 import Dataset, num2date
 from scipy.interpolate import griddata
 from metpy.units import units
 
-def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name='CTRL', variables=['u']):
+def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names,
+                             specific_level, ref_exp_name='CTRL', variables=['u']):
 
     time_interval = 6
     accumulated_hours = 6.0
@@ -87,7 +88,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                     (information, levels) = set_variables(var)
                     n_level = len(levels.keys())
 
-                    filename = os.path.join(dir_weather_map_case, f"{var}_{dom}.nc")
+                    filename = os.path.join(dir_weather_map_case, f"{var}_{specific_level}_{dom}.nc")
                     os.system(f"rm -rf {filename}")
 
                     ncfile_output = Dataset(filename, 'w', format='NETCDF4')
@@ -96,15 +97,13 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                     ncfile_output.createDimension('n_lat',   n_lat)
                     ncfile_output.createDimension('n_lon',   n_lon)
                     ncfile_output.createVariable('time',  'f8', ('n_time'))
-                    ncfile_output.createVariable('level', 'f8', ('n_level'))
                     ncfile_output.createVariable('lat',   'f8', ('n_lat', 'n_lon'))
                     ncfile_output.createVariable('lon',   'f8', ('n_lat', 'n_lon'))
-                    ncfile_output.createVariable(var,     'f8', ('n_time', 'n_level', 'n_lat', 'n_lon'))
+                    ncfile_output.createVariable(var,     'f8', ('n_time', 'n_lat', 'n_lon'))
 
-                    ncfile_output.variables['level'][:] = list(levels.keys())
                     ncfile_output.variables['lat'][:,:] = lat
                     ncfile_output.variables['lon'][:,:] = lon
-                    ncfile_output.variables[var][:,:,:,:] = 0.0
+                    ncfile_output.variables[var][:,:,:] = 0.0
 
                     for idt in tqdm(range(n_time), desc='Times', leave=False):
 
@@ -144,7 +143,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 IMERG_prep_1d = IMERG_prep[IMERG_index]
                                 IMERG_lat_1d  = IMERG_lat[IMERG_index]
                                 IMERG_lon_1d  = IMERG_lon[IMERG_index]
-                                ncfile_output.variables[var][idt,0,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
+                                ncfile_output.variables[var][idt,:,:] = griddata((IMERG_lon_1d, IMERG_lat_1d), IMERG_prep_1d, (lon, lat), method='linear')
 
                             elif 'CMORPH' in exp_name:
 
@@ -179,7 +178,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 CMORPH_prep_1d = CMORPH_prep[CMORPH_index]
                                 CMORPH_lat_1d  = CMORPH_lat[CMORPH_index]
                                 CMORPH_lon_1d  = CMORPH_lon[CMORPH_index]
-                                ncfile_output.variables[var][idt,0,:,:] = griddata((CMORPH_lon_1d, CMORPH_lat_1d), CMORPH_prep_1d, (lon, lat), method='linear')
+                                ncfile_output.variables[var][idt,:,:] = griddata((CMORPH_lon_1d, CMORPH_lat_1d), CMORPH_prep_1d, (lon, lat), method='linear')
 
                             elif 'GSMaP' in exp_name:
 
@@ -209,7 +208,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 GSMaP_prep_1d = GSMaP_prep[GSMaP_index]
                                 GSMaP_lat_1d  = GSMaP_lat[GSMaP_index]
                                 GSMaP_lon_1d  = GSMaP_lon[GSMaP_index]
-                                ncfile_output.variables[var][idt,0,:,:] = griddata((GSMaP_lon_1d, GSMaP_lat_1d), GSMaP_prep_1d, (lon, lat), method='linear')         
+                                ncfile_output.variables[var][idt,:,:] = griddata((GSMaP_lon_1d, GSMaP_lat_1d), GSMaP_prep_1d, (lon, lat), method='linear')         
 
                             else:
 
@@ -243,7 +242,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                             RAINC_0 = 0.0
 
                                         rainfall = RAINNC_1 + RAINC_1 - RAINNC_0 - RAINC_0
-                                        ncfile_output.variables[var][idt,0,:,:] = ncfile_output.variables[var][idt,0,:,:] + rainfall
+                                        ncfile_output.variables[var][idt,:,:] = ncfile_output.variables[var][idt,:,:] + rainfall
 
                         elif 'inc' in var:
 
@@ -254,7 +253,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
 
                             ncfile_bkg = Dataset(filename_bkg)
                             ncfile_anl = Dataset(filename_anl)
-                            ncfile_output.variables[var][idt,:,:,:] = ncfile_anl.variables[var_anl][idt,:,:,:] - ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                            ncfile_output.variables[var][idt,:,:] = ncfile_anl.variables[var_anl][idt,:,:] - ncfile_bkg.variables[var_bkg][idt,:,:]
                             ncfile_bkg.close()
                             ncfile_anl.close()
                         
@@ -268,7 +267,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     filename_bkg = filename.replace('_anl', '')
 
                                     ncfile_bkg = Dataset(filename_bkg)
-                                    ncfile_output.variables[var][idt,:,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                                    ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
                                     ncfile_bkg.close()
                                 
                                 else:
@@ -291,33 +290,19 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     # for grb in GFS_pygrib:
                                     #     print(grb)
 
-                                    if 9999 in levels:
-                                        GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
-                                        GFS_lat, GFS_lon = GFS_temp.latlons()
-                                        GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
-                                        GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
-                                                    (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
+                                    GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
+                                    GFS_lat, GFS_lon = GFS_temp.latlons()
+                                    GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
+                                    GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
                                     
-                                        GFS_lat_1d = GFS_lat[GFS_index]
-                                        GFS_lon_1d = GFS_lon[GFS_index]
-                                        GFS_temp_1d = GFS_temp.values[GFS_index]
-                                        ncfile_output.variables[var][idt,0,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
-                                    else:
-                                        for idl, lev in enumerate(levels):
+                                    GFS_lat_1d = GFS_lat[GFS_index]
+                                    GFS_lon_1d = GFS_lon[GFS_index]
+                                    GFS_temp_1d = GFS_temp.values[GFS_index]
+                                    if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
+                                    if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
 
-                                            GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=lev)[0]
-                                            GFS_lat, GFS_lon = GFS_temp.latlons()
-                                            GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
-                                            GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
-                                                        (GFS_lon < np.array(lon[-1, -1]) + 15.0) & (GFS_lon > np.array(lon[0, 0]) - 15.0)
-                                    
-                                            GFS_lat_1d = GFS_lat[GFS_index]
-                                            GFS_lon_1d = GFS_lon[GFS_index]
-                                            GFS_temp_1d = GFS_temp.values[GFS_index]
-                                            if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
-                                            if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
-
-                                            ncfile_output.variables[var][idt,idl,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
+                                    ncfile_output.variables[var][idt,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
 
                                     GFS_pygrib.close()
 
@@ -329,43 +314,42 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     filename_bkg = filename.replace('_anl', '')
 
                                     ncfile_bkg = Dataset(filename_bkg)
-                                    ncfile_output.variables[var][idt,:,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:,:]
+                                    ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
                                     ncfile_bkg.close()
                                 
                                 else:
 
-                                    if 9999 in levels:
+                                    if specific_level == 9999:
                                         ERA5_filename = os.path.join(dir_ERA5, 'ERA5_single_level.nc')
                                         ERA5_ncfile = Dataset(ERA5_filename)
                                     else:
                                         ERA5_filename = os.path.join(dir_ERA5, 'ERA5_pressure_levels.nc')
                                         ERA5_ncfile = Dataset(ERA5_filename)
-                                        for idl, lev in enumerate(levels):
                                         
-                                            ERA5_hour = ERA5_ncfile.variables['time']
-                                            ERA5_level = ERA5_ncfile.variables['level'][:]
-                                            ERA5_time = num2date(ERA5_hour, ERA5_hour.units, ERA5_hour.calendar)
-                                            ERA5_idt = np.where(ERA5_time == time_now)[0][0]
-                                            ERA5_idl = np.where(ERA5_level == lev)[0][0]
-                                            ERA5_temp = ERA5_ncfile.variables[information['ERA5']][ERA5_idt,ERA5_idl,:,:]
+                                    ERA5_hour = ERA5_ncfile.variables['time']
+                                    ERA5_level = ERA5_ncfile.variables['level'][:]
+                                    ERA5_time = num2date(ERA5_hour, ERA5_hour.units, ERA5_hour.calendar)
+                                    ERA5_idt = np.where(ERA5_time == time_now)[0][0]
+                                    ERA5_idl = np.where(ERA5_level == lev)[0][0]
+                                    ERA5_temp = ERA5_ncfile.variables[information['ERA5']][ERA5_idt,ERA5_idl,:,:]
 
-                                            ERA5_lat = np.transpose(np.tile(ERA5_ncfile.variables['latitude'][:], (1440, 1)))
-                                            ERA5_lon = np.tile(ERA5_ncfile.variables['longitude'][:], (721, 1))
-                                            ERA5_lon[ERA5_lon>180.0] = ERA5_lon[ERA5_lon>180.0] - 360.0
-                                            ERA5_index = (ERA5_lat < np.array(lat[-1, -1]) + 15.0) & (ERA5_lat > np.array(lat[0, 0]) - 15.0) & \
-                                                         (ERA5_lon < np.array(lon[-1, -1]) + 15.0) & (ERA5_lon > np.array(lon[0, 0]) - 15.0)
+                                    ERA5_lat = np.transpose(np.tile(ERA5_ncfile.variables['latitude'][:], (1440, 1)))
+                                    ERA5_lon = np.tile(ERA5_ncfile.variables['longitude'][:], (721, 1))
+                                    ERA5_lon[ERA5_lon>180.0] = ERA5_lon[ERA5_lon>180.0] - 360.0
+                                    ERA5_index = (ERA5_lat < np.array(lat[-1, -1]) + 15.0) & (ERA5_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                 (ERA5_lon < np.array(lon[-1, -1]) + 15.0) & (ERA5_lon > np.array(lon[0, 0]) - 15.0)
                                     
-                                            ERA5_lat_1d = ERA5_lat[ERA5_index]
-                                            ERA5_lon_1d = ERA5_lon[ERA5_index]
-                                            ERA5_temp_1d = ERA5_temp[ERA5_index]
-                                            if var == 'q': ERA5_temp_1d = ERA5_temp_1d/(1.0-ERA5_temp_1d)
-                                            if var == 'avo':
-                                                ERA5_coriolis_parameter = metpy.calc.coriolis_parameter(np.deg2rad(ERA5_lat_1d))
-                                                ERA5_temp_1d = ERA5_temp_1d+ERA5_coriolis_parameter
-                                                ERA5_temp_1d = ERA5_temp_1d*100000.0
-                                            if var == 'geopt':
-                                                ERA5_temp_1d = ERA5_temp_1d/9.80665
-                                            ncfile_output.variables[var][idt,idl,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
+                                    ERA5_lat_1d = ERA5_lat[ERA5_index]
+                                    ERA5_lon_1d = ERA5_lon[ERA5_index]
+                                    ERA5_temp_1d = ERA5_temp[ERA5_index]
+                                    if var == 'q': ERA5_temp_1d = ERA5_temp_1d/(1.0-ERA5_temp_1d)
+                                    if var == 'avo':
+                                        ERA5_coriolis_parameter = metpy.calc.coriolis_parameter(np.deg2rad(ERA5_lat_1d))
+                                        ERA5_temp_1d = ERA5_temp_1d+ERA5_coriolis_parameter
+                                        ERA5_temp_1d = ERA5_temp_1d*100000.0
+                                    if var == 'geopt':
+                                        ERA5_temp_1d = ERA5_temp_1d/9.80665
+                                    ncfile_output.variables[var][idt,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
 
                                     ERA5_ncfile.close()
 
@@ -397,7 +381,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     if 9999 in levels:
                                         ncfile_output.variables[var][idt,0,:,:] = var_value
                                     else:
-                                        temp_var_value = interplevel(var_value, p, list(levels.keys()))
-                                        ncfile_output.variables[var][idt,:,:,:] = temp_var_value
+                                        temp_var_value = interplevel(var_value, p, specific_level)
+                                        ncfile_output.variables[var][idt,:,:] = temp_var_value
 
                     ncfile_output.close()
