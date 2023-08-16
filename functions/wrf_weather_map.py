@@ -25,6 +25,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         contour_negative_clabel=False, contour_negative_levels=[-0.75], contour_negative_color='w',
                         quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='ERA5',
                         quiver_var_color='w', quiver_var_space=10, quiver_var_scale=25,
+                        projection='lcc', lat_1=40.0, lat_2=20.0, lon_0=-80.0,
                         domains=['d01'], da_cycle=1, var_time=20000101010000, region_type='d02'):
 
     if region_type == 'tc':
@@ -47,7 +48,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
     dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
-    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))    
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))   
 
     for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         
@@ -78,24 +79,22 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             pngname = os.path.join(dir_weather_map_case, filename+'.png')
             image_files.append(pngname)
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{dom}.nc")
+            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_{dom}.nc")
             contourf_var_ncfile = Dataset(contourf_var_filename)
             contourf_var_times = contourf_var_ncfile.variables['time'][:]
-            contourf_var_levels = contourf_var_ncfile.variables['level'][:]
             idt = np.where(contourf_var_times == var_time)[0][0]
-            idl = np.where(contourf_var_levels == contourf_var_level)[0][0]
             lat = contourf_var_ncfile.variables['lat'][:,:]
             lon = contourf_var_ncfile.variables['lon'][:,:]
-            contourf_var_value = contourf_var_ncfile.variables[contourf_var][idt,idl,:,:]
+            contourf_var_value = contourf_var_ncfile.variables[contourf_var][idt,:,:]
             contourf_var_ncfile.close()
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_d01.nc")
+            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_d01.nc")
             contourf_var_ncfile = Dataset(contourf_var_filename)
             lat_d01 = contourf_var_ncfile.variables['lat'][:,:]
             lon_d01 = contourf_var_ncfile.variables['lon'][:,:]
             contourf_var_ncfile.close()
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_d02.nc")
+            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_d02.nc")
             contourf_var_ncfile = Dataset(contourf_var_filename)
             lat_d02 = contourf_var_ncfile.variables['lat'][:,:]
             lon_d02 = contourf_var_ncfile.variables['lon'][:,:]
@@ -107,13 +106,11 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     ref_case = '_'.join([case_name, contour_var_ref_exp_name, 'C'+str(da_cycle).zfill(2)])
                     dir_weather_map_case = os.path.join(dir_weather_map, ref_case)
             
-                contour_var_filename = os.path.join(dir_weather_map_case, f"{contour_var}_{dom}.nc")
+                contour_var_filename = os.path.join(dir_weather_map_case, f"{contour_var}_{contour_var_level}_{dom}.nc")
                 contour_var_ncfile = Dataset(contour_var_filename)
                 contour_var_times = contour_var_ncfile.variables['time'][:]
-                contour_var_levels = contour_var_ncfile.variables['level'][:]
                 idt = np.where(contour_var_times == var_time)[0][0]
-                idl = np.where(contour_var_levels == contour_var_level)[0][0]
-                contour_var_value = contourf_var_ncfile.variables[contourf_var][idt,idl,:,:]
+                contour_var_value = contourf_var_ncfile.variables[contourf_var][idt,:,:]
                 contour_var_ncfile.close()
             
             if 'null' not in quiver_vars:
@@ -122,21 +119,17 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     ref_case = '_'.join([case_name, quiver_var_ref_exp_name, 'C'+str(da_cycle).zfill(2)])
                     dir_weather_map_case = os.path.join(dir_weather_map, ref_case)
             
-                quiver_var_1_filename = os.path.join(dir_weather_map_case, f"{quiver_var_1}_{dom}.nc")
+                quiver_var_1_filename = os.path.join(dir_weather_map_case, f"{quiver_var_1}_{quiver_var_level}_{dom}.nc")
                 quiver_var_1_ncfile = Dataset(quiver_var_1_filename)
                 quiver_var_1_times = quiver_var_1_ncfile.variables['time'][:]
-                quiver_var_1_levels = quiver_var_1_ncfile.variables['level'][:]
                 idt = np.where(quiver_var_1_times == var_time)[0][0]
-                idl = np.where(quiver_var_1_levels == quiver_var_level)[0][0]
-                quiver_var_1_value = quiver_var_1_ncfile.variables[quiver_var_1][idt,idl,:,:]
+                quiver_var_1_value = quiver_var_1_ncfile.variables[quiver_var_1][idt,:,:]
                 quiver_var_1_ncfile.close()
-                quiver_var_2_filename = os.path.join(dir_weather_map_case, f"{quiver_var_2}_{dom}.nc")
+                quiver_var_2_filename = os.path.join(dir_weather_map_case, f"{quiver_var_2}_{quiver_var_level}_{dom}.nc")
                 quiver_var_2_ncfile = Dataset(quiver_var_2_filename)
                 quiver_var_2_times = quiver_var_2_ncfile.variables['time'][:]
-                quiver_var_2_levels = quiver_var_2_ncfile.variables['level'][:]
                 idt = np.where(quiver_var_2_times == var_time)[0][0]
-                idl = np.where(quiver_var_2_levels == quiver_var_level)[0][0]
-                quiver_var_2_value = quiver_var_2_ncfile.variables[quiver_var_2][idt,idl,:,:]
+                quiver_var_2_value = quiver_var_2_ncfile.variables[quiver_var_2][idt,:,:]
                 quiver_var_2_ncfile.close()
 
             if region_type == 'd01': extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
@@ -177,13 +170,22 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
             fig_height = 2.75+0.75
             clb_aspect = 25*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
+            if projection == 'lcc': fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])-0.5
 
             with PdfPages(pdfname) as pdf:
 
                 fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
                 ax = axs
 
-                m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
+                if projection == 'cyl':
+                    m = Basemap(llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], \
+                                projection=projection, resolution='i', ax=ax)
+                elif projection == 'lcc':
+                    m = Basemap(llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], \
+                                projection=projection, lat_1=lat_1, lat_2=lat_2, lon_0=lon_0, resolution='i', ax=ax)
+                    m.drawmeridians(np.arange(-180, 181, 10), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                    m.drawparallels(np.arange(-90, 91, 10),   labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+
                 m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
                 mlon, mlat = m(lon, lat)
                 (contourf_information, contourf_levels) = set_variables(contourf_var)
@@ -219,40 +221,50 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                               width=0.0025, headwidth=5.0, headlength=7.5, \
                               color=quiver_var_color, scale=quiver_var_scale, scale_units='inches', zorder=1)
                 
+                
                 if region_type == 'd01' or region_type == 'd02':
-                    ax.set_xticks(np.arange(-180, 181, 10))
-                    ax.set_yticks(np.arange(-90, 91, 10))
-                    ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
-                    ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
-                    ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                    if projection == 'cyl':
+
+                        ax.set_xticks(np.arange(-180, 181, 10))
+                        ax.set_yticks(np.arange(-90, 91, 10))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                        ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                
+                    elif projection == 'lcc':
+                        ax.text(np.min(mlon), np.max(mlat), exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+
                 else:
-                    ax.plot([-180.0, 180.0], [bt_lat, bt_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                    ax.plot([bt_lon, bt_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                    
-                    lat_polar = np.zeros((len(radii), len(angles)))
-                    lon_polar = np.zeros((len(radii), len(angles)))
-                    for idr in range(0, len(radii)):
-                        for ida in range(0, len(angles)):
-                            lat_polar[idr,ida], lon_polar[idr,ida] = clatlon.Cal_LatLon(bt_lat, bt_lon, radii[idr], angles[ida])
-                        ax.plot(lon_polar[idr,:], lat_polar[idr,:], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                    
-                    if region_type == 'tc':
-                        ax.set_xticks(np.arange(-180, 181, 5))
-                        ax.set_yticks(np.arange(-90, 91, 5))
-                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
-                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
-                        ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
-                    if region_type == 'aew':
-                        ax.set_xticks(np.arange(-180, 181, 3))
-                        ax.set_yticks(np.arange(-90, 91, 3))
-                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
-                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
-                        ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                    if projection == 'cyl':
+                        ax.plot([-180.0, 180.0], [bt_lat, bt_lat], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                        ax.plot([bt_lon, bt_lon], [-90.0, 90.0],   '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    
+                        lat_polar = np.zeros((len(radii), len(angles)))
+                        lon_polar = np.zeros((len(radii), len(angles)))
+                        for idr in range(0, len(radii)):
+                            for ida in range(0, len(angles)):
+                                lat_polar[idr,ida], lon_polar[idr,ida] = clatlon.Cal_LatLon(bt_lat, bt_lon, radii[idr], angles[ida])
+                            ax.plot(lon_polar[idr,:], lat_polar[idr,:], '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    
+                        if region_type == 'tc':
+                            ax.set_xticks(np.arange(-180, 181, 5))
+                            ax.set_yticks(np.arange(-90, 91, 5))
+                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
+                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+                            ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
-                ax.tick_params('both', direction='in', labelsize=10.0)
-                ax.axis(extent)
-                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+                        if region_type == 'aew':
+                            ax.set_xticks(np.arange(-180, 181, 3))
+                            ax.set_yticks(np.arange(-90, 91, 3))
+                            ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
+                            ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
+                            ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+
+                if projection == 'cyl':
+                    ax.tick_params('both', direction='in', labelsize=10.0)
+                    ax.axis(extent)
+                    ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
                 if contourf_var_level == 9999:

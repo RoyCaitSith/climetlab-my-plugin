@@ -13,7 +13,7 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2020, 'name': 'LAURA'},
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
     'CMORPH_version': '8km-30min',
-    'GSMaP_version': '05A',
+    'GSMaP_version': '04G',
     'itime': (2020, 8, 24,  0, 0, 0),
     'forecast_hours': 48,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
