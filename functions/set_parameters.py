@@ -399,8 +399,8 @@ def set_variables(var):
         information = {}
         information.update({'name': 'QICE'})
         information.update({'unit': 'null'})
-        information.update({'lb_title': 'Inc. of ice MR ($\mathregular{10^{-3} gkg^{-1}}$)'})
-        information.update({'factor': 1000000.0})
+        information.update({'lb_title': 'Inc. of ice MR ($\mathregular{10^{-2} gkg^{-1}}$)'})
+        information.update({'factor': 100000.0})
         information.update({'extend': 'both'})
         information.update({'GFS': 'Ice water mixing ratio'})
         information.update({'ERA5': 'ciwc'})
