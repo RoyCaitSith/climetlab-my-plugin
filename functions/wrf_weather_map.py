@@ -6,7 +6,6 @@ import pandas as pd
 import cal_polar_to_latlon as clatlon
 import matplotlib.pyplot as plt
 import colormaps as cmaps
-from set_parameters import set_variables
 from datetime import datetime, timedelta
 from combine_and_show_images import combine_images_grid
 from mpl_toolkits.basemap import Basemap
@@ -20,7 +19,7 @@ from IPython.display import display
 
 def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         contourf_var, contourf_var_level,
-                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='ERA5', 
+                        contour_var='null', contour_var_level=9999, contour_var_ref_exp_name='ERA5',
                         contour_positive_clabel=False, contour_positive_levels=[0.75], contour_positive_color='w',
                         contour_negative_clabel=False, contour_negative_levels=[-0.75], contour_negative_color='w',
                         quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='ERA5',
@@ -42,13 +41,16 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
     (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
+    module = importlib.import_module(f"set_parameters_{data_library_name}")
+    set_variables = getattr(module, 'set_variables')
+
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
     dir_weather_map = os.path.join(dir_exp, 'weather_map')
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
     dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
-    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))   
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
 
     for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         
@@ -220,7 +222,6 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                               quiver_2_information['factor']*quiver_var_2_value[::quiver_var_space, ::quiver_var_space], \
                               width=0.0025, headwidth=5.0, headlength=7.5, \
                               color=quiver_var_color, scale=quiver_var_scale, scale_units='inches', zorder=1)
-                
                 
                 if region_type == 'd01' or region_type == 'd02':
                     if projection == 'cyl':

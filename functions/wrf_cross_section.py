@@ -7,7 +7,6 @@ import metpy.calc
 import numpy as np
 import matplotlib.pyplot as plt
 import colormaps as cmaps
-from set_parameters import set_variables
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords, interplevel, g_geoht, CoordPair, vertcross
@@ -49,8 +48,10 @@ def extract_cross_section(data_library_names, dir_cases, case_names, exp_names,
 
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
-        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        module = importlib.import_module(f"set_parameters_{data_library_name}")
+        set_variables = getattr(module, 'set_variables')
 
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
         dir_cross_section = os.path.join(dir_exp, 'cross_section')
         dir_data = os.path.join(dir_exp, 'data')
