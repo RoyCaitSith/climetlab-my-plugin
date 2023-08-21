@@ -245,6 +245,9 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     elif var == 'sp':
                                         GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='surface', level=0)[0]
                                         GFS_lat, GFS_lon = GFS_temp.latlons()
+                                    elif var == 'slp':
+                                        GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='meanSea', level=0)[0]
+                                        GFS_lat, GFS_lon = GFS_temp.latlons()
 
                                     GFS_lon[GFS_lon>180.0] = GFS_lon[GFS_lon>180.0] - 360.0
                                     GFS_index = (GFS_lat < np.array(lat[-1, -1]) + 15.0) & (GFS_lat > np.array(lat[0, 0]) - 15.0) & \
@@ -254,9 +257,10 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     GFS_lon_1d = GFS_lon[GFS_index]
 
                                     if var == 'wspd10':
-                                         GFS_temp_1d = np.sqrt(np.square(GFS_temp_u10.values[GFS_index]) + np.square(GFS_temp_v10.values[GFS_index]))
+                                        GFS_temp_1d = np.sqrt(np.square(GFS_temp_u10.values[GFS_index]) + np.square(GFS_temp_v10.values[GFS_index]))
                                     else:
                                         GFS_temp_1d = GFS_temp.values[GFS_index]
+                                    if var == 'slp': GFS_temp_1d = GFS_temp_1d/100.0
                                 else:
                                     GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='isobaricInhPa', level=specific_level)[0]
                                     GFS_lat, GFS_lon = GFS_temp.latlons()
@@ -322,6 +326,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     ERA5_temp_1d = ERA5_temp_1d+ERA5_coriolis_parameter
                                     ERA5_temp_1d = ERA5_temp_1d*100000.0
                                 if var == 'geopt': ERA5_temp_1d = ERA5_temp_1d/9.80665
+                                if var == 'slp': ERA5_temp_1d = ERA5_temp_1d/100.0
                                 ncfile_output.variables[var][idt,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
                                 ERA5_ncfile.close()
                         else:

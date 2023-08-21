@@ -152,6 +152,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         bt_lat = bt_lats[id_bt]
                         bt_lon = bt_lons[id_bt]
                         extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
+                        print(extent)
 
             if region_type == 'aew':
                 best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
@@ -185,8 +186,15 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 elif projection == 'lcc':
                     m = Basemap(llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], \
                                 projection=projection, lat_1=lat_1, lat_2=lat_2, lon_0=lon_0, resolution='i', ax=ax)
-                    m.drawmeridians(np.arange(-180, 181, 10), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
-                    m.drawparallels(np.arange(-90, 91, 10),   labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                    if region_type == 'd01' or region_type == 'd02':
+                        m.drawmeridians(np.arange(-180, 181, 10), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                        m.drawparallels(np.arange( -90,  91, 10), labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                    elif region_type == 'tc':
+                        m.drawmeridians(np.arange(-180, 181,  5), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                        m.drawparallels(np.arange( -90,  91,  5), labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                    elif region_type == 'aew':
+                        m.drawmeridians(np.arange(-180, 181,  3), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                        m.drawparallels(np.arange( -90,  91,  3), labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
 
                 m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
                 mlon, mlat = m(lon, lat)
@@ -224,8 +232,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                               color=quiver_var_color, scale=quiver_var_scale, scale_units='inches', zorder=1)
                 
                 if region_type == 'd01' or region_type == 'd02':
-                    if projection == 'cyl':
 
+                    if projection == 'cyl':
                         ax.set_xticks(np.arange(-180, 181, 10))
                         ax.set_yticks(np.arange(-90, 91, 10))
                         ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
@@ -233,7 +241,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 
                     elif projection == 'lcc':
-                        ax.text(np.min(mlon), np.max(mlat), exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+                        ax.text(m(extent[0], extent[3]), exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                 else:
 
@@ -254,18 +262,23 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                             ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
                             ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
                             ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
-
-                        if region_type == 'aew':
+                        elif region_type == 'aew':
                             ax.set_xticks(np.arange(-180, 181, 3))
                             ax.set_yticks(np.arange(-90, 91, 3))
                             ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
                             ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
                             ax.text(extent[0], extent[3], exp_name, ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
+                    ax.text(m(extent[0], extent[3])[0], m(extent[0], extent[3])[1], exp_name, \
+                            ha='left', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+
                 if projection == 'cyl':
                     ax.tick_params('both', direction='in', labelsize=10.0)
                     ax.axis(extent)
                     ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
                 if contourf_var_level == 9999:
