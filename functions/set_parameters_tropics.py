@@ -675,15 +675,15 @@ def set_variables(var):
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 6)], cmaps.prcp_2]})
 
-    if var == 'slp' or var == 'slp_anl':
+    if var == 'sp' or var == 'sp_anl':
         information = {}
-        information.update({'name': 'slp'})
-        information.update({'unit': 'hPa'})
-        information.update({'lb_title': 'Slp (hPa)'})
-        information.update({'factor': 1.0})
+        information.update({'name': 'PSFC'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Sp (hPa)'})
+        information.update({'factor': 0.01})
         information.update({'extend': 'max'})
-        information.update({'GFS': 'Mean sea level pressure'})
-        information.update({'ERA5': 'msl'})
+        information.update({'GFS': 'Surface pressure'})
+        information.update({'ERA5': 'sp'})
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
