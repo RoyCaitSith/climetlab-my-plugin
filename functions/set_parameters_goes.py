@@ -144,7 +144,7 @@ def set_variables(var):
         information.update({'ERA5': ['u10', 'v10']})
         
         levels = {}
-        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 33, 4)], cmaps.vik]})
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 3)], cmaps.wind_17lev]})
 
     if var == 't' or var == 't_anl':
         information = {}

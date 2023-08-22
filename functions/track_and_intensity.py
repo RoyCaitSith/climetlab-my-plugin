@@ -104,7 +104,8 @@ def compare_track_scheme(data_library_name, scheme):
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
     colors = compare_schemes[scheme]['colors']
@@ -231,7 +232,8 @@ def compare_intensity_scheme(data_library_name, scheme, variable):
     (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
     dir_save = compare_schemes[scheme]['dir_save']
     labels = compare_schemes[scheme]['labels']
     colors = compare_schemes[scheme]['colors']
@@ -369,7 +371,8 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
 
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
@@ -471,7 +474,8 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
 
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
@@ -573,7 +577,8 @@ def compare_averaged_RMSE_specific_time_each_cycle_scheme(data_library_name, sch
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
 
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
