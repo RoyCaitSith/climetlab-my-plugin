@@ -30,6 +30,32 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'ensemble_members': 80,
 }
 
+attributes[('/02_GOES_Bias_Correction/28_Ida', 'Ida')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/02_Ida/cycling_da/namelists',
+    'NHC_best_track': '2021_09L_Ida.csv',
+    'hwrf_header': 'hwrf.18x18.AL092021.2021082406',
+    'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2021, 'name': 'IDA'},
+    'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
+    'CMORPH_version': '8km-30min',
+    'GSMaP_version': '04G',
+    'itime': (2021, 8, 24,  0, 0, 0),
+    'forecast_hours': 48,
+    'dir_scratch': '/scratch/general/nfs1/u1237353',
+    'total_da_cycles': 12,
+    'time_window_max': 1.5,
+    'da_domains': ['d01'],
+    'forecast_domains': ['d01', 'd02'],
+    'GFDL_domains': ['d01'],
+    'wps_interval': 6,
+    'cycling_interval': 6,
+    'history_interval': 6,
+    'boundary_data_deterministic': 'GFS',
+    'boundary_data_ensemble': 'GFS',
+    'ensemble_members': 80,
+}
+
 compare_schemes['GOES_Laura_scheme_01'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'PB'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_08'), \
