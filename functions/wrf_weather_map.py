@@ -147,6 +147,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
                 else:
                     best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", f"{dom}.csv"]))
+                    if not os.path.exists(best_track):
+                        best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'd01.csv']))
 
                 df = pd.read_csv(best_track)
                 bt_lats = list(df['LAT'][:])
