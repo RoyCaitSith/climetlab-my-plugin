@@ -269,23 +269,24 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
                         ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
 
-                cross_h_lons = np.arange(-180.0, 180.1, 1.0)
-                cross_h_lats = np.array([bt_lat]*len(cross_h_lons))
-                cross_v_lats = np.arange(-90.0, 90.1, 1.0)
-                cross_v_lons = np.array([bt_lon]*len(cross_v_lats))
-                m_cross_h_lons, m_cross_h_lats = m(cross_h_lons, cross_h_lats)
-                m_cross_v_lons, m_cross_v_lats = m(cross_v_lons, cross_v_lats)
+                if region_type == 'tc' or region_type == 'aew':
+                    cross_h_lons = np.arange(-180.0, 180.1, 1.0)
+                    cross_h_lats = np.array([bt_lat]*len(cross_h_lons))
+                    cross_v_lats = np.arange(-90.0, 90.1, 1.0)
+                    cross_v_lons = np.array([bt_lon]*len(cross_v_lats))
+                    m_cross_h_lons, m_cross_h_lats = m(cross_h_lons, cross_h_lats)
+                    m_cross_v_lons, m_cross_v_lats = m(cross_v_lons, cross_v_lats)
 
-                ax.plot(m_cross_h_lons, m_cross_h_lats, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
-                ax.plot(m_cross_v_lons, m_cross_v_lats, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    ax.plot(m_cross_h_lons, m_cross_h_lats, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    ax.plot(m_cross_v_lons, m_cross_v_lats, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                     
-                lat_polar = np.zeros((len(radii), len(angles)))
-                lon_polar = np.zeros((len(radii), len(angles)))
-                for idr in range(0, len(radii)):
-                    for ida in range(0, len(angles)):
-                        lat_polar[idr,ida], lon_polar[idr,ida] = clatlon.Cal_LatLon(bt_lat, bt_lon, radii[idr], angles[ida])
-                    (m_lon_polar, m_lat_polar) = m(lon_polar[idr,:], lat_polar[idr,:])
-                    ax.plot(m_lon_polar, m_lat_polar, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
+                    lat_polar = np.zeros((len(radii), len(angles)))
+                    lon_polar = np.zeros((len(radii), len(angles)))
+                    for idr in range(0, len(radii)):
+                        for ida in range(0, len(angles)):
+                            lat_polar[idr,ida], lon_polar[idr,ida] = clatlon.Cal_LatLon(bt_lat, bt_lon, radii[idr], angles[ida])
+                        (m_lon_polar, m_lat_polar) = m(lon_polar[idr,:], lat_polar[idr,:])
+                        ax.plot(m_lon_polar, m_lat_polar, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                 
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])

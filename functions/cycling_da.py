@@ -347,6 +347,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_gefs_wrf_ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
+    dir_gfs_ensemble = os.path.join(dir_data, 'GFS_Ensemble')
     dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
     dir_dawn = os.path.join(dir_data, 'DAWN')
@@ -364,7 +365,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     os.makedirs(dir_option, exist_ok=True)
 
     option_filelist = ['anavinfo_arw_netcdf_glbe', 'cloudy_radiance_info.txt', 'comgsi_namelist.sh', 'comgsi_satbias_in', 'comgsi_satbias_pc_in', \
-                       'global_convinfo.txt', 'global_satinfo.txt', 'gsi.x', 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
+                       'global_convinfo.txt', 'global_satinfo.txt', f"gsi.x.{exp_name}", 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
                        'read_diag_conv.x', 'read_diag_rad_anl.x', 'read_diag_rad_ges_jacobian.x', 'read_diag_rad_ges.x', 'run_gsi.sh', 'run_GSI.sh']
     print(f"Copy files to dir_option")
     for option_file in option_filelist:
@@ -373,7 +374,9 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     initial_time = datetime(*itime)
     initial_time_YYYYMMDDHH = initial_time.strftime('%Y%m%d%H')
     time_last = initial_time
-    time_last_YYYYMMDDHH = initial_time_YYYYMMDDHH
+    time_last_YYYYMMDDHH = time_last.strftime('%Y%m%d%H')
+    time_last_YYYYMMDD = time_last.strftime('%Y%m%d')
+    time_last_HH = time_last.strftime('%H')
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='DA Cycle', unit="files", bar_format="{desc}: {n}/{total} DA Cycles | {elapsed}<{remaining}"):
 
@@ -420,6 +423,12 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 if boundary_data_ensemble == 'GEFS':
                     for idens in range(1, int(ensemble_members+1)):
                         os.system(f"ln -sf {dir_gefs_wrf_ensemble}/{time_now_YYYYMMDD}/{time_now_HH}/wrfout_{dom}_{str(idens).zfill(3)} {ens_dir}/wrf_en{str(idens).zfill(3)}")
+                elif boundary_data_ensemble == 'GFS':
+                    for idens in range(1, int(ensemble_members+1)):
+                        os.system(f"ln -sf {dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/mem{str(idens).zfill(3)}/gdas.t{time_last_HH}z.atmf006.nc {ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}")
+
+                print(f"Copy gsi.x.exp_name to gsi.x")
+                os.system(f"cp {dir_option}/gsi.x.{exp_name} {dir_option}/gsi.x")
 
                 print(f"Copy, revise, and the script of running gsi at {time_now_YYYYMMDDHH}")
                 run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))
@@ -461,6 +470,8 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
         time_last = time_now
         time_now = time_now + timedelta(hours = cycling_interval)
         time_last_YYYYMMDDHH = time_last.strftime('%Y%m%d%H')
+        time_last_YYYYMMDD = time_last.strftime('%Y%m%d')
+        time_last_HH = time_last.strftime('%H')
         time_now_YYYYMMDDHH  = time_now.strftime('%Y%m%d%H')
 
         #Run WRF
