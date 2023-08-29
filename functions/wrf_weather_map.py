@@ -251,24 +251,6 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     index = (lon >= extent[0]) & (lon <= extent[1]) & (lat >= extent[2]) & (lat <= extent[3])
                     tc_information += f"{float(np.nanmin(contour_var_value[index])):.0f} hPa, {float(np.nanmax(contourf_var_value[index])):.0f} " + '$\mathregular{ms^{-1}}$'
 
-                if projection == 'cyl':
-                    ax.axis(extent)
-                    if region_type == 'd01' or region_type == 'd02':
-                        ax.set_xticks(np.arange(-180, 181, 10))
-                        ax.set_yticks(np.arange(-90, 91, 10))
-                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
-                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
-                    elif region_type == 'tc':
-                        ax.set_xticks(np.arange(-180, 181, 5))
-                        ax.set_yticks(np.arange(-90, 91, 5))
-                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
-                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
-                    elif region_type == 'aew':
-                        ax.set_xticks(np.arange(-180, 181, 3))
-                        ax.set_yticks(np.arange(-90, 91, 3))
-                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
-                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
-
                 if region_type == 'tc' or region_type == 'aew':
                     cross_h_lons = np.arange(-180.0, 180.1, 1.0)
                     cross_h_lats = np.array([bt_lat]*len(cross_h_lons))
@@ -288,15 +270,33 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         (m_lon_polar, m_lat_polar) = m(lon_polar[idr,:], lat_polar[idr,:])
                         ax.plot(m_lon_polar, m_lat_polar, '--', color=grayC_cm_data[53], linewidth=0.5, zorder=3)
                 
-                ax.tick_params('both', direction='in', labelsize=10.0)
-                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-
                 if region_type == 'tc' and tc_info:
                     ax.text(m(extent[1], extent[3])[0], m(extent[1], extent[3])[1], f"{exp_name}: {tc_information}", \
                             ha='right', va='top', color='k', fontsize=5.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
                 else:
                     ax.text(m(extent[1], extent[3])[0], m(extent[1], extent[3])[1], exp_name, \
                             ha='right', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+
+                if projection == 'cyl':
+                    if region_type == 'd01' or region_type == 'd02':
+                        ax.set_xticks(np.arange(-180, 181, 10))
+                        ax.set_yticks(np.arange(-90, 91, 10))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                    elif region_type == 'tc':
+                        ax.set_xticks(np.arange(-180, 181, 5))
+                        ax.set_yticks(np.arange(-90, 91, 5))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 5)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  5)])
+                    elif region_type == 'aew':
+                        ax.set_xticks(np.arange(-180, 181, 3))
+                        ax.set_yticks(np.arange(-90, 91, 3))
+                        ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 3)])
+                        ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  3)])
+                    ax.axis(extent)
+
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
                 if contourf_var_level == 9999:
