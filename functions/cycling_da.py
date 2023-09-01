@@ -153,6 +153,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
     os.makedirs(dir_GFS, exist_ok=True)
 
     # I do not need to set the directories of these files
+    specific_case_name = f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}"
+    dir_namelists      = os.path.join(dir_namelists, specific_case_name)
     namelist_wps_dir   = os.path.join(dir_namelists, 'namelist.wps')
     namelist_input_dir = os.path.join(dir_namelists, 'namelist.input')
     run_wps_dir        = os.path.join(dir_namelists, 'run_wps.sh')
@@ -345,14 +347,16 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     ensemble_members = attributes[(dir_case, case_name)]['ensemble_members']
     dir_namelists = attributes[(dir_case, case_name)]['dir_namelists']
 
+    specific_case_name = f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}"
+    dir_namelists = os.path.join(dir_namelists, specific_case_name)
     dir_data = os.path.join(dir_exp, 'data')
     dir_gefs_wrf_ensemble = os.path.join(dir_data, 'GEFS_WRF_Ensemble')
     dir_gfs_ensemble = os.path.join(dir_data, 'GFS_Ensemble')
-    dir_cycling_da = os.path.join(dir_exp, 'cycling_da', f"{case_name}_{exp_name}_C{str(total_da_cycles).zfill(2)}")
+    dir_cycling_da = os.path.join(dir_exp, 'cycling_da', specific_case_name)
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
     dir_dawn = os.path.join(dir_data, 'DAWN')
     dir_halo = os.path.join(dir_data, 'HALO')
-    dir_scratch_case = os.path.join(dir_scratch, '_'.join([case_name, f"{exp_name}_C{str(total_da_cycles).zfill(2)}"]))
+    dir_scratch_case = os.path.join(dir_scratch, specific_case_name)
 
     dir_da = os.path.join(dir_cycling_da, 'da')
     dir_bkg = os.path.join(dir_cycling_da, 'bkg')
@@ -365,7 +369,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     os.makedirs(dir_option, exist_ok=True)
 
     option_filelist = ['anavinfo_arw_netcdf_glbe', 'cloudy_radiance_info.txt', 'comgsi_namelist.sh', 'comgsi_satbias_in', 'comgsi_satbias_pc_in', \
-                       'global_convinfo.txt', 'global_satinfo.txt', f"gsi.x.{exp_name}", 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
+                       'global_convinfo.txt', 'global_satinfo.txt', 'gsi.x', 'namelist.conv', 'namelist.rad', 'prepobs_errtable.global', \
                        'read_diag_conv.x', 'read_diag_rad_anl.x', 'read_diag_rad_ges_jacobian.x', 'read_diag_rad_ges.x', 'run_gsi.sh', 'run_GSI.sh']
     print(f"Copy files to dir_option")
     for option_file in option_filelist:
@@ -426,9 +430,6 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 elif boundary_data_ensemble == 'GFS':
                     for idens in range(1, int(ensemble_members+1)):
                         os.system(f"ln -sf {dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/mem{str(idens).zfill(3)}/gdas.t{time_last_HH}z.atmf006.nc {ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}")
-
-                print(f"Copy gsi.x.exp_name to gsi.x")
-                os.system(f"cp {dir_option}/gsi.x.{exp_name} {dir_option}/gsi.x")
 
                 print(f"Copy, revise, and the script of running gsi at {time_now_YYYYMMDDHH}")
                 run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))
