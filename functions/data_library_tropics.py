@@ -28,6 +28,7 @@ attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'dir_IMERG': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/IMERG',
     'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
 }
+
 attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'itime': (2021, 8, 26,  0, 0, 0),
     'forecast_hours': 78,
@@ -52,6 +53,7 @@ attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'dir_IMERG': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/Data/IMERG',
     'dir_ScientificColourMaps7': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps/ScientificColourMaps7',
 }
+
 compare_schemes['TROPICS_Ida_scheme_01'] = {
     'cases': [('/05_TROPICS/05_cycling_da', 'Ida', 'CONTROL'), \
               ('/05_TROPICS/05_cycling_da', 'Ida', 'TROPICS_Q_ENS'), \
