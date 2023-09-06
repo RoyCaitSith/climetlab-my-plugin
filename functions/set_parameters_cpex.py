@@ -688,5 +688,18 @@ def set_variables(var):
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+
+    if var == 'slp' or var == 'slp_anl':
+        information = {}
+        information.update({'name': 'slp'})
+        information.update({'unit': 'hPa'})
+        information.update({'lb_title': 'SLP (hPa)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'max'})
+        information.update({'GFS': 'Pressure reduced to MSL'})
+        information.update({'ERA5': 'msl'})
+        
+        levels = {}
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
     
     return (information, levels)

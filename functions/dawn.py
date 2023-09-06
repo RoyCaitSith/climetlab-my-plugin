@@ -208,8 +208,10 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_DAWN = os.path.join(dir_data, 'DAWN')
+    dir_DAWN_bufr = os.path.join(dir_DAWN, 'bufr')
     dir_DAWN_bufr_temp = os.path.join(dir_DAWN, 'bufr_temp')
     os.makedirs(dir_DAWN, exist_ok=True)
+    os.makedirs(dir_DAWN_bufr, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -217,11 +219,11 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
 
-        dir_DAWN_bufr = os.path.join(dir_DAWN, anl_end_time_YYYYMMDD)
-        file_DAWN_bufr = os.path.join(dir_DAWN_bufr, f"gdas.t{anl_end_time_HH}z.dawn.tm00.bufr_d")
+        dir_bufr = os.path.join(dir_DAWN_bufr, anl_end_time_YYYYMMDD)
+        file_bufr = os.path.join(dir_bufr, f"gdas.t{anl_end_time_HH}z.dawn.tm00.bufr_d")
         dir_fortran = os.path.join(dir_DAWN, 'fortran_files')
         file_fortran_bufr = os.path.join(dir_fortran, 'gdas.dawn.bufr')
-        os.makedirs(dir_DAWN_bufr, exist_ok=True)
+        os.makedirs(dir_bufr, exist_ok=True)
         os.system(f"rm -rf {file_fortran_bufr}")
 
         print('Check bufr_temp: ')
@@ -260,7 +262,7 @@ def create_DAWN_bufr(data_library_name, dir_case, case_name):
                         file_size = file_size_next
                 print(file_size)
 
-            os.system(f"mv {file_fortran_bufr} {file_DAWN_bufr}")
+            os.system(f"mv {file_fortran_bufr} {file_bufr}")
 
 def wrf_extract_DAWN(data_library_names, dir_cases, case_names, exp_names):
 

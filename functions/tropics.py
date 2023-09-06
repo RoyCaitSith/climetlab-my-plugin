@@ -1,4 +1,6 @@
 import os
+import re
+import time
 import glob
 import netCDF4
 import importlib
@@ -17,7 +19,7 @@ from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 
-def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
+def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2_SEA_AS'):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -30,10 +32,10 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
     dir_data = os.path.join(dir_exp, 'data')
-    dir_DAWN = os.path.join(dir_data, 'DAWN')
-    dir_DAWN_bufr_temp = os.path.join(dir_DAWN, 'bufr_temp')
-    os.makedirs(dir_DAWN, exist_ok=True)
-    os.makedirs(dir_DAWN_bufr_temp, exist_ok=True)
+    dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
+    dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+    os.makedirs(dir_TROPICS, exist_ok=True)
+    os.makedirs(dir_TROPICS_bufr_temp, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -42,13 +44,14 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
         time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
+        print(anl_end_time)
 
-        dir_bufr_temp = os.path.join(dir_DAWN_bufr_temp, anl_end_time_YYYYMMDD)
+        dir_bufr_temp = os.path.join(dir_TROPICS_bufr_temp, anl_end_time_YYYYMMDD)
         os.makedirs(dir_bufr_temp, exist_ok=True)
         dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
         os.system(f"rm -rf {dir_bufr_temp}")
         os.makedirs(dir_bufr_temp, exist_ok=True)
-        filenames = os.popen(f"ls {dir_DAWN}/*DAWN*.nc")
+        filenames = os.popen(f"ls {dir_TROPICS}/TROPICS01*.nc")
         n_total_data = 0
         YEAR = []
         MNTH = []
@@ -62,102 +65,149 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
         CLON = []
         PRLC = []
         GP10 = []
+        QMAT = []
+        TMDB = []
+        QMDD = []
+        SPFH = []
+        REHU = []
         QMWN = []
         WDIR = []
         WSPD = []
         PKWDSP = []
 
-        for file_DAWN in filenames:
-            date = re.search(r"\d{8}", file_DAWN).group()
-            initial_time = datetime.strptime(date, "%Y%m%d")
-            time_s_hours = (time_s - initial_time).total_seconds()/3600.0
-            time_e_hours = (time_e - initial_time).total_seconds()/3600.0
+        for file_TROPICS in filenames:
+                            
+            pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
+            pattern_match = re.search(pattern, file_TROPICS)
+            date_st_str = pattern_match.group(1)
+            date_et_str = pattern_match.group(2)
+            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
 
-            if 'CV' in dir_case:
-                ncfile = Dataset(file_DAWN.rstrip('\n'))
-                altitude = np.arange(-0.015, 12.980, 0.030)*1000.0
-                (n_loc, n_hgt) = ncfile.variables['smoothed_Wind_Speed'][:, :].shape
+            if date_st <= time_e and date_et >= time_s:
 
-                DAWN_latitude = np.transpose(np.tile(ncfile.variables['lat'][:], (n_hgt, 1))).flatten('F')
-                DAWN_longitude = np.transpose(np.tile(ncfile.variables['lon'][:], (n_hgt, 1))).flatten('F')
-                DAWN_time = np.transpose(np.tile(ncfile.groups['Date_Time'].variables['Profile_Time'][:], (n_hgt, 1))).flatten('F')
-                DAWN_year = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_mnth = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_days = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_hour = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_minu = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_seco = np.zeros(n_loc*n_hgt, dtype=int)
-                DAWN_mcse = np.zeros(n_loc*n_hgt, dtype=int)
-                for idd, dtime in enumerate(DAWN_time):
-                    DAWN_year[idd] = (initial_time + timedelta(hours = dtime)).year
-                    DAWN_mnth[idd] = (initial_time + timedelta(hours = dtime)).month
-                    DAWN_days[idd] = (initial_time + timedelta(hours = dtime)).day
-                    DAWN_hour[idd] = (initial_time + timedelta(hours = dtime)).hour
-                    DAWN_minu[idd] = (initial_time + timedelta(hours = dtime)).minute
-                    DAWN_seco[idd] = (initial_time + timedelta(hours = dtime)).second
-                    DAWN_mcse[idd] = (initial_time + timedelta(hours = dtime)).microsecond
-                    DAWN_seco[idd] = DAWN_seco[idd] + DAWN_mcse[idd]/1000000.0
-                DAWN_altitude = np.tile(altitude, (n_loc, 1)).flatten('F')
-                DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
-                DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
-                DAWN_wind_direction = np.array(ncfile.variables['smoothed_Wind_Direction'][:, :].flatten('F'))
-                DAWN_wind_speed = np.array(ncfile.variables['smoothed_Wind_Speed'][:, :].flatten('F'))
-                DAWN_qc_flag = np.array(ncfile.groups['Data_Quality'].variables['QC_flag'][:,:].flatten('F'))
-                DAWN_ac_roll = np.abs(np.transpose(np.tile(ncfile.groups['Nav_Data'].variables['AC_Roll'][:], (n_hgt, 1))).flatten('F'))
-                ncfile.close()
+                if 'V1' in version:
 
-                index = ~np.isnan(DAWN_wind_speed) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
-                        (DAWN_qc_flag != 1) & (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
+                    ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
+                    (n_scans, n_spots, n_vertical_levels) = ncfile.variables['PTemp'][:,:,:].shape
+                    n_data = n_vertical_levels*n_scans*n_spots
+                    print(file_TROPICS.rstrip('\n'))
 
-            if 'AW' in dir_case:
-                ncfile = Dataset(file_DAWN.rstrip('\n'))
-                altitude = np.arange(np.min(ncfile.variables['Profile_Altitude'][:]), np.max(ncfile.variables['Profile_Altitude'][:])+0.001, 0.033)*1000.0
-                n_loc = len(ncfile.variables['Profile_Latitude'][:])
-                n_hgt = len(ncfile.variables['Profile_Altitude'][:])
+                    TROPICS_YEAR = np.transpose(np.tile(ncfile.variables['ScanTime_year'][:],   (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_MNTH = np.transpose(np.tile(ncfile.variables['ScanTime_month'][:],  (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_DAYS = np.transpose(np.tile(ncfile.variables['ScanTime_dom'][:],    (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_HOUR = np.transpose(np.tile(ncfile.variables['ScanTime_hour'][:],   (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_MINU = np.transpose(np.tile(ncfile.variables['ScanTime_minute'][:], (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_SECO = np.transpose(np.tile(ncfile.variables['ScanTime_second'][:], (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
+                    TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
+                    TROPICS_CLAT = np.transpose(np.tile(np.transpose(ncfile.variables['Latitude'][:,:]), (n_vertical_levels, 1, 1))).flatten()
+                    TROPICS_Longitude = ncfile.variables['Longitude'][:,:]
+                    TROPICS_Longitude[TROPICS_Longitude<0] = TROPICS_Longitude[TROPICS_Longitude<0] + 360.0
+                    TROPICS_CLON = np.transpose(np.tile(np.transpose(TROPICS_Longitude), (n_vertical_levels, 1, 1))).flatten()
+                    TROPICS_PRLC = np.tile(ncfile.variables['Player'][:]*100.0, (n_scans, n_spots, 1)).flatten()
+                    TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_QMAT = np.full((n_data), 2, dtype='int')
+                    TROPICS_TMDB = ncfile.variables['PTemp'][:,:,:].flatten()
+                    TROPICS_QMDD = np.full((n_data), 2, dtype='int')
+                    TROPICS_SPFH = (ncfile.variables['PVapor'][:,:,:].flatten()/1000.0)/(ncfile.variables['PVapor'][:,:,:].flatten()/1000.0+1.0)
+                    TROPICS_es = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
+                    TROPICS_ws = 0.622*TROPICS_es/(TROPICS_PRLC/100.0)
+                    TROPICS_REHU = 100.0*ncfile.variables['PVapor'][:,:,:].flatten()/1000.0/TROPICS_ws
+                    TROPICS_QMWN = np.full((n_data), 2, dtype='int')
+                    TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
 
-                DAWN_latitude = np.tile(ncfile.variables['Profile_Latitude'][:], (n_hgt, 1)).flatten('F')
-                DAWN_longitude = np.tile(ncfile.variables['Profile_Longitude'][:], (n_hgt, 1)).flatten('F')
-                DAWN_time = np.tile(ncfile.variables['Profile_Time'][:], (n_hgt, 1)).flatten('F')
-                DAWN_year = np.array([(initial_time + timedelta(hours = d)).year for d in DAWN_time], dtype='int64')
-                DAWN_mnth = np.array([(initial_time + timedelta(hours = d)).month for d in DAWN_time], dtype='int64')
-                DAWN_days = np.array([(initial_time + timedelta(hours = d)).day for d in DAWN_time], dtype='int64')
-                DAWN_hour = np.array([(initial_time + timedelta(hours = d)).hour for d in DAWN_time], dtype='int64')
-                DAWN_minu = np.array([(initial_time + timedelta(hours = d)).minute for d in DAWN_time], dtype='int64')
-                DAWN_seco = np.array([(initial_time + timedelta(hours = d)).second for d in DAWN_time])
-                DAWN_mcse = np.array([(initial_time + timedelta(hours = d)).microsecond for d in DAWN_time])
-                DAWN_seco = DAWN_seco + DAWN_mcse/1000000.0
-                DAWN_altitude = np.transpose(np.tile(altitude, (n_loc, 1))).flatten('F')
-                DAWN_geopotential = np.array(metpy.calc.height_to_geopotential(DAWN_altitude*units.m))
-                DAWN_pressure = np.array(metpy.calc.height_to_pressure_std(DAWN_altitude*units.m))*100.0
-                DAWN_wind_direction = ncfile.variables['Wind_Direction'][:,:].flatten('F')
-                DAWN_wind_speed = ncfile.variables['Wind_Speed'][:,:].flatten('F')
-                DAWN_ac_roll = np.abs(np.tile(ncfile.variables['AC_Roll'][:], (n_hgt, 1))).flatten('F')
-                ncfile.close()
+                    Bad_Qual_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,0]), (n_vertical_levels, 1, 1))).flatten()
+                    Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,1]), (n_vertical_levels, 1, 1))).flatten()
 
-                index = (~DAWN_wind_speed.mask) & (DAWN_time >= time_s_hours) & (DAWN_time < time_e_hours) & \
-                        (DAWN_ac_roll <= 3) & (DAWN_altitude > 15)
+                    if 'SEA' in version and 'AS' in version:
+                        index = (Bad_Qual_Flag < 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
 
-            n_data = sum(index==True)
-            if n_data > 0:
+                elif 'V2' in version:
+                
+                    ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
+                    (n_vertical_levels, n_scans, n_spots) = ncfile.variables['t'][:,:,:].shape
+                    n_data = n_vertical_levels*n_scans*n_spots
+                    print(file_TROPICS.rstrip('\n'))
 
-                n_total_data += n_data
-                YEAR += DAWN_year[index].tolist()
-                MNTH += DAWN_mnth[index].tolist()
-                DAYS += DAWN_days[index].tolist()
-                HOUR += DAWN_hour[index].tolist()
-                MINU += DAWN_minu[index].tolist()
-                SECO += DAWN_seco[index].tolist()
-                QHDOP += np.full((n_data), 0, dtype='int').tolist()
-                QHDOM += np.full((n_data), 0, dtype='int').tolist()
-                CLAT += DAWN_latitude[index].tolist()
-                CLON += DAWN_longitude[index].tolist()
-                PRLC += DAWN_pressure[index].tolist()
-                GP10 += DAWN_geopotential[index].tolist()
-                QMWN += np.full((n_data), 2, dtype='int').tolist()
-                WDIR += DAWN_wind_direction[index].tolist()
-                WSPD += DAWN_wind_speed[index].tolist()
-                PKWDSP += np.full((n_data), 0.0, dtype='float64').tolist()
+                    TROPICS_YEAR = np.tile(np.transpose(np.tile(ncfile.variables['Year'][:],   (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_MNTH = np.tile(np.transpose(np.tile(ncfile.variables['Month'][:],  (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_DAYS = np.tile(np.transpose(np.tile(ncfile.variables['Day'][:],    (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_HOUR = np.tile(np.transpose(np.tile(ncfile.variables['Hour'][:],   (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_MINU = np.tile(np.transpose(np.tile(ncfile.variables['Minute'][:], (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_SECO = np.tile(np.transpose(np.tile(ncfile.variables['Second'][:], (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
+                    TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
+                    TROPICS_CLAT = np.tile(ncfile.variables['losLat_deg'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_Longitude = ncfile.variables['losLon_deg'][:,:]
+                    TROPICS_Longitude[TROPICS_Longitude<0] = TROPICS_Longitude[TROPICS_Longitude<0] + 360.0
+                    TROPICS_CLON = np.tile(TROPICS_Longitude, (n_vertical_levels, 1, 1)).flatten()
+                    TROPICS_PRLC = (ncfile.variables['press'][:,:,:]*100.0).flatten()
+                    TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_QMAT = np.full((n_data), 1, dtype='int')
+                    TROPICS_TMDB = ncfile.variables['t'][:,:,:].flatten()
+                    TROPICS_QMDD = np.full((n_data), 1, dtype='int')
+                    TROPICS_SPFH = ncfile.variables['q'][:,:,:].flatten()/(ncfile.variables['q'][:,:,:].flatten()+1.0)
+                    TROPICS_es = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
+                    TROPICS_ws = 0.622*TROPICS_es/(TROPICS_PRLC/100.0)
+                    TROPICS_REHU = 100.0*ncfile.variables['q'][:,:,:].flatten()/TROPICS_ws
+                    TROPICS_QMWN = np.full((n_data), 2, dtype='int')
+                    TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_LEVEL = np.transpose(np.tile(range(n_vertical_levels), (n_spots, n_scans, 1))).flatten()
 
+                    #Quality Control
+                    Bad_Scan_Flag = np.tile(ncfile.variables['bad_scan_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    Bad_Latlon = np.tile(ncfile.variables['bad_latlon'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    Bad_CalQual_Flag = np.tile(ncfile.variables['bad_calQual_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    Lat_Region = np.tile(ncfile.variables['lat_region'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    Land_Flag = np.tile(ncfile.variables['land_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    Process = np.tile(ncfile.variables['process'][:,:], (n_vertical_levels, 1, 1)).flatten()
+
+                    if 'SEA' in version and 'AS' in version:
+                        index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & \
+                                (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+
+                n_data = sum(index==True)
+                print(n_data)
+                if n_data > 0:
+                    n_total_data += n_data
+                    YEAR   += TROPICS_YEAR[index].tolist()
+                    MNTH   += TROPICS_MNTH[index].tolist()
+                    DAYS   += TROPICS_DAYS[index].tolist()
+                    HOUR   += TROPICS_HOUR[index].tolist()
+                    MINU   += TROPICS_MINU[index].tolist()
+                    SECO   += TROPICS_SECO[index].tolist()
+                    QHDOP  += TROPICS_QHDOP[index].tolist()
+                    QHDOM  += TROPICS_QHDOM[index].tolist()
+                    CLAT   += TROPICS_CLAT[index].tolist()
+                    CLON   += TROPICS_CLON[index].tolist()
+                    PRLC   += TROPICS_PRLC[index].tolist()
+                    GP10   += TROPICS_GP10[index].tolist()
+                    QMAT   += TROPICS_QMAT[index].tolist()
+                    TMDB   += TROPICS_TMDB[index].tolist()
+                    QMDD   += TROPICS_QMDD[index].tolist()
+                    SPFH   += TROPICS_SPFH[index].tolist()
+                    REHU   += TROPICS_REHU[index].tolist()
+                    QMWN   += TROPICS_QMWN[index].tolist()
+                    WDIR   += TROPICS_WDIR[index].tolist()
+                    WSPD   += TROPICS_WSPD[index].tolist()
+                    PKWDSP += TROPICS_PKWDSP[index].tolist()
+                    
+                    # print('TMDB')
+                    # print(len(TMDB))
+                    # non_numeric_values = []
+                    # non_numeric_values_index = []
+                    # for idt, item in enumerate(TMDB):
+                    #     if not isinstance(item, (int, float)):
+                    #         non_numeric_values.append(item)
+                    #         non_numeric_values_index.append(idt)
+                    # print('Non-Numeric Values: ', non_numeric_values)
+                    # print('Non-Numeric Values Index: ', non_numeric_values_index)
+        
         with open(os.path.join(dir_bufr_temp,  '1.txt'), 'ab') as f:
             np.savetxt(f, YEAR)
         with open(os.path.join(dir_bufr_temp,  '2.txt'), 'ab') as f:
@@ -183,16 +233,201 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name, version):
         with open(os.path.join(dir_bufr_temp, '12.txt'), 'ab') as f:
             np.savetxt(f, GP10)
         with open(os.path.join(dir_bufr_temp, '13.txt'), 'ab') as f:
-            np.savetxt(f, QMWN)
+            np.savetxt(f, QMAT)
         with open(os.path.join(dir_bufr_temp, '14.txt'), 'ab') as f:
-            np.savetxt(f, WDIR)
+            np.savetxt(f, TMDB)
         with open(os.path.join(dir_bufr_temp, '15.txt'), 'ab') as f:
-            np.savetxt(f, WSPD)
+            np.savetxt(f, QMDD)
         with open(os.path.join(dir_bufr_temp, '16.txt'), 'ab') as f:
+            np.savetxt(f, SPFH)
+        with open(os.path.join(dir_bufr_temp, '17.txt'), 'ab') as f:
+            np.savetxt(f, REHU)
+        with open(os.path.join(dir_bufr_temp, '18.txt'), 'ab') as f:
+            np.savetxt(f, QMWN)
+        with open(os.path.join(dir_bufr_temp, '19.txt'), 'ab') as f:
+            np.savetxt(f, WDIR)
+        with open(os.path.join(dir_bufr_temp, '20.txt'), 'ab') as f:
+            np.savetxt(f, WSPD)
+        with open(os.path.join(dir_bufr_temp, '21.txt'), 'ab') as f:
             np.savetxt(f, PKWDSP)
         np.savetxt(os.path.join(dir_bufr_temp, '0.txt'), [n_total_data])
+        print('\n')
 
-def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, cygnss_exp_name):
+def create_TROPICS_bufr(data_library_name, dir_case, case_name, version='V2_SEA_AS'):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
+    dir_TROPICS_bufr = os.path.join(dir_TROPICS, 'bufr')
+    dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+    os.makedirs(dir_TROPICS, exist_ok=True)
+    os.makedirs(dir_TROPICS_bufr, exist_ok=True)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
+        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
+        anl_end_time_HH = anl_end_time.strftime('%H')
+
+        dir_bufr = os.path.join(dir_TROPICS_bufr, anl_end_time_YYYYMMDD)
+        file_bufr = os.path.join(dir_bufr, f"gdas.t{anl_end_time_HH}z.tropics.tm00.bufr_d")
+        dir_fortran = os.path.join(dir_TROPICS, 'fortran_files')
+        file_fortran_bufr = os.path.join(dir_fortran, 'gdas.tropics.bufr')
+        os.makedirs(dir_bufr, exist_ok=True)
+        os.system(f"rm -rf {file_fortran_bufr}")
+
+        print('Check bufr_temp: ')
+        flag = True
+        info = os.popen(f"cd {dir_TROPICS_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH} && ls ./*.txt").readlines()
+        if len(info) != 22:
+            flag = False
+        print(len(info))
+        print(flag)
+
+        if flag:
+
+            fdata = ''
+            with open(f"{dir_fortran}/bufr_encode_tropics.f90", 'r') as f:
+                for line in f.readlines():
+                    if(line.find('idate = ') == 4): line = f"    idate = {anl_end_time_YYYYMMDD}{anl_end_time_HH}\n"
+                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_TROPICS_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH}/'\n"
+                    fdata += line
+            f.close()
+
+            with open(f"{dir_fortran}/bufr_encode_tropics.f90", 'w') as f:
+                f.writelines(fdata)
+            f.close()
+
+            os.popen(f"cd {dir_fortran} && ./run_encode_tropics.sh > log_out")
+            flag = True
+            file_size = 0
+            while flag:
+                time.sleep(5)
+                file_size_temp = os.popen(f"stat -c '%s' {file_fortran_bufr}").read()
+                if file_size_temp:
+                    file_size_next = int(file_size_temp)
+                    if file_size_next == file_size:
+                        flag = False
+                    else:
+                        file_size = file_size_next
+                print(file_size)
+
+            os.system(f"mv {file_fortran_bufr} {file_bufr}")
+
+def calculate_TROPICS_tpw(data_library_name, dir_case, case_name, version):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_TROPICS_data = os.path.join(dir_data, f"TROPICS_{version}")
+    dir_tropics = os.path.join(dir_exp, 'tropics')
+    os.makedirs(dir_tropics, exist_ok=True)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
+        time_s = anl_end_time - timedelta(hours=cycling_interval/2.0)
+        time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
+        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
+        anl_end_time_HH = anl_end_time.strftime('%H')
+        print(anl_end_time)
+
+        dir_bufr_temp = os.path.join(dir_TROPICS_bufr_temp, anl_end_time_YYYYMMDD)
+        os.makedirs(dir_bufr_temp, exist_ok=True)
+        dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
+        os.system(f"rm -rf {dir_bufr_temp}")
+        os.makedirs(dir_bufr_temp, exist_ok=True)
+        filenames = os.popen(f"ls {dir_TROPICS}/TROPICS01*.nc")
+        n_total_data = 0
+        YEAR = []
+        MNTH = []
+        DAYS = []
+        HOUR = []
+        MINU = []
+        SECO = []
+        QHDOP = []
+        QHDOM = []
+        CLAT = []
+        CLON = []
+        PRLC = []
+        GP10 = []
+        QMAT = []
+        TMDB = []
+        QMDD = []
+        SPFH = []
+        REHU = []
+        QMWN = []
+        WDIR = []
+        WSPD = []
+        PKWDSP = []
+
+        for file_TROPICS in filenames:
+                            
+            pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
+            pattern_match = re.search(pattern, file_TROPICS)
+            date_st_str = pattern_match.group(1)
+            date_et_str = pattern_match.group(2)
+            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
+
+            if date_st <= time_e and date_et >= time_s:
+
+                if 'V1' in version:
+
+                    ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
+                    (n_scans, n_spots, n_vertical_levels) = ncfile.variables['PTemp'][:,:,:].shape
+                    n_data = n_vertical_levels*n_scans*n_spots
+                    print(file_TROPICS.rstrip('\n'))
+
+                    TROPICS_YEAR = np.transpose(np.tile(ncfile.variables['ScanTime_year'][:],   (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_MNTH = np.transpose(np.tile(ncfile.variables['ScanTime_month'][:],  (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_DAYS = np.transpose(np.tile(ncfile.variables['ScanTime_dom'][:],    (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_HOUR = np.transpose(np.tile(ncfile.variables['ScanTime_hour'][:],   (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_MINU = np.transpose(np.tile(ncfile.variables['ScanTime_minute'][:], (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_SECO = np.transpose(np.tile(ncfile.variables['ScanTime_second'][:], (n_vertical_levels, n_spots, 1))).flatten()
+                    TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
+                    TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
+                    TROPICS_CLAT = np.transpose(np.tile(np.transpose(ncfile.variables['Latitude'][:,:]), (n_vertical_levels, 1, 1))).flatten()
+                    TROPICS_Longitude = ncfile.variables['Longitude'][:,:]
+                    TROPICS_Longitude[TROPICS_Longitude<0] = TROPICS_Longitude[TROPICS_Longitude<0] + 360.0
+                    TROPICS_CLON = np.transpose(np.tile(np.transpose(TROPICS_Longitude), (n_vertical_levels, 1, 1))).flatten()
+                    TROPICS_PRLC = np.tile(ncfile.variables['Player'][:]*100.0, (n_scans, n_spots, 1)).flatten()
+                    TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_QMAT = np.full((n_data), 2, dtype='int')
+                    TROPICS_TMDB = ncfile.variables['PTemp'][:,:,:].flatten()
+                    TROPICS_QMDD = np.full((n_data), 2, dtype='int')
+                    TROPICS_SPFH = (ncfile.variables['PVapor'][:,:,:].flatten()/1000.0)/(ncfile.variables['PVapor'][:,:,:].flatten()/1000.0+1.0)
+                    TROPICS_es = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
+                    TROPICS_ws = 0.622*TROPICS_es/(TROPICS_PRLC/100.0)
+                    TROPICS_REHU = 100.0*ncfile.variables['PVapor'][:,:,:].flatten()/1000.0/TROPICS_ws
+                    TROPICS_QMWN = np.full((n_data), 2, dtype='int')
+                    TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
+                    TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
+
+                    Bad_Qual_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,0]), (n_vertical_levels, 1, 1))).flatten()
+                    Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,1]), (n_vertical_levels, 1, 1))).flatten()
+
+                    if 'SEA' in version and 'AS' in version:
+                        index = (Bad_Qual_Flag < 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+
+def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, ref_exp_name, version):
 
     sns_bright_cmap = sns.color_palette('bright')
 
@@ -209,7 +444,7 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, cygnss_exp_name)
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         product = attributes[(dir_case, case_name)]['product']
         dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-        dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{cygnss_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
+        dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{ref_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
         dir_save = '/'.join([dir_exp, 'draw_Tropics', 'total_precipitable_water'])
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
