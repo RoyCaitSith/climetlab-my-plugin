@@ -135,3 +135,17 @@ compare_schemes['GOES_Laura_scheme_05'] = {
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2]],
     'linestyles': ['-', '-', '-'],
 }
+compare_schemes['GOES_Ida_scheme_01'] = {
+    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'CTRL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'labels': ['CTRL'],
+    'colors': [sns_bright_cmap[0]],
+    'linestyles': ['-'],
+}
+compare_schemes['GOES_Ida_scheme_02'] = {
+    'cases': [('/02_GOES_Bias_Correction/29_Ida', 'Ida1', 'CTRL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/29_Ida/track_intensity/figures',
+    'labels': ['CTRL'],
+    'colors': [sns_bright_cmap[0]],
+    'linestyles': ['-'],
+}
