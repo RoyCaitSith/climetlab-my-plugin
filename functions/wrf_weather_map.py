@@ -67,7 +67,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
         )
         output_file = os.path.join(dir_save, output_filename+'.png')
 
-        for idc in tqdm(range(len(dir_cases)), desc='Cases', leave=False):
+        for idc in tqdm(range(len(dir_cases)), desc='Cases', position=0, leave=True):
 
             # Import the necessary library
             (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])

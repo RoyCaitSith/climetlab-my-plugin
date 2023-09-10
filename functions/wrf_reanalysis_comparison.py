@@ -36,7 +36,7 @@ def wrf_reanalysis_comparison_6h(data_library_names, dir_cases, case_names, exp_
         n_time = int(total_da_cycles*cycling_interval/time_interval)
         n_level = len(levels)
 
-        for dom in tqdm(da_domains, desc='Domains', leave=False):
+        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
 
             columns_lists = ['Date_Time', 'DA_Cycle', 'Variables', 'Level', 'Bias', 'RMSE']
             for lev in levels: columns_lists += str(lev)
@@ -44,9 +44,9 @@ def wrf_reanalysis_comparison_6h(data_library_names, dir_cases, case_names, exp_
                 columns=columns_lists)
 
             idc = 0
-            for idt in tqdm(range(n_time), desc='Times', leave=False):
-                for var in tqdm(variables, desc='Variables', leave=False):
-                    for lev in tqdm(levels, desc='Levels', leave=False):
+            for idt in tqdm(range(n_time), desc='Times', position=0, leave=True):
+                for var in tqdm(variables, desc='Variables', position=0, leave=True):
+                    for lev in tqdm(levels, desc='Levels', position=0, leave=True):
 
                         df['Date_Time'][idc] = anl_start_time + timedelta(hours=idt*time_interval)
                         df['DA_Cycle'][idc] = int((idt+1)*time_interval/cycling_interval)

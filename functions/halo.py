@@ -52,7 +52,7 @@ def create_HALO_bufr_temp(data_library_name, dir_case, case_name):
         dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
         os.system(f"rm -rf {dir_bufr_temp}")
         os.makedirs(dir_bufr_temp, exist_ok=True)
-        filenames = os.popen(f"ls {dir_HALO}/*HALO*.h5")
+        filenames = os.popen(f"ls {dir_HALO}/*HALO*.h5").readlines()
         n_total_data = 0
         YEAR = []
         MNTH = []
@@ -287,9 +287,9 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
         dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
         os.makedirs(dir_cross_section, exist_ok=True)
 
-        for dom in tqdm(da_domains, desc='Domains', leave=False):
-            # for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', leave=False):
-            for da_cycle in tqdm(range(4, 5, 1), desc='Cycles', leave=False):
+        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
+            # for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', position=0, leave=True):
+            for da_cycle in tqdm(range(4, 5, 1), desc='Cycles', position=0, leave=True):
 
                 anl_start_time = initial_time + timedelta(hours=cycling_interval)
                 n_time = int(da_cycle)
@@ -297,7 +297,7 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                 dir_cross_section_case = os.path.join(dir_cross_section, specific_case)
                 os.makedirs(dir_cross_section_case, exist_ok=True)
 
-                for idt in tqdm(range(n_time), desc='Times', leave=False):
+                for idt in tqdm(range(n_time), desc='Times', position=0, leave=True):
 
                     time_now = anl_start_time + timedelta(hours = idt*cycling_interval)
                     time_now_YYYYMMDD = time_now.strftime('%Y%m%d')
@@ -408,7 +408,7 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                         anl_lat_1d = anl_lat[anl_index]
                         anl_lon_1d = anl_lon[anl_index]
                         
-                        for idl in tqdm(range(n_levels), desc='Levels', leave=False):
+                        for idl in tqdm(range(n_levels), desc='Levels', position=0, leave=True):
 
                             bkg_q_level = np.array(bkg_q_levels[idl,:,:])
                             anl_q_level = np.array(anl_q_levels[idl,:,:])
@@ -455,7 +455,7 @@ def draw_HALO_comparison(data_library_names, dir_cases, case_names, exp_names, s
         )
         output_file = os.path.join(dir_save, output_filename+'.png')
 
-        for idc in tqdm(range(len(dir_cases)), desc='Cases', leave=False):
+        for idc in tqdm(range(len(dir_cases)), desc='Cases', position=0, leave=True):
 
             # Import the necessary library
             (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])

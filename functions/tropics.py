@@ -18,6 +18,8 @@ from matplotlib.colors import LinearSegmentedColormap
 from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
+from metpy.calc import height_to_geopotential, dewpoint_from_specific_humidity, precipitable_water
+from metpy.units import units
 
 def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2_SEA_AS'):
 
@@ -51,7 +53,8 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
         dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
         os.system(f"rm -rf {dir_bufr_temp}")
         os.makedirs(dir_bufr_temp, exist_ok=True)
-        filenames = os.popen(f"ls {dir_TROPICS}/TROPICS01*.nc")
+        filenames = os.popen(f"ls {dir_TROPICS}/TROPICS01*.nc").readlines()
+
         n_total_data = 0
         YEAR = []
         MNTH = []
@@ -339,113 +342,126 @@ def calculate_TROPICS_tpw(data_library_name, dir_case, case_name, version):
     dir_tropics = os.path.join(dir_exp, 'tropics')
     os.makedirs(dir_tropics, exist_ok=True)
 
-    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+    time_s = initial_time + timedelta(hours=cycling_interval) - timedelta(hours=cycling_interval/2.0)
+    time_e = initial_time + timedelta(hours=cycling_interval*total_da_cycles) + timedelta(hours=cycling_interval/2.0)
+    filenames = os.popen(f"ls {dir_TROPICS_data}/TROPICS01*.nc").readlines()
 
-        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
-        time_s = anl_end_time - timedelta(hours=cycling_interval/2.0)
-        time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
-        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
-        anl_end_time_HH = anl_end_time.strftime('%H')
-        print(anl_end_time)
+    for file_TROPICS in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        dir_bufr_temp = os.path.join(dir_TROPICS_bufr_temp, anl_end_time_YYYYMMDD)
-        os.makedirs(dir_bufr_temp, exist_ok=True)
-        dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
-        os.system(f"rm -rf {dir_bufr_temp}")
-        os.makedirs(dir_bufr_temp, exist_ok=True)
-        filenames = os.popen(f"ls {dir_TROPICS}/TROPICS01*.nc")
-        n_total_data = 0
-        YEAR = []
-        MNTH = []
-        DAYS = []
-        HOUR = []
-        MINU = []
-        SECO = []
-        QHDOP = []
-        QHDOM = []
-        CLAT = []
-        CLON = []
-        PRLC = []
-        GP10 = []
-        QMAT = []
-        TMDB = []
-        QMDD = []
-        SPFH = []
-        REHU = []
-        QMWN = []
-        WDIR = []
-        WSPD = []
-        PKWDSP = []
+        print(file_TROPICS.rstrip('\n'))
+        pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
+        pattern_match = re.search(pattern, file_TROPICS)
+        date_st_str = pattern_match.group(1)
+        date_et_str = pattern_match.group(2)
+        date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+        date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
 
-        for file_TROPICS in filenames:
-                            
-            pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
-            pattern_match = re.search(pattern, file_TROPICS)
-            date_st_str = pattern_match.group(1)
-            date_et_str = pattern_match.group(2)
-            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
-            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
+        if date_st <= time_e and date_et >= time_s:
 
-            if date_st <= time_e and date_et >= time_s:
+            file_tpw = os.path.join(dir_TROPICS_data, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
+            ncfile_tpw = Dataset(file_tpw, 'w', format='NETCDF4')
 
-                if 'V1' in version:
+            if 'V1' in version:
 
-                    ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
-                    (n_scans, n_spots, n_vertical_levels) = ncfile.variables['PTemp'][:,:,:].shape
-                    n_data = n_vertical_levels*n_scans*n_spots
-                    print(file_TROPICS.rstrip('\n'))
+                ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
+                (n_scans, n_spots, n_vertical_levels) = ncfile.variables['PTemp'][:,:,:].shape
 
-                    TROPICS_YEAR = np.transpose(np.tile(ncfile.variables['ScanTime_year'][:],   (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_MNTH = np.transpose(np.tile(ncfile.variables['ScanTime_month'][:],  (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_DAYS = np.transpose(np.tile(ncfile.variables['ScanTime_dom'][:],    (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_HOUR = np.transpose(np.tile(ncfile.variables['ScanTime_hour'][:],   (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_MINU = np.transpose(np.tile(ncfile.variables['ScanTime_minute'][:], (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_SECO = np.transpose(np.tile(ncfile.variables['ScanTime_second'][:], (n_vertical_levels, n_spots, 1))).flatten()
-                    TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
-                    TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
-                    TROPICS_CLAT = np.transpose(np.tile(np.transpose(ncfile.variables['Latitude'][:,:]), (n_vertical_levels, 1, 1))).flatten()
-                    TROPICS_Longitude = ncfile.variables['Longitude'][:,:]
-                    TROPICS_Longitude[TROPICS_Longitude<0] = TROPICS_Longitude[TROPICS_Longitude<0] + 360.0
-                    TROPICS_CLON = np.transpose(np.tile(np.transpose(TROPICS_Longitude), (n_vertical_levels, 1, 1))).flatten()
-                    TROPICS_PRLC = np.tile(ncfile.variables['Player'][:]*100.0, (n_scans, n_spots, 1)).flatten()
-                    TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
-                    TROPICS_QMAT = np.full((n_data), 2, dtype='int')
-                    TROPICS_TMDB = ncfile.variables['PTemp'][:,:,:].flatten()
-                    TROPICS_QMDD = np.full((n_data), 2, dtype='int')
-                    TROPICS_SPFH = (ncfile.variables['PVapor'][:,:,:].flatten()/1000.0)/(ncfile.variables['PVapor'][:,:,:].flatten()/1000.0+1.0)
-                    TROPICS_es = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
-                    TROPICS_ws = 0.622*TROPICS_es/(TROPICS_PRLC/100.0)
-                    TROPICS_REHU = 100.0*ncfile.variables['PVapor'][:,:,:].flatten()/1000.0/TROPICS_ws
-                    TROPICS_QMWN = np.full((n_data), 2, dtype='int')
-                    TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
-                    TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
-                    TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
+                lat = ncfile.variables['Latitude'][:,:]
+                lon = ncfile.variables['Longitude'][:,:]
 
-                    Bad_Qual_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,0]), (n_vertical_levels, 1, 1))).flatten()
-                    Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,1]), (n_vertical_levels, 1, 1))).flatten()
+                mixing_ratio = np.array(ncfile.variables['PVapor'][:,:,:])
+                pressure = np.array(np.tile(ncfile.variables['Player'][:], (n_scans, n_spots, 1)))
+                temperature = np.array(ncfile.variables['PTemp'][:,:,:])
+                specific_humidity = mixing_ratio/(mixing_ratio/1000.0+1.0)
+                dewpoint = np.array(dewpoint_from_specific_humidity(pressure*units.hPa, temperature*units.degK, specific_humidity*units('g/kg')))
+                tpw = np.zeros((n_scans, n_spots))
+                tpw_tropics = ncfile.variables['TPW'][:,:]
+                clear_sky = np.zeros((n_scans, n_spots))
+                clear_sky_tropics = ncfile.variables['Qc'][:,:,1]
 
-                    if 'SEA' in version and 'AS' in version:
-                        index = (Bad_Qual_Flag < 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                for idscan in tqdm(range(n_scans), desc='Scans', position=0, leave=True):
+                    for idspot in tqdm(range(n_spots), desc='Spots', position=0, leave=True, disable=True):
+                        pressure_pw = np.array(pressure[idscan,idspot,:])
+                        dewpoint_pw = np.array(dewpoint[idscan,idspot,:])
+                        index = (~np.isnan(pressure_pw)) & (~np.isnan(dewpoint_pw))
+                        pressure_pw = pressure_pw[index]
+                        dewpoint_pw = dewpoint_pw[index]
+                        if (len(dewpoint_pw) > 0):
+                            tpw[idscan, idspot] = np.array(precipitable_water(pressure_pw*units.hPa, dewpoint_pw*units.degC, bottom=pressure_pw[-1]*units.hPa, top=pressure_pw[0]*units.hPa))
 
-def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, ref_exp_name, version):
+            elif 'V2' in version:
 
-    sns_bright_cmap = sns.color_palette('bright')
+                ncfile = netCDF4.Dataset(file_TROPICS.rstrip('\n'), mode='r', format='NETCDF4')
+                (n_vertical_levels, n_scans, n_spots) = ncfile.variables['t'][:,:,:].shape
+
+                lat = ncfile.variables['losLat_deg'][:,:]
+                lon = ncfile.variables['losLon_deg'][:,:]
+
+                mixing_ratio = np.array(ncfile.variables['q'][3:,:,:])
+                pressure = np.array(ncfile.variables['press'][3:,:,:])
+                temperature = np.array(ncfile.variables['t'][3:,:,:])
+                specific_humidity = mixing_ratio*1000.0/(mixing_ratio+1.0)
+                dewpoint = np.array(dewpoint_from_specific_humidity(pressure*units.hPa, temperature*units.degK, specific_humidity*units('g/kg')))
+                tpw = np.zeros((n_scans, n_spots))
+                tpw_tropics = np.zeros((n_scans, n_spots))
+                clear_sky = np.zeros((n_scans, n_spots))
+                clear_sky_tropics = np.zeros((n_scans, n_spots))
+
+                for idscan in tqdm(range(n_scans), desc='Scans', position=0, leave=True):
+                    for idspot in tqdm(range(n_spots), desc='Spots', position=0, leave=True, disable=True):
+                        pressure_pw = np.array(pressure[:,idscan,idspot])
+                        dewpoint_pw = np.array(dewpoint[:,idscan,idspot])
+                        index = (~np.isnan(pressure_pw)) & (~np.isnan(dewpoint_pw))
+                        pressure_pw = pressure_pw[index]
+                        dewpoint_pw = dewpoint_pw[index]
+                        if (len(dewpoint_pw) > 0):
+                            tpw[idscan, idspot] = np.array(precipitable_water(pressure_pw*units.hPa, dewpoint_pw*units.degC, bottom=pressure_pw[-1]*units.hPa, top=pressure_pw[0]*units.hPa))
+
+            index = tpw >= 55.5
+            clear_sky[index] = 1
+
+            ncfile_tpw.createDimension('n_scans',  n_scans)
+            ncfile_tpw.createDimension('n_spots',  n_spots)
+            ncfile_tpw.createVariable('lat',               'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.createVariable('lon',               'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.createVariable('tpw',               'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.createVariable('tpw_tropics',       'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.createVariable('clear_sky',         'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.createVariable('clear_sky_tropics', 'f8', ('n_scans', 'n_spots'))
+            ncfile_tpw.variables['lat'][:,:] = lat
+            ncfile_tpw.variables['lon'][:,:] = lon
+            ncfile_tpw.variables['tpw'][:,:] = tpw
+            ncfile_tpw.variables['tpw_tropics'][:,:] = tpw_tropics
+            ncfile_tpw.variables['clear_sky'][:,:] = clear_sky
+            ncfile_tpw.variables['clear_sky_tropics'][:,:] = clear_sky_tropics
+
+            ncfile_tpw.close()
+
+def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, versions, ref_exp_names, domains, projections):
 
     n_cases = len(dir_cases)
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (data_library_name, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
+        data_library_name = data_library_names[idc]
+        dir_case = dir_cases[idc]
+        case_name = case_names[idc]
+        version = versions[idc]
+        ref_exp_name = ref_exp_names[idc]
+        domain = domains[idc]
+        projection = projections[idc]
+
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
         itime = attributes[(dir_case, case_name)]['itime']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-        time_window_max = attributes[(dir_case, case_name)]['time_window_max']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-        product = attributes[(dir_case, case_name)]['product']
-        dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-        dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{ref_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
-        dir_save = '/'.join([dir_exp, 'draw_Tropics', 'total_precipitable_water'])
+        dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+        dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
+        dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
+        dir_tropics = os.path.join(dir_exp, 'tropics')
+        dir_TROPICS_data = os.path.join(dir_exp, 'data', f"TROPICS_{version}")
+
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
@@ -455,67 +471,90 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, ref_exp_name, ve
         anl_start_time_str = anl_start_time.strftime('%Y%m%d%H%M%S')
         anl_end_time_str = anl_end_time.strftime('%Y%m%d%H%M%S')
 
-        wrfout_format='wrfout_d01_{ctime:%Y-%m-%d_%H:%M:00}'
-        file_wrfout_d01 = '/'.join([dir_wrfout, wrfout_format.format(ctime=initial_time)])
+        dir_wrfout = os.path.join(dir_cycling_da, f"{case_name}_{ref_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg')
+        wrfout_format='wrfout_{domain}_{ctime:%Y-%m-%d_%H:%M:00}'
+        file_wrfout = '/'.join([dir_wrfout, wrfout_format.format(domain=domain, ctime=initial_time)])
+        wrfout = Dataset(file_wrfout)
+        wrflat = wrfout.variables['XLAT'][0,:,:]
+        wrflon = wrfout.variables['XLONG'][0,:,:]
+        extent = [wrflon[0,0], wrflon[-1,-1], wrflat[0,0], wrflat[-1,-1]]
+        wrfout.close()
 
-        wrfout_d01 = Dataset(file_wrfout_d01)
-        lat_d01 = wrfout_d01.variables['XLAT'][0,:,:]
-        lon_d01 = wrfout_d01.variables['XLONG'][0,:,:]
-        extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
-        wrfout_d01.close()
-
-        if 'TROPICS V1' in product: output_file = f'{dir_save}/{anl_start_time_str}_{anl_end_time_str}_tropics_v1_tpw_d01.png'
-        if 'TROPICS V3' in product: output_file = f'{dir_save}/{anl_start_time_str}_{anl_end_time_str}_tropics_v3_tpw_d01.png'
-
+        output_filename = f"tpw_{version}_{domain}"
+        output_file = os.path.join(dir_tropics, output_filename+'.png')
         image_files = []
-        filenames = os.popen('cd ' + dir_save + ' && ls *total_precipitable_water.nc').readlines()
-        for filename in tqdm(filenames, desc='Cycles', leave=False, unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-            filename = filename.strip('\n')
-            time_ST_str = filename[ 0:14]
-            time_ET_str = filename[15:29]
-            time_ST = datetime.strptime(time_ST_str, '%Y%m%d%H%M%S')
-            time_ET = datetime.strptime(time_ET_str, '%Y%m%d%H%M%S')
+        filenames = os.popen(f"ls {dir_TROPICS_data}/*TPW.nc").readlines()
+        for filename in tqdm(filenames, desc="Processing files", position=0, leave=True):
 
-            filename = '/'.join([dir_save, filename])
-            nc_fid = Dataset(filename, mode='r', format='NETCDF4')
-            lat = nc_fid.variables['lat'][:]
-            lon = nc_fid.variables['lon'][:]
-            total_precipitable_water = nc_fid.variables['total_precipitable_water'][:]
-            nc_fid.close()
+            print(filename.rstrip('\n'))
+            pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
+            pattern_match = re.search(pattern, filename)
+            date_st_str = pattern_match.group(1)
+            date_et_str = pattern_match.group(2)
+            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
 
-            if 'TROPICS V1' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_all_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_all_sky_d01.png'
-            if 'TROPICS V3' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_all_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_all_sky_d01.png'
+            ncfile = Dataset(filename.rstrip('\n'), mode='r', format='NETCDF4')
+            lat = ncfile.variables['lat'][:,:]
+            lon = ncfile.variables['lon'][:,:]
+            tpw = ncfile.variables['tpw'][:,:]
+            tpw_tropics = ncfile.variables['tpw_tropics'][:,:]
+            clear_sky = ncfile.variables['clear_sky'][:,:]
+            clear_sky_tropics = ncfile.variables['clear_sky_tropics'][:,:]
+            ncfile.close()
 
+            filename = f"ST{date_st_str}_ET{date_et_str}_tpw_{version}_{domain}"
+            pdfname = os.path.join(dir_tropics, filename+'.pdf')
+            pngname = os.path.join(dir_tropics, filename+'.png')
             image_files.append(pngname)
-            index = (total_precipitable_water >= 0.0)
+
+            fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
+            fig_height = 2.75+0.75
+            clb_aspect = 25*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
+            if projection == 'lcc' and domain == 'd01':
+                fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])-0.5
 
             with PdfPages(pdfname) as pdf:
 
-                fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
-
+                fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
                 ax = axs
-                m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
-                m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
-                mlons, mlats = m(lon, lat)
-                pcm = ax.scatter(mlons[index], mlats[index], marker='s', s=2.50, linewidths=0.0, c=total_precipitable_water[index], vmin=40, vmax=70, cmap='jet', zorder=0)
 
-                ax.set_xticks(np.arange(-180, 181, 10))
-                ax.set_yticks(np.arange(-90, 91, 10))
-                ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
-                ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                if projection == 'cyl':
+                    m = Basemap(llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], \
+                                projection=projection, resolution='i', ax=ax)
+                elif projection == 'lcc':
+                    m = Basemap(llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], \
+                                projection=projection, lat_1=lat_1, lat_2=lat_2, lon_0=lon_0, resolution='i', ax=ax)
+                    m.drawmeridians(np.arange(-180, 181, 10), labels=[0,0,0,1], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+                    m.drawparallels(np.arange( -90,  91, 10), labels=[1,0,0,0], fontsize=10.0, linewidth=0.5, dashes=[1,1], color=grayC_cm_data[53])
+
+                m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
+                mlon, mlat = m(lon, lat)
+                
+                if 'AS' in version:
+                    index = (tpw > 0)
+                elif 'CS' in version:
+                    index = (tpw > 0) & (clear_sky == 0)
+                pcm = ax.scatter(mlon[index], mlat[index], c=tpw[index], marker='s', s=2.50, linewidths=0.0, vmin=0, vmax=70, cmap='jet', zorder=0)
+                # ax.text(m(extent[1], extent[3])[0], m(extent[1], extent[3])[1], f"{date_st_str}", \
+                #             ha='right', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
+
+                if projection == 'cyl':
+                    ax.set_xticks(np.arange(-180, 181, 10))
+                    ax.set_yticks(np.arange(-90, 91, 10))
+                    ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
+                    ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
+                    ax.axis(extent)
+
                 ax.tick_params('both', direction='in', labelsize=10.0)
-                ax.axis(extent)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
 
-                lb_title = r'TPW (kg m$^{-2}$) in AS'
-                clb = fig.colorbar(pcm, ax=ax, ticks=np.arange(40, 71, 5), orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
-                clb.set_label(lb_title, fontsize=10.0, labelpad=4.0)
+                clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
+                clb.set_label(r'TPW (kg m$^{-2}$)', fontsize=10.0, labelpad=4.0)
                 clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                clb.ax.minorticks_off()
+                clb.set_ticks(range(0, 71, 10))
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)
@@ -523,86 +562,9 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, ref_exp_name, ve
                 plt.cla()
                 plt.clf()
                 plt.close()
-
-            if 'TROPICS V1' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_clear_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_clear_sky_d01.png'
-            if 'TROPICS V3' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_clear_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_clear_sky_d01.png'
-
-            image_files.append(pngname)
-            index = (total_precipitable_water >= 0.0) & (total_precipitable_water <= 56.5)
-
-            with PdfPages(pdfname) as pdf:
-
-                fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
-
-                ax = axs
-                m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
-                m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
-                mlons, mlats = m(lon, lat)
-                pcm = ax.scatter(mlons[index], mlats[index], marker='s', s=2.50, linewidths=0.0, c=total_precipitable_water[index], vmin=40, vmax=70, cmap='jet', zorder=0)
-
-                ax.set_xticks(np.arange(-180, 181, 10))
-                ax.set_yticks(np.arange(-90, 91, 10))
-                ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
-                ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
-                ax.tick_params('both', direction='in', labelsize=10.0)
-                ax.axis(extent)
-                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-
-                lb_title = r'TPW (kg m$^{-2}$) in CS'
-                clb = fig.colorbar(pcm, ax=ax, ticks=np.arange(40, 71, 5), orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
-                clb.set_label(lb_title, fontsize=10.0, labelpad=4.0)
-                clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
-
-                plt.tight_layout()
-                plt.savefig(pngname, dpi=600)
-                pdf.savefig(fig)
-                plt.cla()
-                plt.clf()
-                plt.close()
-
-            if 'TROPICS V1' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_cloudy_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v1_tpw_cloudy_sky_d01.png'
-            if 'TROPICS V3' in product:
-                pdfname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_cloudy_sky_d01.pdf'
-                pngname = f'{dir_save}/{time_ST_str}_{time_ET_str}_tropics_v3_tpw_cloudy_sky_d01.png'
-
-            image_files.append(pngname)
-            index = (total_precipitable_water >= 56.5)
-
-            with PdfPages(pdfname) as pdf:
-
-                fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.50))
-
-                ax = axs
-                m = Basemap(projection='cyl', llcrnrlat=extent[2], llcrnrlon=extent[0], urcrnrlat=extent[3], urcrnrlon=extent[1], resolution='i', ax=ax)
-                m.drawcoastlines(linewidth=0.5, color='k', zorder=2)
-                mlons, mlats = m(lon, lat)
-                pcm = ax.scatter(mlons[index], mlats[index], marker='s', s=2.50, linewidths=0.0, c=total_precipitable_water[index], vmin=40, vmax=70, cmap='jet', zorder=0)
-
-                ax.set_xticks(np.arange(-180, 181, 10))
-                ax.set_yticks(np.arange(-90, 91, 10))
-                ax.set_xticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "W" if x < 0 else ("E" if x > 0 else "")) for x in range(int(-180), int(180)+1, 10)])
-                ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
-                ax.tick_params('both', direction='in', labelsize=10.0)
-                ax.axis(extent)
-                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-
-                lb_title = r'TPW (kg m$^{-2}$) in CS'
-                clb = fig.colorbar(pcm, ax=ax, ticks=np.arange(40, 71, 5), orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
-                clb.set_label(lb_title, fontsize=10.0, labelpad=4.0)
-                clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
-
-                plt.tight_layout()
-                plt.savefig(pngname, dpi=600)
-                pdf.savefig(fig)
-                plt.cla()
-                plt.clf()
-                plt.close()
+            
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
 
         combine_images_grid(image_files, output_file)
         command = f"convert {output_file} -trim {output_file}"
@@ -610,76 +572,99 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, ref_exp_name, ve
         image = IPImage(filename=output_file)
         display(image)
 
-def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names):
+
+def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names, versions):
 
     sns_bright_cmap = sns.color_palette('bright')
-
-    data_library_name = data_library_names[0]
-    dir_case = dir_cases[0]
-    case_name = case_names[0]
-
-    module = importlib.import_module(f"data_library_{data_library_name}")
+    
+    module = importlib.import_module(f"data_library_{data_library_names[0]}")
     attributes = getattr(module, 'attributes')
-    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-    dir_save = os.path.join(dir_exp, 'draw_Tropics', 'total_precipitable_water')
-    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+    dir_exp = attributes[(dir_cases[0], case_names[0])]['dir_exp']
+    dir_tropics = os.path.join(dir_exp, 'tropics')
+    output_file = os.path.join(dir_tropics, 'tpw_cdf.png')
+    image_files = []
 
-    pdfname = os.path.join(dir_save, 'total_precipitable_water_cdf.pdf')
-    pngname = os.path.join(dir_save, 'total_precipitable_water_cdf.png')
+    n_cases = len(dir_cases)
+    for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-    with PdfPages(pdfname) as pdf:
+        data_library_name = data_library_names[idc]
+        dir_case = dir_cases[idc]
+        case_name = case_names[idc]
+        version = versions[idc]
 
-        fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.0))
-        ax = axs
-        xmax = 99999999.9
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+        dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
+        dir_TROPICS_data = os.path.join(dir_exp, 'data', f"TROPICS_{version}")
+        dir_tropics = os.path.join(dir_exp, 'tropics')
 
-        for idc, (dir_case, case_name) in enumerate(zip(dir_cases, case_names)):
+        grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+        grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
 
-            dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-            product = attributes[(dir_case, case_name)]['product']
-            dir_tpw = os.path.join(dir_exp, 'draw_Tropics', 'total_precipitable_water')
-            tpw_files = glob.glob(os.path.join(dir_tpw, '*precipitable_water.nc'))
-            tpw = []
+        filename = f"tpw_cdf_{version}"
+        pdfname = os.path.join(dir_tropics, filename+'.pdf')
+        pngname = os.path.join(dir_tropics, filename+'.png')
+        image_files.append(pngname)
 
-            for filename in tpw_files:
-                with netCDF4.Dataset(filename, mode='r', format='NETCDF4') as nc_fid:
-                    total_precipitable_water = nc_fid.variables['total_precipitable_water'][:]
+        with PdfPages(pdfname) as pdf:
 
-                index = (total_precipitable_water >= 0.0)
-                total_precipitable_water = total_precipitable_water[index]
-                tpw.extend(total_precipitable_water.tolist())
+            fig, axs = plt.subplots(1, 1, figsize=(3.25, 3.0))
+            ax = axs
+            xmax = 99999999.9
 
-            tpw = np.sort(tpw)
-            percentile_90 = np.percentile(tpw, 90)
-            cdf = np.arange(1, len(tpw) + 1)/len(tpw)
-            print(f"90th percentile of {product} is: {percentile_90:.2f}%")
+            tpw_all = []
+            filenames = os.popen(f"ls {dir_TROPICS_data}/*TPW.nc").readlines()
 
-            specific_value = 56.5
-            percentage = np.sum(tpw > specific_value)/len(tpw)*100
-            print(f"Percentage of values over {specific_value} in {product}: {percentage:.2f}%")
+            for filename in filenames:
+                with netCDF4.Dataset(filename.rstrip('\n'), mode='r', format='NETCDF4') as ncfile:
+                    if 'AS' in version:
+                        tpw = ncfile.variables['tpw'][:,:].flatten()
+                        index = (tpw > 0.0) & (np.array(tpw.tolist()) != None)
+                    elif 'CS' in version:
+                        tpw = ncfile.variables['tpw'][:,:].flatten()
+                        clear_sky = ncfile.variables['clear_sky'][:,:].flatten()
+                        index = (tpw > 0.0) & (np.array(tpw.tolist()) != None) & (clear_sky == 0)
+
+                tpw = tpw[index]
+                tpw_all.extend(tpw.tolist())
+
+            tpw_all = np.sort(tpw_all)
+            percentile_90 = np.percentile(tpw_all, 90)
+            cdf = np.arange(1, len(tpw_all) + 1)/len(tpw_all)
+            print(f"90th percentile of {version} is: {percentile_90:.2f}")
+
+            specific_value = 55.5
+            percentage = np.sum(tpw_all > specific_value)/len(tpw_all)*100
+            print(f"Percentage of values over {specific_value} in {version}: {percentage:.2f}%")
+            print(len(tpw_all))
 
             xmax = np.min([xmax, np.max(tpw)])
-            ax.plot(tpw, cdf, color=sns_bright_cmap[idc], ls='-', ms=2.00, linewidth=1.25, label=product, zorder=3)
+            print(xmax)
+            ax.plot(tpw_all, cdf, color=sns_bright_cmap[0], ls='-', ms=2.00, linewidth=1.25, label=version, zorder=3)
 
-        ax.plot([56.5, 56.5], [0.0, 0.9], color='k', ls='-', ms=2.00, linewidth=1.25, zorder=3)
-        ax.plot([ 0.0, 56.5], [0.9, 0.9], color='k', ls='-', ms=2.00, linewidth=1.25, zorder=3)
-        ax.set_xlabel(r'Total Precipitable Water (kg m$^{-2}$)', fontsize=10.0)
-        ax.set_ylabel('Cumulative Probability', fontsize=10.0)
-        ax.tick_params('both', direction='in', labelsize=10.0)
-        ax.axis([0, xmax, 0, 1.2])
-        ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
-        ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
+            ax.plot([55.5, 55.5], [0.0, 0.9], color='k', ls='-', ms=2.00, linewidth=1.25, zorder=3)
+            ax.plot([ 0.0, 55.5], [0.9, 0.9], color='k', ls='-', ms=2.00, linewidth=1.25, zorder=3)
+            ax.set_xlabel(r'TPW (kg m$^{-2}$)', fontsize=10.0)
+            ax.set_ylabel('Cumulative Probability', fontsize=10.0)
+            ax.tick_params('both', direction='in', labelsize=10.0)
+            ax.axis([0, 70, 0, 1.2])
+            ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+            ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
 
-        plt.tight_layout()
-        plt.savefig(pngname, dpi=600)
-        pdf.savefig(fig)
-        plt.cla()
-        plt.clf()
-        plt.close()
+            plt.tight_layout()
+            plt.savefig(pngname, dpi=600)
+            pdf.savefig(fig)
+            plt.cla()
+            plt.clf()
+            plt.close()
 
-    command = f"convert {pngname} -trim {pngname}"
+        command = f"convert {pngname} -trim {pngname}"
+        subprocess.run(command, shell=True)
+
+    combine_images_grid(image_files, output_file)
+    command = f"convert {output_file} -trim {output_file}"
     subprocess.run(command, shell=True)
-    image = IPImage(filename=pngname)
+    image = IPImage(filename=output_file)
     display(image)

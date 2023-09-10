@@ -1,5 +1,7 @@
+import re
 import os
 import glob
+import time
 import netCDF4
 import importlib
 import subprocess
@@ -16,6 +18,299 @@ from matplotlib.colors import LinearSegmentedColormap
 from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
+
+def create_CYGNSS_bufr_temp(data_library_name, dir_case, case_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_CYGNSS = os.path.join(dir_data, 'CYGNSS')
+    dir_CYGNSS_bufr_temp = os.path.join(dir_CYGNSS, 'bufr_temp')
+    os.makedirs(dir_CYGNSS, exist_ok=True)
+    os.makedirs(dir_CYGNSS_bufr_temp, exist_ok=True)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
+        time_s = anl_end_time - timedelta(hours=cycling_interval/2.0)
+        time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
+        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
+        anl_end_time_HH = anl_end_time.strftime('%H')
+        print(anl_end_time)
+
+        dir_bufr_temp = os.path.join(dir_CYGNSS_bufr_temp, anl_end_time_YYYYMMDD)
+        os.makedirs(dir_bufr_temp, exist_ok=True)
+        dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
+        os.system(f"rm -rf {dir_bufr_temp}")
+        os.makedirs(dir_bufr_temp, exist_ok=True)
+        filenames = os.popen(f"ls {dir_CYGNSS}/cyg*l2*.nc").readlines()
+        n_total_data = 0
+
+        SID  = []
+        XOB  = []
+        YOB  = []
+        DHR  = []
+        TYP  = []
+        ELV  = []
+        SAID = []
+        T29  = []
+        POB  = []
+        QOB  = []
+        TOB  = []
+        ZOB  = []
+        UOB  = []
+        VOB  = []
+        PWO  = []
+        CAT  = []
+        PRSS = []
+        PQM  = []
+        QQM  = []
+        TQM  = []
+        ZQM  = []
+        WQM  = []
+        NUL1 = []
+        PWQ  = []
+        POE  = []
+        QOE  = []
+        TOE  = []
+        NUL2 = []
+        WOE  = []
+        NUL3 = []
+        PWE  = []
+
+        for file_CYGNSS in filenames:
+
+            pattern = r's(\d{8}-\d{6})-e(\d{8}-\d{6})'
+            pattern_match = re.search(pattern, file_CYGNSS)
+            date_st_str = pattern_match.group(1)
+            date_et_str = pattern_match.group(2)
+            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
+            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
+
+            if date_st <= time_e and date_et >= time_s:
+
+                ncfile = netCDF4.Dataset(file_CYGNSS.rstrip('\n'), mode='r', format='NETCDF4')
+                n_data = len(list(ncfile.variables['sample_time'][:]))
+                print(file_CYGNSS.rstrip('\n'))
+
+                CYGNSS_SID  = np.full((n_data), 48112, dtype='float')
+                CYGNSS_XOB  = ncfile.variables['lon'][:]
+                CYGNSS_YOB  = ncfile.variables['lat'][:]
+                CYGNSS_TYP  = np.full((n_data), 283, dtype='float')
+                CYGNSS_ELV  = np.full((n_data), 0.0, dtype='float')
+                CYGNSS_SAID = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_T29  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_POB  = np.full((n_data), 1013.0, dtype='float')
+                CYGNSS_QOB  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_TOB  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_ZOB  = np.full((n_data), 0.0, dtype='float')
+                CYGNSS_UOB  = ncfile.variables['wind_speed'][:]
+                CYGNSS_VOB  = np.full((n_data), 0.0, dtype='float')
+                CYGNSS_PWO  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_CAT  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_PRSS = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_PQM  = np.full((n_data), 2, dtype='float')
+                CYGNSS_QQM  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_TQM  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_ZQM  = np.full((n_data), 2, dtype='float')
+                CYGNSS_WQM  = np.full((n_data), 1, dtype='float')
+                CYGNSS_NUL1 = np.full((n_data), 1, dtype='float')
+                CYGNSS_PWQ  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_POE  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_QOE  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_TOE  = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_NUL2 = np.full((n_data), 10.0e10, dtype='float')
+                CYGNSS_WOE  = np.full((n_data), 2.2, dtype='float')
+                CYGNSS_NUL3 = np.full((n_data), 2.2, dtype='float')
+                CYGNSS_PWE  = np.full((n_data), 10.0e10, dtype='float')
+
+                CYGNSS_TIME = ncfile.variables['sample_time'][:]
+                CYGNSS_DHR = np.full((n_data), 0.0, dtype='float64')
+                for idt, cyg_time in enumerate(CYGNSS_TIME):
+                    CYGNSS_DHR[idt] = (date_st + timedelta(seconds=cyg_time) - anl_end_time).total_seconds()/3600.0
+
+                index = (CYGNSS_DHR >= -1.0*cycling_interval/2.0) & (CYGNSS_DHR <= cycling_interval/2.0) & \
+                        (np.array(CYGNSS_UOB.tolist()) != None)
+
+                n_data = sum(index==True)
+                print(n_data)
+                if n_data > 0:
+                    n_total_data += n_data
+                    SID  += CYGNSS_SID[index].tolist()
+                    XOB  += CYGNSS_XOB[index].tolist()
+                    YOB  += CYGNSS_YOB[index].tolist()
+                    DHR  += CYGNSS_DHR[index].tolist()
+                    TYP  += CYGNSS_TYP[index].tolist()
+                    ELV  += CYGNSS_ELV[index].tolist()
+                    SAID += CYGNSS_SAID[index].tolist()
+                    T29  += CYGNSS_T29[index].tolist()
+                    POB  += CYGNSS_POB[index].tolist()
+                    QOB  += CYGNSS_QOB[index].tolist()
+                    TOB  += CYGNSS_TOB[index].tolist()
+                    ZOB  += CYGNSS_ZOB[index].tolist()
+                    UOB  += CYGNSS_UOB[index].tolist()
+                    VOB  += CYGNSS_VOB[index].tolist()
+                    PWO  += CYGNSS_PWO[index].tolist()
+                    CAT  += CYGNSS_CAT[index].tolist()
+                    PRSS += CYGNSS_PRSS[index].tolist()
+                    PQM  += CYGNSS_PQM[index].tolist()
+                    QQM  += CYGNSS_QQM[index].tolist()
+                    TQM  += CYGNSS_TQM[index].tolist()
+                    ZQM  += CYGNSS_ZQM[index].tolist()
+                    WQM  += CYGNSS_WQM[index].tolist()
+                    NUL1 += CYGNSS_NUL1[index].tolist()
+                    PWQ  += CYGNSS_PWQ[index].tolist()
+                    POE  += CYGNSS_POE[index].tolist()
+                    QOE  += CYGNSS_QOE[index].tolist()
+                    TOE  += CYGNSS_TOE[index].tolist()
+                    NUL2 += CYGNSS_NUL2[index].tolist()
+                    WOE  += CYGNSS_WOE[index].tolist()
+                    NUL3 += CYGNSS_NUL3[index].tolist()
+                    PWE  += CYGNSS_PWE[index].tolist()
+
+        with open(os.path.join(dir_bufr_temp, '1.txt'), 'ab') as f:
+            np.savetxt(f, SID)
+        with open(os.path.join(dir_bufr_temp, '2.txt'), 'ab') as f:
+            np.savetxt(f, XOB)
+        with open(os.path.join(dir_bufr_temp, '3.txt'), 'ab') as f:
+            np.savetxt(f, YOB)
+        with open(os.path.join(dir_bufr_temp, '4.txt'), 'ab') as f:
+            np.savetxt(f, DHR)
+        with open(os.path.join(dir_bufr_temp, '5.txt'), 'ab') as f:
+            np.savetxt(f, TYP)
+        with open(os.path.join(dir_bufr_temp, '6.txt'), 'ab') as f:
+            np.savetxt(f, ELV)
+        with open(os.path.join(dir_bufr_temp, '7.txt'), 'ab') as f:
+            np.savetxt(f, SAID)
+        with open(os.path.join(dir_bufr_temp, '8.txt'), 'ab') as f:
+            np.savetxt(f, T29)
+        with open(os.path.join(dir_bufr_temp, '9.txt'), 'ab') as f:
+            np.savetxt(f, POB)
+        with open(os.path.join(dir_bufr_temp, '10.txt'), 'ab') as f:
+            np.savetxt(f, QOB)
+        with open(os.path.join(dir_bufr_temp, '11.txt'), 'ab') as f:
+            np.savetxt(f, TOB)
+        with open(os.path.join(dir_bufr_temp, '12.txt'), 'ab') as f:
+            np.savetxt(f, ZOB)
+        with open(os.path.join(dir_bufr_temp, '13.txt'), 'ab') as f:
+            np.savetxt(f, UOB)
+        with open(os.path.join(dir_bufr_temp, '14.txt'), 'ab') as f:
+            np.savetxt(f, VOB)
+        with open(os.path.join(dir_bufr_temp, '15.txt'), 'ab') as f:
+            np.savetxt(f, PWO)
+        with open(os.path.join(dir_bufr_temp, '16.txt'), 'ab') as f:
+            np.savetxt(f, CAT)
+        with open(os.path.join(dir_bufr_temp, '17.txt'), 'ab') as f:
+            np.savetxt(f, PRSS)
+        with open(os.path.join(dir_bufr_temp, '18.txt'), 'ab') as f:
+            np.savetxt(f, PQM)
+        with open(os.path.join(dir_bufr_temp, '19.txt'), 'ab') as f:
+            np.savetxt(f, QQM)
+        with open(os.path.join(dir_bufr_temp, '20.txt'), 'ab') as f:
+            np.savetxt(f, TQM)
+        with open(os.path.join(dir_bufr_temp, '21.txt'), 'ab') as f:
+            np.savetxt(f, ZQM)
+        with open(os.path.join(dir_bufr_temp, '22.txt'), 'ab') as f:
+            np.savetxt(f, WQM)
+        with open(os.path.join(dir_bufr_temp, '23.txt'), 'ab') as f:
+            np.savetxt(f, NUL1)
+        with open(os.path.join(dir_bufr_temp, '24.txt'), 'ab') as f:
+            np.savetxt(f, PWQ)
+        with open(os.path.join(dir_bufr_temp, '25.txt'), 'ab') as f:
+            np.savetxt(f, POE)
+        with open(os.path.join(dir_bufr_temp, '26.txt'), 'ab') as f:
+            np.savetxt(f, QOE)
+        with open(os.path.join(dir_bufr_temp, '27.txt'), 'ab') as f:
+            np.savetxt(f, TOE)
+        with open(os.path.join(dir_bufr_temp, '28.txt'), 'ab') as f:
+            np.savetxt(f, NUL2)
+        with open(os.path.join(dir_bufr_temp, '29.txt'), 'ab') as f:
+            np.savetxt(f, WOE)
+        with open(os.path.join(dir_bufr_temp, '30.txt'), 'ab') as f:
+            np.savetxt(f, NUL3)
+        with open(os.path.join(dir_bufr_temp, '31.txt'), 'ab') as f:
+            np.savetxt(f, PWE)
+
+        np.savetxt(os.path.join(dir_bufr_temp, '0.txt'), [n_total_data])
+        print('\n')
+
+def create_CYGNSS_bufr(data_library_name, dir_case, case_name):
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    itime = attributes[(dir_case, case_name)]['itime']
+    initial_time = datetime(*itime)
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_CYGNSS = os.path.join(dir_data, 'CYGNSS')
+    dir_CYGNSS_bufr = os.path.join(dir_CYGNSS, 'bufr')
+    dir_CYGNSS_bufr_temp = os.path.join(dir_CYGNSS, 'bufr_temp')
+    os.makedirs(dir_CYGNSS, exist_ok=True)
+    os.makedirs(dir_CYGNSS_bufr, exist_ok=True)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        anl_end_time = initial_time + timedelta(hours=cycling_interval*idc)
+        anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
+        anl_end_time_HH = anl_end_time.strftime('%H')
+
+        dir_bufr = os.path.join(dir_CYGNSS_bufr, anl_end_time_YYYYMMDD)
+        file_bufr = os.path.join(dir_bufr, f"gdas.t{anl_end_time_HH}z.cygnss.tm00.bufr_d")
+        dir_fortran = os.path.join(dir_CYGNSS, 'fortran_files')
+        file_fortran_bufr = os.path.join(dir_fortran, 'gdas.cygnss.bufr')
+        os.makedirs(dir_bufr, exist_ok=True)
+        os.system(f"rm -rf {file_fortran_bufr}")
+
+        print('Check bufr_temp: ')
+        flag = True
+        info = os.popen(f"cd {dir_CYGNSS_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH} && ls ./*.txt").readlines()
+        if len(info) != 32:
+            flag = False
+        print(len(info))
+        print(flag)
+
+        if flag:
+
+            fdata = ''
+            with open(f"{dir_fortran}/prepbufr_encode_CYGNSS.f90", 'r') as f:
+                for line in f.readlines():
+                    if(line.find('idate = ') == 4): line = f"    idate = {anl_end_time_YYYYMMDD}{anl_end_time_HH}\n"
+                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_CYGNSS_bufr_temp}/{anl_end_time_YYYYMMDD}/{anl_end_time_HH}/'\n"
+                    fdata += line
+            f.close()
+
+            with open(f"{dir_fortran}/prepbufr_encode_CYGNSS.f90", 'w') as f:
+                f.writelines(fdata)
+            f.close()
+
+            os.popen(f"cd {dir_fortran} && ./run_prepbufr_encode_CYGNSS.sh > log_out")
+            flag = True
+            file_size = 0
+            while flag:
+                time.sleep(5)
+                file_size_temp = os.popen(f"stat -c '%s' {file_fortran_bufr}").read()
+                if file_size_temp:
+                    file_size_next = int(file_size_temp)
+                    if file_size_next == file_size:
+                        flag = False
+                    else:
+                        file_size = file_size_next
+                print(file_size)
+
+            os.system(f"mv {file_fortran_bufr} {file_bufr}")
 
 def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp_name):
 

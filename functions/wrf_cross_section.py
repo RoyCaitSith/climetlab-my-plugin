@@ -72,7 +72,7 @@ def extract_cross_section(data_library_names, dir_cases, case_names, exp_names,
         else:
             dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'bkg')
 
-        for var in tqdm(variables, desc='Variables', leave=False):
+        for var in tqdm(variables, desc='Variables', position=0, leave=True):
 
             (information, levels) = set_variables(var)
 

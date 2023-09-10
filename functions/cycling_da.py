@@ -357,9 +357,12 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     dir_prepbufr = os.path.join(dir_data, 'PREPBUFR')
     dir_dawnbufr = os.path.join(dir_data, 'DAWN', 'bufr')
     dir_halobufr = os.path.join(dir_data, 'HALO', 'bufr')
+    dir_cygnssbufr = os.path.join(dir_data, 'CYGNSS', 'bufr')
     if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_AS', 'bufr')
-    if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_AS', 'bufr')
-    
+    if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_AS', 'bufr')
+    if 'V1_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_CS', 'bufr')
+    if 'V2_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_CS', 'bufr')
+
     dir_da = os.path.join(dir_cycling_da, 'da')
     dir_bkg = os.path.join(dir_cycling_da, 'bkg')
     dir_gsi = os.path.join(dir_cycling_da, 'gsi')
@@ -422,6 +425,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 if 'CTRL' not in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
                 if 'DAWN' in exp_name: os.system(f"cp {dir_dawnbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d ")
                 if 'HALO' in exp_name: os.system(f"cp {dir_halobufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.halo.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.halo.tm00.bufr_d ")
+                if 'CYG' in exp_name: os.system(f"cp {dir_cygnssbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.cygnss.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.cygnss.tm00.bufr_d ")
                 if 'V1_AS' in exp_name or 'V2_AS' in exp_name or 'V1_CS' in exp_name or 'V2_CS' in exp_name:
                     os.system(f"cp {dir_tropicsbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.tropics.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.tropics.tm00.bufr_d ")
 
@@ -441,6 +445,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 run_gsi_input.substitude_string('OPTION_ROOT', '=', dir_option)
                 run_gsi_input.substitude_string('ANAL_TIME', '=', time_now_YYYYMMDDHH)
                 run_gsi_input.substitude_string('DOMAIN_NAME', '=', dom)
+                run_gsi_input.substitude_string('GSIPROC', '=', str(gsi_ntasks))
                 run_gsi_input.save_content()
 
                 print(f"Run gsi for domain {dom} at {time_now_YYYYMMDDHH}")
@@ -665,7 +670,7 @@ def run_wrf_forecast(data_library_name, dir_case, case_name, exp_name, da_cycle,
                    history_interval=cycling_interval)
 
         # Run wrf to get the forecast
-        print(f'Run wrf from {time_start} to {time_end}')
+        print(f'Cycle {da_cycle}: Run wrf from {time_start} to {time_end}')
         submit_job(dir_script=os.path.join(dir_scratch_case, 'Run_WRF'),
                    script_name='run_wrf.sh',
                    whether_wait=whether_wait,

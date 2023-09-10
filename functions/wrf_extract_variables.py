@@ -61,7 +61,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
         else:
             domains = da_domains
         # domains = ['d02']
-        for dom in tqdm(domains, desc='Domains', leave=False):
+        for dom in tqdm(domains, desc='Domains', position=0, leave=True):
             if 'IMERG'  in exp_name or \
                'CMORPH' in exp_name or \
                'GSMaP'  in exp_name or \
@@ -76,7 +76,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
             ncfile.close()
             lat, lon = latlon_coords(p)
             (n_lat, n_lon) = lat.shape
-            for var in tqdm(variables, desc='Variables', leave=False):
+            for var in tqdm(variables, desc='Variables', position=0, leave=True):
                 (information, levels) = set_variables(var)
                 n_level = len(levels.keys())
                 filename = os.path.join(dir_weather_map_case, f"{var}_{specific_level}_{dom}.nc")
@@ -93,7 +93,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                 ncfile_output.variables['lat'][:,:] = lat
                 ncfile_output.variables['lon'][:,:] = lon
                 ncfile_output.variables[var][:,:,:] = 0.0
-                for idt in tqdm(range(n_time), desc='Times', leave=False):
+                for idt in tqdm(range(n_time), desc='Times', position=0, leave=True):
                     time_now = initial_time + timedelta(hours = idt*time_interval)
                     ncfile_output.variables['time'][idt] = int(time_now.strftime('%Y%m%d%H%M00'))
                     # To Calculate 6-hr accumulated precipitation

@@ -41,7 +41,7 @@ def link_wrfout(data_library_name, dir_case, case_name, exp_name, \
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1
 
         print(f'Link wrfout files from {anl_start_time} to {forecast_end_time}')
-        for item in tqdm(range(n_time), desc="Processing files", leave=False):
+        for item in tqdm(range(n_time), desc="Processing files", position=0, leave=True):
             for dom in GFDL_domains:
                 forecast_time_now = anl_start_time + timedelta(hours=history_interval * item)
                 wrfout_time = forecast_time_now.strftime('%Y-%m-%d_%H:00:00')
@@ -132,7 +132,7 @@ def process_gfdl_files(data_library_name, dir_case, case_name, exp_name, \
 
         n_time = int((forecast_end_time - anl_start_time).total_seconds() / 3600 / history_interval) + 1
 
-        for item in tqdm(range(n_time), desc="Processing files", leave=False):
+        for item in tqdm(range(n_time), desc="Processing files", position=0, leave=True):
             for dom in GFDL_domains:
                 input_file = os.path.join(files_dir, f'FINAL_{dom}.{str(item * history_interval).zfill(2)}')
                 flnm_hwrf = f'{files_out}/{hwrf_header}.f{str(item * dtime).zfill(5)}'
