@@ -123,10 +123,22 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
                     TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
 
                     Bad_Qual_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,0]), (n_vertical_levels, 1, 1))).flatten()
-                    Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,1]), (n_vertical_levels, 1, 1))).flatten()
+                    # Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile.variables['Qc'][:,:,1]), (n_vertical_levels, 1, 1))).flatten()
+
+                    file_tpw = os.path.join(dir_TROPICS, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
+                    ncfile_tpw = Dataset(file_tpw, 'r')
+                    Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile_tpw.variables['clear_sky'][:,:]), (n_vertical_levels, 1, 1))).flatten()
+                    print(file_tpw)
 
                     if 'SEA' in version and 'AS' in version:
-                        index = (Bad_Qual_Flag < 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                        index = (Bad_Qual_Flag < 2) & \
+                                (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    elif 'SEA' in version and 'CS' in version:
+                        index = (Bad_Qual_Flag < 2) & (Clear_Sky_Flag < 1) & \
+                                (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+
+                    ncfile.close()
+                    ncfile_tpw.close()
 
                 elif 'V2' in version:
                 
@@ -170,9 +182,20 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
                     Land_Flag = np.tile(ncfile.variables['land_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
                     Process = np.tile(ncfile.variables['process'][:,:], (n_vertical_levels, 1, 1)).flatten()
 
+                    file_tpw = os.path.join(dir_TROPICS, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
+                    ncfile_tpw = Dataset(file_tpw, 'r')
+                    Clear_Sky_Flag = np.tile(ncfile_tpw.variables['clear_sky'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                    print(file_tpw)
+
                     if 'SEA' in version and 'AS' in version:
                         index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & \
                                 (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    elif 'SEA' in version and 'CS' in version:
+                        index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & (Clear_Sky_Flag < 1) & \
+                                (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+
+                    ncfile.close()
+                    ncfile_tpw.close()
 
                 n_data = sum(index==True)
                 print(n_data)
@@ -339,7 +362,7 @@ def calculate_TROPICS_tpw(data_library_name, dir_case, case_name, version):
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
     dir_data = os.path.join(dir_exp, 'data')
     dir_TROPICS_data = os.path.join(dir_data, f"TROPICS_{version}")
-    dir_tropics = os.path.join(dir_exp, 'tropics')
+    dir_tropics = os.path.join(dir_exp, 'observations', 'tropics')
     os.makedirs(dir_tropics, exist_ok=True)
 
     time_s = initial_time + timedelta(hours=cycling_interval) - timedelta(hours=cycling_interval/2.0)
@@ -459,7 +482,7 @@ def draw_TROPICS_tpw(data_library_names, dir_cases, case_names, versions, ref_ex
         dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
         dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
-        dir_tropics = os.path.join(dir_exp, 'tropics')
+        dir_tropics = os.path.join(dir_exp, 'observations', 'tropics')
         dir_TROPICS_data = os.path.join(dir_exp, 'data', f"TROPICS_{version}")
 
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
@@ -580,7 +603,7 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names, versions):
     module = importlib.import_module(f"data_library_{data_library_names[0]}")
     attributes = getattr(module, 'attributes')
     dir_exp = attributes[(dir_cases[0], case_names[0])]['dir_exp']
-    dir_tropics = os.path.join(dir_exp, 'tropics')
+    dir_tropics = os.path.join(dir_exp, 'observations', 'tropics')
     output_file = os.path.join(dir_tropics, 'tpw_cdf.png')
     image_files = []
 
@@ -598,7 +621,7 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names, versions):
         dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
         dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
         dir_TROPICS_data = os.path.join(dir_exp, 'data', f"TROPICS_{version}")
-        dir_tropics = os.path.join(dir_exp, 'tropics')
+        dir_tropics = os.path.join(dir_exp, 'observations', 'tropics')
 
         grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
         grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
