@@ -655,8 +655,10 @@ def draw_TROPICS_tpw_cdf(data_library_names, dir_cases, case_names, versions):
 
             tpw_all = np.sort(tpw_all)
             percentile_90 = np.percentile(tpw_all, 90)
+            percentile_95 = np.percentile(tpw_all, 95)
             cdf = np.arange(1, len(tpw_all) + 1)/len(tpw_all)
             print(f"90th percentile of {version} is: {percentile_90:.2f}")
+            print(f"95th percentile of {version} is: {percentile_95:.2f}")
 
             specific_value = 55.5
             percentage = np.sum(tpw_all > specific_value)/len(tpw_all)*100

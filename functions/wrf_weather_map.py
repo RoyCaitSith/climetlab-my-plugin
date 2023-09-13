@@ -27,13 +27,13 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                         quiver_vars=['null', 'null'], quiver_var_level=9999, quiver_var_ref_exp_name='ERA5',
                         quiver_var_color='w', quiver_var_space=10, quiver_var_scale=25,
                         projection='lcc', lat_1=40.0, lat_2=20.0, lon_0=-80.0,
-                        domains=['d01'], da_cycle=1, region_type='d02', tc_info=False,
+                        domains=['d01'], da_cycle=1, region_type='d02', tc_info=False, target_on='tc',
                         var_time=20000101010000):
 
-    if region_type == 'tc':
+    if region_type == 'tc' or target_on == 'tc':
         radii = [150.0, 300.0, 450.0]
         angles = np.arange(0.0, 360.0, 2.0)
-    if region_type == 'aew':
+    if region_type == 'aew' or target_on == 'aew':
         radii = [100.0, 200.0, 300.0]
         angles = np.arange(0.0, 360.0, 2.0)
 
@@ -142,7 +142,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             if region_type == 'd01': extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
             if region_type == 'd02': extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
             
-            if region_type == 'tc':
+            if region_type == 'tc' or target_on == 'tc':
                 if exp_name  == 'GFS' or exp_name == 'ERA5':
                     best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
                 else:
@@ -164,10 +164,11 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     if bt_datetime == var_time_datetime:
                         bt_lat = bt_lats[id_bt]
                         bt_lon = bt_lons[id_bt]
-                        extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
-                        tc_information = f"{float(bt_mslps[id_bt]):.0f} hPa, {float(bt_mwss[id_bt]/1.9438444924):.0f} " + '$\mathregular{ms^{-1}}$, '
+                        if region_type == 'tc':
+                            extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
+                            tc_information = f"{float(bt_mslps[id_bt]):.0f} hPa, {float(bt_mwss[id_bt]/1.9438444924):.0f} " + '$\mathregular{ms^{-1}}$, '
 
-            if region_type == 'aew':
+            if region_type == 'aew' or target_on == 'aew':
                 best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
                 df = pd.read_csv(best_track)
                 bt_lats = list(df['LAT'][:])
@@ -181,7 +182,8 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     if bt_datetime == var_time_datetime:
                         bt_lat = bt_lats[id_bt]
                         bt_lon = bt_lons[id_bt]
-                        extent = [bt_lon-3.0, bt_lon+3.0, bt_lat-3.0, bt_lat+3.0]
+                        if region_type == 'tc':
+                            extent = [bt_lon-3.0, bt_lon+3.0, bt_lat-3.0, bt_lat+3.0]
 
             fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
             fig_height = 2.75+0.75
@@ -251,7 +253,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     index = (lon >= extent[0]) & (lon <= extent[1]) & (lat >= extent[2]) & (lat <= extent[3])
                     tc_information += f"{float(np.nanmin(contour_var_value[index])):.0f} hPa, {float(np.nanmax(contourf_var_value[index])):.0f} " + '$\mathregular{ms^{-1}}$'
 
-                if region_type == 'tc' or region_type == 'aew':
+                if region_type == 'tc' or region_type == 'aew' or target_on:
                     cross_h_lons = np.arange(-180.0, 180.1, 1.0)
                     cross_h_lats = np.array([bt_lat]*len(cross_h_lons))
                     cross_v_lats = np.arange(-90.0, 90.1, 1.0)
@@ -309,6 +311,9 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     clb.set_ticks(list(map(float, contourf_labels[0::2])))
                     clb.set_ticklabels(contourf_labels[0::2])
                 elif len(contourf_labels)-1 <= 16:
+                    clb.set_ticks(list(map(float, contourf_labels[0::4])))
+                    clb.set_ticklabels(contourf_labels[0::4])
+                else:
                     clb.set_ticks(list(map(float, contourf_labels[0::4])))
                     clb.set_ticklabels(contourf_labels[0::4])
 

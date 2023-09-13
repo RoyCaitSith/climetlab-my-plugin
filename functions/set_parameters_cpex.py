@@ -673,8 +673,9 @@ def set_variables(var):
         information.update({'ERA5': 'tp'})
 
         levels = {}
-        # levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 3)], cmaps.prcp_2]})
-        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 33, 2)], cmaps.prcp_2]})
+        # levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 49, 2)], cmaps.prcp_2]})
+        # levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 33, 2)], cmaps.prcp_2]})
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(0, 65, 2)], cmaps.WhiteBlueGreenYellowRed]})
 
     if var == 'sp' or var == 'sp_anl':
         information = {}
