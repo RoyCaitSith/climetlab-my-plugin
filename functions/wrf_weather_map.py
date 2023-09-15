@@ -142,7 +142,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             if region_type == 'd01': extent = [lon_d01[0,0], lon_d01[-1,-1], lat_d01[0,0], lat_d01[-1,-1]]
             if region_type == 'd02': extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
             
-            if region_type == 'tc' or target_on == 'tc':
+            if region_type == 'tc' or (region_type != 'tc' and region_type !='aew' and target_on == 'tc'):
                 if exp_name  == 'GFS' or exp_name == 'ERA5':
                     best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
                 else:
@@ -168,7 +168,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                             extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
                             tc_information = f"{float(bt_mslps[id_bt]):.0f} hPa, {float(bt_mwss[id_bt]/1.9438444924):.0f} " + '$\mathregular{ms^{-1}}$, '
 
-            if region_type == 'aew' or target_on == 'aew':
+            if region_type == 'aew' or (region_type != 'tc' and region_type !='aew' and target_on == 'aew'):
                 best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['AEW_best_track'])
                 df = pd.read_csv(best_track)
                 bt_lats = list(df['LAT'][:])
@@ -182,7 +182,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     if bt_datetime == var_time_datetime:
                         bt_lat = bt_lats[id_bt]
                         bt_lon = bt_lons[id_bt]
-                        if region_type == 'tc':
+                        if region_type == 'aew':
                             extent = [bt_lon-3.0, bt_lon+3.0, bt_lat-3.0, bt_lat+3.0]
 
             fig_width = 2.75*np.abs(extent[1]-extent[0])/np.abs(extent[3]-extent[2])
@@ -313,9 +313,12 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                 elif len(contourf_labels)-1 <= 16:
                     clb.set_ticks(list(map(float, contourf_labels[0::4])))
                     clb.set_ticklabels(contourf_labels[0::4])
+                elif len(contourf_labels)-1 <= 32:
+                    clb.set_ticks(list(map(float, contourf_labels[0::8])))
+                    clb.set_ticklabels(contourf_labels[0::8])
                 else:
-                    clb.set_ticks(list(map(float, contourf_labels[0::4])))
-                    clb.set_ticklabels(contourf_labels[0::4])
+                    clb.set_ticks(list(map(float, contourf_labels[0::16])))
+                    clb.set_ticklabels(contourf_labels[0::16])
 
                 plt.tight_layout()
                 plt.savefig(pngname, dpi=600)
