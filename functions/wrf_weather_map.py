@@ -229,18 +229,17 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     if draw_contour_positive:
                         CS1 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
                                          levels=contour_positive_levels, linestyles='solid',  \
-                                         colors=contour_positive_color, linewidths=1.0, zorder=1)
+                                         colors=contour_positive_color, linewidths=1.0, zorder=2)
                         if contour_positive_clabel == True: ax.clabel(CS1, inline=True, fontsize=5.0)
                     if draw_contour_negative:
                         CS2 = ax.contour(mlon, mlat, contour_information['factor']*contour_var_value, \
                                          levels=contour_negative_levels, linestyles='dashed',  \
-                                         colors=contour_negative_color, linewidths=1.0, zorder=1)
+                                         colors=contour_negative_color, linewidths=1.0, zorder=2)
                         if contour_negative_clabel == True: ax.clabel(CS2, inline=True, fontsize=5.0)
                     # print(np.nanmax(contour_var_value))
                     # print(np.nanmin(contour_var_value))
 
                 if 'null' not in quiver_vars:
-
                     (quiver_1_information, quiver_1_levels) = set_variables(quiver_var_1)
                     (quiver_2_information, quiver_2_levels) = set_variables(quiver_var_2)
                     ax.quiver(mlon[::quiver_var_space, ::quiver_var_space], mlat[::quiver_var_space, ::quiver_var_space], \
