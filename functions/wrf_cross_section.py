@@ -292,6 +292,9 @@ def draw_cross_section(data_library_names, dir_cases, case_names, exp_names,
     (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
+    module = importlib.import_module(f"set_parameters_{data_library_name}")
+    set_variables = getattr(module, 'set_variables')
+
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
     dir_cross_section = os.path.join(dir_exp, 'cross_section')

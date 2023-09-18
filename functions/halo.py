@@ -435,11 +435,13 @@ def draw_HALO_comparison(data_library_names, dir_cases, case_names, exp_names, s
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
     time_window_max = attributes[(dir_case, case_name)]['time_window_max']
     dir_cross_section = os.path.join(dir_exp, 'cross_section')
     dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
     dir_best_track = os.path.join(dir_track_intensity, 'best_track')
+
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
     start_time = float(var_time_datetime.strftime('%H')) - time_window_max
