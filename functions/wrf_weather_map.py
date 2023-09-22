@@ -73,7 +73,6 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
             specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
             dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
-            
             # print(exp_name)
 
             filename = (
