@@ -436,10 +436,22 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 os.makedirs(ens_dir, exist_ok=True)
                 if boundary_data_ensemble == 'GEFS':
                     for idens in range(1, int(ensemble_members+1)):
-                        os.system(f"ln -sf {dir_gefs_wrf_ensemble}/{time_now_YYYYMMDD}/{time_now_HH}/wrfout_{dom}_{str(idens).zfill(3)} {ens_dir}/wrf_en{str(idens).zfill(3)}")
+                        ens_in  = f"{dir_gefs_wrf_ensemble}/{time_now_YYYYMMDD}/{time_now_HH}/wrfout_{dom}_{str(idens).zfill(3)}"
+                        if os.path.exists(ens_in):
+                            ens_out = f"{ens_dir}/wrf_en{str(idens).zfill(3)}"
+                            os.system(f"ln -sf {ens_in} {ens_out}")
                 elif boundary_data_ensemble == 'GFS':
                     for idens in range(1, int(ensemble_members+1)):
-                        os.system(f"ln -sf {dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/mem{str(idens).zfill(3)}/gdas.t{time_last_HH}z.atmf006.nc {ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}")
+                        ens_in = f"{dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/mem{str(idens).zfill(3)}/gdas.t{time_last_HH}z.atmf006.nc"
+                        # print(ens_in)
+                        if os.path.exists(ens_in):
+                            ens_out = f"{ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
+                            os.system(f"ln -sf {ens_in} {ens_out}")
+                        ens_in = f"{dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
+                        # print(ens_in)
+                        if os.path.exists(ens_in):
+                            ens_out = f"{ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
+                            os.system(f"ln -sf {ens_in} {ens_out}")
 
                 print(f"Copy, revise, and the script of running gsi at {time_now_YYYYMMDDHH}")
                 run_gsi_input = fo.change_content(os.path.join(dir_option, 'run_GSI.sh'))

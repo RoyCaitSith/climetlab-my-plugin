@@ -66,6 +66,7 @@ def setup_gfdl_folder(data_library_name, dir_case, case_name, exp_name, copy_exp
     for da_cycle in tqdm(range(1, total_da_cycles+1), desc="DA Cycle"):
         case = '_'.join([case_name, exp_name, 'C' + str(da_cycle).zfill(2)])
         copy_case = '_'.join([case_name, copy_exp_name, 'C' + str(da_cycle).zfill(2)])
+        print(case)
 
         folder_in = os.path.join(dir_exp, 'track_intensity', copy_case)
         folder_out = os.path.join(dir_exp, 'track_intensity', case)
