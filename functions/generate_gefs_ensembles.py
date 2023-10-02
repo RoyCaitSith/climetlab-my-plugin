@@ -90,7 +90,8 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, nodes, ntasks, account, partition, nodelist=''):
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, ref_exp_name,
+                          whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -113,10 +114,11 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
     dir_GEFS = os.path.join(dir_data, 'GEFS')
 
     # I do not need to set the directories of these files
-    namelist_wps_dir   = os.path.join(dir_namelists, 'namelist.wps')
-    namelist_input_dir = os.path.join(dir_namelists, 'namelist.input')
-    run_wps_dir        = os.path.join(dir_namelists, 'run_wps.sh')
-    run_wrf_dir        = os.path.join(dir_namelists, 'run_wrf.sh')
+    ref_case_name      = '_'.join([case_name, ref_exp_name, f"C{str(total_da_cycles).zfill(2)}"])
+    namelist_wps_dir   = os.path.join(dir_namelists, ref_case_name, 'namelist.wps')
+    namelist_input_dir = os.path.join(dir_namelists, ref_case_name, 'namelist.input')
+    run_wps_dir        = os.path.join(dir_namelists, ref_case_name, 'run_wps.sh')
+    run_wrf_dir        = os.path.join(dir_namelists, ref_case_name, 'run_wrf.sh')
 
     #print(f'Generate 6 and 12 hour ensemble forecasts for each cycles')
     ensemble_forecast_hours = [6, 12]
@@ -137,7 +139,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, whether_wait, 
                 anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
 
                 max_dom = len(da_domains)
-                wps_interval = 3
+                # wps_interval = 3
                 start_date = anl_end_time - timedelta(hours = ens_hours)
                 end_date = anl_end_time
                 #print(f"domains: {max_dom}")
