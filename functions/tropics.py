@@ -21,7 +21,7 @@ from IPython.display import Image as IPImage
 from metpy.calc import height_to_geopotential, dewpoint_from_specific_humidity, precipitable_water
 from metpy.units import units
 
-def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2_SEA_AS'):
+def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2_AS'):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -32,10 +32,16 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
-
     dir_data = os.path.join(dir_exp, 'data')
-    dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
-    dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+
+    if 'OLD' in version or 'old' in version:
+        # Remove '_OLD' in version
+        dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version[:-4]}")
+        dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp_old')
+    else:
+        dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
+        dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+
     os.makedirs(dir_TROPICS, exist_ok=True)
     os.makedirs(dir_TROPICS_bufr_temp, exist_ok=True)
 
@@ -127,15 +133,23 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
 
                     file_tpw = os.path.join(dir_TROPICS, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
                     ncfile_tpw = Dataset(file_tpw, 'r')
+                    TPW = np.transpose(np.tile(np.transpose(ncfile_tpw.variables['tpw'][:,:]), (n_vertical_levels, 1, 1))).flatten()
                     Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile_tpw.variables['clear_sky'][:,:]), (n_vertical_levels, 1, 1))).flatten()
                     print(file_tpw)
 
-                    if 'SEA' in version and 'AS' in version:
-                        index = (Bad_Qual_Flag < 2) & \
-                                (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
-                    elif 'SEA' in version and 'CS' in version:
-                        index = (Bad_Qual_Flag < 2) & (Clear_Sky_Flag < 1) & \
-                                (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    if 'OLD' in version or 'old' in version:
+                        if 'AS' in version:
+                            index = (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                        elif 'CS' in version:
+                            index = (TPW >= 0.0) & (TPW <= 56.5) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    else:
+                        if 'AS' in version:
+                            index = (Bad_Qual_Flag < 2) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                        elif 'CS' in version:
+                            index = (Bad_Qual_Flag < 2) & (Clear_Sky_Flag < 1) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
 
                     ncfile.close()
                     ncfile_tpw.close()
@@ -184,15 +198,24 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
 
                     file_tpw = os.path.join(dir_TROPICS, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
                     ncfile_tpw = Dataset(file_tpw, 'r')
+                    TPW = np.tile(ncfile_tpw.variables['tpw'][:,:], (n_vertical_levels, 1, 1)).flatten()
                     Clear_Sky_Flag = np.tile(ncfile_tpw.variables['clear_sky'][:,:], (n_vertical_levels, 1, 1)).flatten()
                     print(file_tpw)
 
-                    if 'SEA' in version and 'AS' in version:
-                        index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & \
-                                (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
-                    elif 'SEA' in version and 'CS' in version:
-                        index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & (Clear_Sky_Flag < 1) & \
-                                (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    if 'OLD' in version or 'old' in version:
+                        if 'AS' in version:
+                            index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                        elif 'CS' in version:
+                            index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (TPW >= 0) & (TPW <= 56.5) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                    else:
+                        if 'AS' in version:
+                            index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & \
+                                    (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                        elif 'CS' in version:
+                            index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & (Clear_Sky_Flag < 1) & \
+                                    (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
 
                     ncfile.close()
                     ncfile_tpw.close()
@@ -279,7 +302,7 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
         np.savetxt(os.path.join(dir_bufr_temp, '0.txt'), [n_total_data])
         print('\n')
 
-def create_TROPICS_bufr(data_library_name, dir_case, case_name, version='V2_SEA_AS'):
+def create_TROPICS_bufr(data_library_name, dir_case, case_name, version='V2_AS'):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -290,11 +313,17 @@ def create_TROPICS_bufr(data_library_name, dir_case, case_name, version='V2_SEA_
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
     cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
-
     dir_data = os.path.join(dir_exp, 'data')
-    dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
-    dir_TROPICS_bufr = os.path.join(dir_TROPICS, 'bufr')
-    dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+
+    if 'OLD' in version or 'old' in version:
+        dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version[:-4]}")
+        dir_TROPICS_bufr = os.path.join(dir_TROPICS, 'bufr_old')
+        dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp_old')
+    else:
+        dir_TROPICS = os.path.join(dir_data, f"TROPICS_{version}")
+        dir_TROPICS_bufr = os.path.join(dir_TROPICS, 'bufr')
+        dir_TROPICS_bufr_temp = os.path.join(dir_TROPICS, 'bufr_temp')
+
     os.makedirs(dir_TROPICS, exist_ok=True)
     os.makedirs(dir_TROPICS_bufr, exist_ok=True)
 

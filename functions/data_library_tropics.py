@@ -69,7 +69,7 @@ attributes[('/05_TROPICS/11_cycling_da_tropics', 'Ida')] = {
     'itime': (2021, 8, 26,  0, 0, 0),
     'forecast_hours': 72,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
-    'total_da_cycles': 8,
+    'total_da_cycles': 6,
     'time_window_max': 3.0,
     'da_domains': ['d01', 'd02'],
     'forecast_domains': ['d01', 'd02'],

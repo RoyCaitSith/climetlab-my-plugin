@@ -359,10 +359,16 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     dir_dawnbufr = os.path.join(dir_data, 'DAWN', 'bufr')
     dir_halobufr = os.path.join(dir_data, 'HALO', 'bufr')
     dir_cygnssbufr = os.path.join(dir_data, 'CYGNSS', 'bufr')
-    if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_AS', 'bufr')
-    if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_AS', 'bufr')
-    if 'V1_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_CS', 'bufr')
-    if 'V2_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_CS', 'bufr')
+    if 'OLD' in exp_name or 'old' in exp_name:
+        if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_AS', 'bufr_old')
+        if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_AS', 'bufr_old')
+        if 'V1_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_CS', 'bufr_old')
+        if 'V2_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_CS', 'bufr_old')
+    else:
+        if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_AS', 'bufr')
+        if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_AS', 'bufr')
+        if 'V1_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_SEA_CS', 'bufr')
+        if 'V2_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_SEA_CS', 'bufr')
 
     dir_da = os.path.join(dir_cycling_da, 'da')
     dir_bkg = os.path.join(dir_cycling_da, 'bkg')
