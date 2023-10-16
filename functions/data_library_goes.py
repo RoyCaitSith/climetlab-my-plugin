@@ -35,7 +35,7 @@ attributes[('/02_GOES_Bias_Correction/28_Ida', 'Ida')] = {
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/02_Ida/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
-    'hwrf_header': 'hwrf.18x18.AL092021.2021082506',
+    'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
     'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2021, 'name': 'IDA'},
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
     'CMORPH_version': '8km-30min',
@@ -70,14 +70,16 @@ compare_schemes['GOES_Laura_scheme_01'] = {
 compare_schemes['GOES_Laura_scheme_02'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_08'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_09'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_10'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
-    'labels': ['NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
-    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5]],
-    'linestyles': ['-', '-', '-', '-', '-', '-'],
+    'labels': ['NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_03'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_08'), \
@@ -91,14 +93,16 @@ compare_schemes['GOES_Laura_scheme_03'] = {
 }
 compare_schemes['GOES_Laura_scheme_04'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_08'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_09'), \
+              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_10'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
-    'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
-    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
-    'linestyles': ['-', '-', '-', '-', '-'],
+    'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_05'] = {
     'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \

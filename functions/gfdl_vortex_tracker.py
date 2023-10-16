@@ -31,7 +31,7 @@ def link_wrfout(data_library_name, dir_case, case_name, exp_name, \
         else:
             anl_start_time = input_anl_start_time
         if input_forecast_end_time == datetime(2000, 1, 1, 0, 0, 0):
-            forecast_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle + forecast_hours)
+            forecast_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle + forecast_hours + 6)
         else:
             forecast_end_time = input_forecast_end_time
         dir_in = os.path.join(dir_exp, 'cycling_da', case, 'bkg')
@@ -127,7 +127,7 @@ def process_gfdl_files(data_library_name, dir_case, case_name, exp_name, \
             anl_start_time = input_anl_start_time
 
         if input_forecast_end_time == datetime(2000, 1, 1, 0, 0, 0):
-            forecast_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle + forecast_hours)
+            forecast_end_time = initial_time + timedelta(hours=cycling_interval*da_cycle + forecast_hours + 6)
         else:
             forecast_end_time = input_forecast_end_time
 
