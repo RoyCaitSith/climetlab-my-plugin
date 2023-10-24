@@ -10,25 +10,20 @@
 		},
 		{
 			"name": "climetlab-my-plugin",
-			"path": "climetlab-my-plugin"
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin"
 		},
 		{
 			"name": "CPEX",
-			"path": "CPEX"
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CPEX"
 		},
 		{
 			"name": "TROPICS",
-			"path": "TROPICS"
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/TROPICS"
 		},
 		{
 			"name": "GOES-R-observation-error-covariance",
-			"path": "GOES-R-observation-error-covariance"
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance"
 		},
-		{
-			"name": "RoyCaitSith.github.io",
-			"path": "RoyCaitSith.github.io"
-		},
-
 	],
 	"settings": {
         "python.defaultInterpreterPath": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/mymini3/bin/python",
