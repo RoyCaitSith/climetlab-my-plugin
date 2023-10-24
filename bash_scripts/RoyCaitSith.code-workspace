@@ -1,0 +1,43 @@
+{
+	"folders": [
+		{
+            "name": "u1237353",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353"
+		},
+		{
+            "name": "cfeng",
+			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng"
+		},
+		{
+			"name": "climetlab-my-plugin",
+			"path": "climetlab-my-plugin"
+		},
+		{
+			"name": "CPEX",
+			"path": "CPEX"
+		},
+		{
+			"name": "TROPICS",
+			"path": "TROPICS"
+		},
+		{
+			"name": "GOES-R-observation-error-covariance",
+			"path": "GOES-R-observation-error-covariance"
+		},
+		{
+			"name": "RoyCaitSith.github.io",
+			"path": "RoyCaitSith.github.io"
+		},
+
+	],
+	"settings": {
+        "python.defaultInterpreterPath": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/mymini3/bin/python",
+        "terminal.integrated.profiles.linux": {
+			"bash":{
+				"path": "/usr/bin/bash",
+				"args": ["-l"]
+			},
+		},
+        "terminal.integrated.defaultProfile.linux": "bash",
+    }
+}
