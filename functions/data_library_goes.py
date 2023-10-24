@@ -101,7 +101,7 @@ compare_schemes['GOES_Laura_scheme_04'] = {
               ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
     'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
-    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6]],
+    'colors': [sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
     'linestyles': ['-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_05'] = {
@@ -119,4 +119,31 @@ compare_schemes['GOES_Ida_scheme_01'] = {
     'labels': ['CTRL'],
     'colors': [sns_bright_cmap[0]],
     'linestyles': ['-'],
+}
+compare_schemes['GOES_Ida_scheme_02'] = {
+    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'labels': ['NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '-', '-'],
+}
+compare_schemes['GOES_Ida_scheme_04'] = {
+    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
+    'colors': [sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
+    'linestyles': ['-', '-', '-', '-', '-', '-', '-'],
 }
