@@ -127,7 +127,7 @@ def submit_job(dir_script, script_name, whether_wait, nodes, ntasks, account, pa
             time.sleep(sleep_interval)
         print(f'Finish running the job')
 
-def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, whether_wait, nodes, ntasks, account, partition, nodelist=''):
+def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_version, period, whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
     module = importlib.import_module(f"data_library_{data_library_name}")
@@ -295,7 +295,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, period, w
         run_wps = fo.change_content(run_wps_dir)
         run_wps.substitude_string('#SBATCH -J', ' ', initial_time_str[2::])
         run_wps.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
-        run_wps.substitude_string('ln -sf $WORK_DIRECTORY/WPS/ungrib/Variable_Tables', '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
+        run_wps.substitude_string(f"ln -sf $WORK_DIRECTORY/{wps_version}/ungrib/Variable_Tables", '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
 
         if boundary_data_deterministic == 'GFS':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gfs* $RUN_WRF_DIRECTORY')

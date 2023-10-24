@@ -90,7 +90,7 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
 
                 forecast_ntime += forecast_interval
 
-def run_wps_and_real_gefs(data_library_name, dir_case, case_name, ref_exp_name,
+def run_wps_and_real_gefs(data_library_name, dir_case, case_name, ref_exp_name, wps_version,
                           whether_wait, nodes, ntasks, account, partition, nodelist=''):
 
     # Import the necessary library
@@ -223,7 +223,7 @@ def run_wps_and_real_gefs(data_library_name, dir_case, case_name, ref_exp_name,
                 run_wps = fo.change_content(run_wps_dir)
                 run_wps.substitude_string('#SBATCH -J', ' ', initial_time_str[2::])
                 run_wps.substitude_string('export SCRATCH_DIRECTORY', '=', folder_dir)
-                run_wps.substitude_string('ln -sf $WORK_DIRECTORY/WPS/ungrib/Variable_Tables', '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
+                run_wps.substitude_string(f"ln -sf $WORK_DIRECTORY/{wps_version}/ungrib/Variable_Tables", '/', f"{vtable} $RUN_WRF_DIRECTORY/Vtable")
                 run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gep* $RUN_WRF_DIRECTORY')
                 run_wps.save_content()
 
