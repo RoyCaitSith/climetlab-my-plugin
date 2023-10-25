@@ -4,8 +4,8 @@ attributes = {}
 compare_schemes = {}
 sns_bright_cmap = sns.color_palette('bright')
 
-attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN',
+attributes[('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/01_CV_RF07_AEW06_IAN',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/01_CV_RF07_AEW06_IAN/namelists',
     'NHC_best_track': '2022_09L_Ian.csv',
@@ -31,8 +31,8 @@ attributes[('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/08_CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/02_AW_RF01_AEW01',
+attributes[('/CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/02_AW_RF01_AEW01',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/02_AW_RF01_AEW01/namelists',
     'AEW_best_track': '2021_AEW01.csv',
@@ -55,8 +55,8 @@ attributes[('/08_CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/08_CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/03_AW_RF02_AEW02',
+attributes[('/CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/03_AW_RF02_AEW02',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/03_AW_RF02_AEW02/namelists',
     'AEW_best_track': '2021_AEW02.csv',
@@ -79,8 +79,8 @@ attributes[('/08_CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/08_CPEX/04_AW_RF07_Larry', 'Larry')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/04_AW_RF07_Larry',
+attributes[('/CPEX/04_AW_RF07_Larry', 'Larry')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/04_AW_RF07_Larry',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/04_AW_RF07_Larry/namelists',
     'NHC_best_track': '2021_12L_Larry.csv',
@@ -104,8 +104,8 @@ attributes[('/08_CPEX/04_AW_RF07_Larry', 'Larry')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/08_CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/05_CV_RF07_AEW06',
+attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/05_CV_RF07_AEW06',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/05_CV_RF07_AEW06/namelists',
     'AEW_best_track': '2022_AEW06.csv',
@@ -113,7 +113,7 @@ attributes[('/08_CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
     'CMORPH_version': '8km-30min',
     'GSMaP_version': '05A',
     'itime': (2022, 9, 16,  0, 0, 0),
-    'forecast_hours': 36,
+    'forecast_hours': 48,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 4,
     'time_window_max': 3.0,
@@ -129,11 +129,11 @@ attributes[('/08_CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
 }
 
 compare_schemes['Ian_scheme_01'] = {
-    'cases': [('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CTRL'), \
-              ('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CONV'), \
-              ('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'DAWN'), \
-              ('/08_CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'HALO')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/08_CPEX/01_CV_RF07_AEW06_IAN/track_intensity/figures',
+    'cases': [('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CTRL'), \
+              ('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CONV'), \
+              ('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'DAWN'), \
+              ('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'HALO')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/01_CV_RF07_AEW06_IAN/track_intensity/figures',
     'labels': ['CTRL', 'CONV', 'DAWN', 'HALO'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2],  sns_bright_cmap[3]],
     'linestyles': ['-', '-', '-', '-'],
