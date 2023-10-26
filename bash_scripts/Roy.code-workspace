@@ -24,6 +24,10 @@
 			"name": "GOES-R-observation-error-covariance",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance"
 		},
+		{
+            "name": "software",
+			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software"
+		},
 	],
 	"settings": {
         "python.defaultInterpreterPath": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/mymini3/bin/python",
