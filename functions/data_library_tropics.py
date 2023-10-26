@@ -6,7 +6,7 @@ sns_bright_cmap = sns.color_palette('bright')
 
 attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/05_cycling_da',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/05_cycling_da/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
@@ -32,7 +32,7 @@ attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
 
 attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/10_cycling_da_tropics_v3',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/05_cycling_da/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
@@ -58,7 +58,7 @@ attributes[('/05_TROPICS/10_cycling_da_tropics_v3', 'Ida')] = {
 
 attributes[('/05_TROPICS/11_cycling_da_tropics', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/11_cycling_da_tropics',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/11_cycling_da_tropics/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',

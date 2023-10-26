@@ -160,7 +160,7 @@ def draw_goes_images(data_library_name, dir_case, case_name, channel=8, goes_lev
     dir_goes = os.path.join(dir_exp, 'observations', 'goes')
     dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-    cpt, cpt_r = loadCPT(os.path.join(dir_colormaps, 'GOES-R_BT.rgb'))
+    cpt, cpt_r = loadCPT(os.path.join(dir_colormaps, 'goes', 'GOES-R_BT.rgb'))
     cpt_convert = LinearSegmentedColormap('cpt', cpt)
     
     if region_type == 'd01' or region_type == 'd02':

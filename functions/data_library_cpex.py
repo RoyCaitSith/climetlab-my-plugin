@@ -6,7 +6,7 @@ sns_bright_cmap = sns.color_palette('bright')
 
 attributes[('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/01_CV_RF07_AEW06_IAN',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/01_CV_RF07_AEW06_IAN/namelists',
     'NHC_best_track': '2022_09L_Ian.csv',
     'AEW_best_track': '2022_AEW06.csv',
@@ -33,7 +33,7 @@ attributes[('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian')] = {
 
 attributes[('/CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/02_AW_RF01_AEW01',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/02_AW_RF01_AEW01/namelists',
     'AEW_best_track': '2021_AEW01.csv',
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
@@ -57,7 +57,7 @@ attributes[('/CPEX/02_AW_RF01_AEW01', 'AEW01')] = {
 
 attributes[('/CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/03_AW_RF02_AEW02',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/03_AW_RF02_AEW02/namelists',
     'AEW_best_track': '2021_AEW02.csv',
     'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
@@ -81,7 +81,7 @@ attributes[('/CPEX/03_AW_RF02_AEW02', 'AEW02')] = {
 
 attributes[('/CPEX/04_AW_RF07_Larry', 'Larry')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/04_AW_RF07_Larry',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/04_AW_RF07_Larry/namelists',
     'NHC_best_track': '2021_12L_Larry.csv',
     'hwrf_header': 'hwrf.18x18.AL122021.2021090406',
@@ -106,7 +106,7 @@ attributes[('/CPEX/04_AW_RF07_Larry', 'Larry')] = {
 
 attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/05_CV_RF07_AEW06',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/05_CV_RF07_AEW06/namelists',
     'AEW_best_track': '2022_AEW06.csv',
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},

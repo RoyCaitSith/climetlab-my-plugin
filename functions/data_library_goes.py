@@ -6,7 +6,7 @@ sns_bright_cmap = sns.color_palette('bright')
 
 attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/01_Laura/namelists',
     'NHC_best_track': '2020_13L_Laura.csv',
     'hwrf_header': 'hwrf.18x18.AL132020.2020082406',
@@ -32,7 +32,7 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
 
 attributes[('/02_GOES_Bias_Correction/28_Ida', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida',
-    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin/colormaps',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/02_Ida/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
     'hwrf_header': 'hwrf.18x18.AL092021.2021082606',
