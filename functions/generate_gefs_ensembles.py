@@ -26,7 +26,11 @@ def download_gefs_ensemble(data_library_name, dir_case, case_name):
     dir_GEFS = os.path.join(dir_data, 'GEFS')
     os.makedirs(dir_GEFS, exist_ok=True)
 
-    aws_s3_cp = 'aws s3 cp --no-sign-request '
+    # print("PATH:", os.environ["PATH"])
+    # aws_cli_executable = '/uufs/chpc.utah.edu/sys/installdir/aws-cli/2.2.29/bin/aws'
+    aws_cli_executable = 'aws'
+
+    aws_s3_cp = aws_cli_executable + ' s3 cp --no-sign-request '
     aws_s3_bucket = 's3://noaa-gefs-pds/'
     forecast_interval = 3
     forecast_period = 12

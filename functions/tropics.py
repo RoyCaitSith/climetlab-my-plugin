@@ -145,10 +145,10 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
                                     (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
                     else:
                         if 'AS' in version:
-                            index = (Bad_Qual_Flag < 2) & \
+                            index = (Bad_Qual_Flag < 2) & (TROPICS_CLAT <= 40.0) & (TROPICS_CLAT >= -40.0) & \
                                     (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
                         elif 'CS' in version:
-                            index = (Bad_Qual_Flag < 2) & (Clear_Sky_Flag < 1) & \
+                            index = (Bad_Qual_Flag < 2) & (Clear_Sky_Flag < 1) & (TROPICS_CLAT <= 40.0) & (TROPICS_CLAT >= -40.0) & \
                                     (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
 
                     ncfile.close()
@@ -212,10 +212,12 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
                     else:
                         if 'AS' in version:
                             index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & \
-                                    (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                                    (TROPICS_CLAT <= 40.0) & (TROPICS_CLAT >= -40.0) & (TROPICS_LEVEL > 2) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
                         elif 'CS' in version:
                             index = (Lat_Region == 1) & (Bad_Scan_Flag == 0) & (Bad_Latlon == 0) & (Land_Flag == 0) & (Clear_Sky_Flag < 1) & \
-                                    (TROPICS_LEVEL > 2) & (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
+                                    (TROPICS_CLAT <= 40.0) & (TROPICS_CLAT >= -40.0) & (TROPICS_LEVEL > 2) & \
+                                    (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
 
                     ncfile.close()
                     ncfile_tpw.close()
