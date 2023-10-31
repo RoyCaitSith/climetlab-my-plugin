@@ -16,7 +16,7 @@ from mpl_toolkits.basemap import Basemap
 from IPython.display import Image as IPImage
 from matplotlib.colors import LinearSegmentedColormap
 
-def download_goes_date(download_start_time, n_days, dir_GOES, data_set='ABI-L2-CMIPF'):
+def download_goes_date(download_start_time, n_days, dir_GOES, time_interval, data_set='ABI-L2-CMIPF'):
     """
     Download GOES-R data for a specified number of days and store it locally.
 
@@ -41,7 +41,7 @@ def download_goes_date(download_start_time, n_days, dir_GOES, data_set='ABI-L2-C
 
         os.makedirs(dir_day, exist_ok=True)
 
-        for hour in tqdm(range(24), desc='Hours', leave=False, unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        for hour in tqdm(range(0, 24, time_interval), desc='Hours', leave=False, unit="files", bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
             dir_hour = f"{dir_day}/{str(hour).zfill(2)}"
             os.makedirs(dir_hour, exist_ok=True)
             dir_in = f"{data_set}/{year}/{day}/{str(hour).zfill(2)}/"
