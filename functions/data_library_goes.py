@@ -4,8 +4,8 @@ attributes = {}
 compare_schemes = {}
 sns_bright_cmap = sns.color_palette('bright')
 
-attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor',
+attributes[('/GOES-R-observation-error-covariance/01_Laura', 'Laura')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/GOES-R-observation-error-covariance/01_Laura',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/01_Laura/namelists',
     'NHC_best_track': '2020_13L_Laura.csv',
@@ -30,8 +30,8 @@ attributes[('/02_GOES_Bias_Correction/27_ChCor', 'Laura')] = {
     'ensemble_members': 80,
 }
 
-attributes[('/02_GOES_Bias_Correction/28_Ida', 'Ida')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida',
+attributes[('/GOES-R-observation-error-covariance/02_Ida', 'Ida')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/GOES-R-observation-error-covariance/02_Ida',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance/02_Ida/namelists',
     'NHC_best_track': '2021_09L_Ida.csv',
@@ -57,92 +57,92 @@ attributes[('/02_GOES_Bias_Correction/28_Ida', 'Ida')] = {
 }
 
 compare_schemes['GOES_Laura_scheme_01'] = {
-    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'PB'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'PB'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/01_Laura/track_intensity/figures',
     'labels': ['PB', 'ASRBC4CLD_CLD_08', 'ASRBC4CLD_CLD_09', 'ASRBC4CLD_CLD_10', 'ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
     'linestyles': ['-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_02'] = {
-    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/01_Laura/track_intensity/figures',
     'labels': ['NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
     'linestyles': ['-', '-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_03'] = {
-    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/01_Laura/track_intensity/figures',
     'labels': ['ASRBC4CLD_CLD_08', 'ASRBC4CLD_CLD_09', 'ASRBC4CLD_CLD_10', 'ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3]],
     'linestyles': ['-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_04'] = {
-    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/01_Laura/track_intensity/figures',
     'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
     'linestyles': ['-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Laura_scheme_05'] = {
-    'cases': [('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10_V1'), \
-              ('/02_GOES_Bias_Correction/27_ChCor', 'Laura', 'NPB_ASRBC4CLD_CLD_10_V2')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/27_ChCor/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_10_V1'), \
+              ('/GOES-R-observation-error-covariance/01_Laura', 'Laura', 'NPB_ASRBC4CLD_CLD_10_V2')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/01_Laura/track_intensity/figures',
     'labels': ['NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_10_V1', 'NPB_ASRBC4CLD_CLD_10_V2'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2]],
     'linestyles': ['-', '-', '-'],
 }
 compare_schemes['GOES_Ida_scheme_01'] = {
-    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'CTRL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'CTRL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/02_Ida/track_intensity/figures',
     'labels': ['CTRL'],
     'colors': [sns_bright_cmap[0]],
     'linestyles': ['-'],
 }
 compare_schemes['GOES_Ida_scheme_02'] = {
-    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/02_Ida/track_intensity/figures',
     'labels': ['NPB', 'NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
     'linestyles': ['-', '-', '-', '-', '-', '-', '-', '-'],
 }
 compare_schemes['GOES_Ida_scheme_04'] = {
-    'cases': [('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
-              ('/02_GOES_Bias_Correction/28_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
-    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/02_GOES_Bias_Correction/28_Ida/track_intensity/figures',
+    'cases': [('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_08'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_09'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_10'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_08'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_09'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_10'), \
+              ('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB_ASRBC4CLD_CLD_ALL')],
+    'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/GOES-R-observation-error-covariance/02_Ida/track_intensity/figures',
     'labels': ['NPB_ASRBC4CLD_08', 'NPB_ASRBC4CLD_09', 'NPB_ASRBC4CLD_10', 'NPB_ASRBC4CLD_CLD_08', 'NPB_ASRBC4CLD_CLD_09', 'NPB_ASRBC4CLD_CLD_10', 'NPB_ASRBC4CLD_CLD_ALL'],
     'colors': [sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4], sns_bright_cmap[5], sns_bright_cmap[6], sns_bright_cmap[7]],
     'linestyles': ['-', '-', '-', '-', '-', '-', '-'],
