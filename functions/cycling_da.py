@@ -453,7 +453,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                         if os.path.exists(ens_in):
                             ens_out = f"{ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
                             os.system(f"ln -sf {ens_in} {ens_out}")
-                        ens_in = f"{dir_gfs_ensemble}/{time_last_YYYYMMDD}/{time_last_HH}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
+                        ens_in = f"{dir_gfs_ensemble}/enkfgdas.{time_last_YYYYMMDD}/{time_last_HH}/mem{str(idens).zfill(3)}/gdas.t{time_last_HH}z.atmf006.nemsio"
                         # print(ens_in)
                         if os.path.exists(ens_in):
                             ens_out = f"{ens_dir}/gdas.t{time_last_HH}z.atmf006s.mem{str(idens).zfill(3)}"
