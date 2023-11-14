@@ -110,9 +110,9 @@ compare_schemes['GOES_Laura_scheme_05'] = {
     'linestyles': ['-', '-', '-'],
 }
 compare_schemes['GOES_Ida_scheme_01'] = {
-    'cases': [('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'CTRL')],
+    'cases': [('/GOES-R-observation-error-covariance/02_Ida', 'Ida', 'NPB')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/GOES-R-observation-error-covariance/02_Ida/track_intensity/figures',
-    'labels': ['CTRL'],
+    'labels': ['NPB'],
     'colors': [sns_bright_cmap[0]],
     'linestyles': ['-'],
 }
