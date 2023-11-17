@@ -128,6 +128,30 @@ attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
     'ensemble_members': 60,
 }
 
+attributes[('/CPEX/06_CV_Hermine', 'Hermine')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_CV_Hermine',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_CV_Hermine/namelists',
+    'AEW_best_track': '2022_10L_Hermine.csv',
+    'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
+    'CMORPH_version': '8km-30min',
+    'GSMaP_version': '05A',
+    'itime': (2022, 9, 20,  0, 0, 0),
+    'forecast_hours': 48,
+    'dir_scratch': '/scratch/general/nfs1/u1237353',
+    'total_da_cycles': 4,
+    'time_window_max': 3.0,
+    'da_domains': ['d01', 'd02'],
+    'forecast_domains': ['d01', 'd02'],
+    'GFDL_domains': ['d01'],
+    'wps_interval': 6,
+    'cycling_interval': 6,
+    'history_interval': 6,
+    'boundary_data_deterministic': 'GFS',
+    'boundary_data_ensemble': 'GEFS',
+    'ensemble_members': 60,
+}
+
 compare_schemes['Ian_scheme_01'] = {
     'cases': [('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CTRL'), \
               ('/CPEX/01_CV_RF07_AEW06_IAN', 'Ian', 'CONV'), \
