@@ -74,11 +74,12 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
     itime = attributes[(dir_case, case_name)]['itime']
     initial_time = datetime(*itime)
     dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-    dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
     total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_MetNav = os.path.join(dir_data, 'MetNav')
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
     grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
     filenames = glob.glob(os.path.join(dir_MetNav, '*flight_track*csv'))
 
