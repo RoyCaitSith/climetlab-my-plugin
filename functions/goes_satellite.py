@@ -52,7 +52,8 @@ def download_goes_date(download_start_time, n_days, dir_GOES, time_interval, dat
                 # Check if the file corresponds to channels 7 to 16
                 channel_number = int(file_name.split("_")[1][-2:])
                 if 7 <= channel_number <= 16:
-                    local_path = os.path.join(dir_hour, file_name)
+                    # local_path = os.path.join(dir_hour, file_name)
+                    local_path = os.path.join(dir_day,  file_name)
                     # Download the file from GCS to the local machine
                     with open(local_path, "wb") as f:
                         blob.download_to_file(f)
@@ -195,7 +196,7 @@ def draw_goes_images(data_library_name, dir_case, case_name, channel=8, goes_lev
         wrfout_d02.close()
     
     if region_type == 'flight' or flight_track:
-        filenames = glob.glob(os.path.join(dir_MetNav, '*flight_track*csv'))
+        filenames = glob.glob(os.path.join(dir_MetNav, f"*flight_track*{anl_start_time.strftime('%Y%m%d')}.csv"))
         for filename in filenames:
             df = pd.read_csv(filename)
             flight_time = df['Time']
