@@ -394,7 +394,7 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
         for da_cycle in range(0, total_da_cycles):
             filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
-            mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
+            mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
             RMSE_ref += np.square(df.loc[mask, variable].to_numpy())
         RMSE_ref = np.sqrt(RMSE_ref/total_da_cycles)
 
@@ -419,7 +419,7 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
                 for da_cycle in range(total_da_cycles):
                     filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
                     df = pd.read_csv(filename)
-                    mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
+                    mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
                     RMSE += np.square(df.loc[mask, variable].to_numpy())
 
                 RMSE = np.sqrt(RMSE/total_da_cycles)
@@ -496,7 +496,7 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
         for da_cycle in range(0, total_da_cycles):
             filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
-            mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
+            mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
             RMSE_ref[da_cycle] = np.sqrt(np.average(np.square(df.loc[mask, variable].to_numpy())))
 
         with PdfPages(pdfname) as pdf:
@@ -520,7 +520,7 @@ def compare_averaged_RMSE_each_cycle_scheme(data_library_name, scheme, variable)
                 for da_cycle in range(total_da_cycles):
                     filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
                     df = pd.read_csv(filename)
-                    mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours - 6.0) & (df['Forecast_Hour']%6 == 0)
+                    mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
                     RMSE[da_cycle] = np.sqrt(np.average(np.square(df.loc[mask, variable].to_numpy())))
 
                 RMSE = RMSE_ref-RMSE
