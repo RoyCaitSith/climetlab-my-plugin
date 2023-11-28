@@ -58,7 +58,8 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
             row = pd.DataFrame({'Time': time_list, \
                                 'LAT': lat_list, \
                                 'LON': lon_list})
-            df = pd.concat([df, row], ignore_index=True)
+            # df = pd.concat([df, row], ignore_index=True)
+            df = pd.concat([row.iloc[0:2], row.iloc[2:]], ignore_index=True)
 
             filename_flight_track = '_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.csv'])
             save_file = os.path.join(dir_MetNav, filename_flight_track)

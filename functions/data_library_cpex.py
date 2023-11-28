@@ -128,16 +128,16 @@ attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/CPEX/06_CV_Hermine', 'Hermine')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_CV_Hermine',
+attributes[('/CPEX/06_CV', 'CV')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_CV',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
-    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_CV_Hermine/namelists',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_CV/namelists',
     'AEW_best_track': '2022_10L_Hermine.csv',
     'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2022, 'name': 'HERMINE'},
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
     'GSMaP_version': '05A',
-    'itime': (2022, 9, 20,  0, 0, 0),
+    'itime': (2022, 9,  2,  0, 0, 0),
     'forecast_hours': 48,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 4,
