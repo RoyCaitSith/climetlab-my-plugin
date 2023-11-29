@@ -49,11 +49,14 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
                 for line in lines[first_line:]:
                     line = line.rstrip('\n')
                     items = line.split(',')
-                    time_now = day + timedelta(seconds = float(items[0]))
-                    time_now_str = int(time_now.strftime('%Y%m%d%H%M%S'))
-                    time_list += [time_now_str]
-                    lat_list += [float(items[2])]
-                    lon_list += [float(items[3])]
+                    flag = ('' in items)
+
+                    if not flag:
+                        time_now = day + timedelta(seconds = float(items[0]))
+                        time_now_str = int(time_now.strftime('%Y%m%d%H%M%S'))
+                        time_list += [time_now_str]
+                        lat_list += [float(items[2])]
+                        lon_list += [float(items[3])]
 
             row = pd.DataFrame({'Time': time_list, \
                                 'LAT': lat_list, \
@@ -61,7 +64,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
             # df = pd.concat([df, row], ignore_index=True)
             df = pd.concat([row.iloc[0:2], row.iloc[2:]], ignore_index=True)
 
-            filename_flight_track = '_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.csv'])
+            filename_flight_track = '_'.join(['MetNav', 'DC8', 'flight', 'track', day_str+'.csv'])
             save_file = os.path.join(dir_MetNav, filename_flight_track)
             df.to_csv(save_file, index=False)
             print(filename_flight_track)
@@ -143,10 +146,10 @@ def draw_metnav_dc8(data_library_name, dir_case, case_name, wrf_domain=False, wr
 
         numbers = re.findall(r'\d+', filename)
         day_str = numbers[-1]
-        pdfname = os.path.join(dir_MetNav, '_'.join([day_str, 'CPEXCV-MetNav', 'DC8', 'flight', 'track', domain+'.pdf']))
-        pngname = os.path.join(dir_MetNav, '_'.join([day_str, 'CPEXCV-MetNav', 'DC8', 'flight', 'track', domain+'.png']))
+        pdfname = os.path.join(dir_MetNav, '_'.join([day_str, 'MetNav', 'DC8', 'flight', 'track', domain+'.pdf']))
+        pngname = os.path.join(dir_MetNav, '_'.join([day_str, 'MetNav', 'DC8', 'flight', 'track', domain+'.png']))
 
-        print('_'.join(['CPEXCV-MetNav', 'DC8', 'flight', 'track', day_str+'.csv']))
+        print('_'.join(['MetNav', 'DC8', 'flight', 'track', day_str+'.csv']))
         print(f"Time: from {min_flight_time} to {max_flight_time}")
         print(f"LAT: from {min_flight_lat} to {max_flight_lat}")
         print(f"LON: from {min_flight_lon} to {max_flight_lon}")

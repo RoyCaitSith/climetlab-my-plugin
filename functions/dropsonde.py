@@ -2,6 +2,7 @@ import os
 import re
 import time
 import h5py
+import glob
 import importlib
 import subprocess
 import metpy.calc
@@ -20,6 +21,88 @@ from IPython.display import Image as IPImage
 from wrf import getvar, latlon_coords, interplevel
 from matplotlib.backends.backend_pdf import PdfPages
 from combine_and_show_images import combine_images_grid
+
+def dropsonde_to_csv(data_library_name, dir_case, case_name):
+
+    # Import the necessary library
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_data = os.path.join(dir_exp, 'data')
+    dir_Dropsonde = os.path.join(dir_data, 'Dropsonde')
+
+    filenames = glob.glob(os.path.join(dir_Dropsonde, 'CPEX*DC8*ict'))
+    for filename in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        if filename != '':
+            df = pd.DataFrame(columns=['TIME', 'LAT', 'LON', 'PRLC', 'GP10', 'TMDB', 'SPFH', 'REHU', 'WDIR', 'WSPD'])
+            with open(filename, encoding='windows-1252') as f:
+                lines = f.readlines()
+
+                #Get the first line of the record
+                line = lines[0:1][0].rstrip('\n')
+                items = line.split(',')
+                first_line = int(items[0])
+
+                #Get the date
+                line = lines[29:30][0].rstrip('\n')
+                pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
+                pattern_match = re.search(pattern, line)
+                launch_time_str = pattern_match.group(1)
+                launch_time = datetime.strptime(launch_time_str, '%Y-%m-%d %H:%M:%S')
+                launch_time_str = launch_time.strftime('%Y%m%d%H%M%S')
+
+                time_list = []
+                lat_list  = []
+                lon_list  = []
+                prlc_list = []
+                gp10_list = []
+                tmdb_list = []
+                spfh_list = []
+                rehu_list = []
+                wdir_list = []
+                wspd_list = []
+                
+                for line in lines[first_line:]:
+                    line = line.rstrip('\n')
+                    items = line.split(',')
+                    flag = ('-9999' in items) or ('' in items)
+
+                    if not flag:
+                        time_now = launch_time + timedelta(seconds = float(items[1]))
+                        time_now_str = int(time_now.strftime('%Y%m%d%H%M%S'))
+                        e = 6.112*np.exp((17.67*float(items[11]))/(float(items[11])+243.5))
+                        q = 0.622*e/(float(items[2])-0.378*e)
+
+                        time_list += [time_now_str]
+                        lat_list  += [float(items[7])]
+                        lon_list  += [float(items[8])]
+                        prlc_list += [float(items[2])*100.0]
+                        gp10_list += [float(items[9])*9.80665]
+                        tmdb_list += [float(items[3])+273.15]
+                        spfh_list += [q]
+                        rehu_list += [float(items[4])]
+                        wdir_list += [float(items[6])]
+                        wspd_list += [float(items[5])]
+
+            row = pd.DataFrame({'TIME': time_list, \
+                                'LAT': lat_list, \
+                                'LON': lon_list, \
+                                'PRLC': prlc_list, \
+                                'GP10': gp10_list, \
+                                'TMDB': tmdb_list, \
+                                'SPFH': spfh_list, \
+                                'REHU': rehu_list, \
+                                'WDIR': wdir_list, \
+                                'WSPD': wspd_list})
+            
+            # df = pd.concat([df, row], ignore_index=True)
+            df = pd.concat([row.iloc[0:2], row.iloc[2:]], ignore_index=True)
+
+            filename_dropsonde = '_'.join(['Dropsonde', 'DC8', launch_time_str+'.csv'])
+            save_file = os.path.join(dir_Dropsonde, filename_dropsonde)
+            df.to_csv(save_file, index=False)
+            print(filename_dropsonde)
 
 def create_Dropsonde_bufr_temp(data_library_name, dir_case, case_name):
 
