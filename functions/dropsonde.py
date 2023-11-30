@@ -104,7 +104,7 @@ def dropsonde_to_csv(data_library_name, dir_case, case_name):
             df.to_csv(save_file, index=False)
             print(filename_dropsonde)
 
-def create_Dropsonde_bufr_temp(data_library_name, dir_case, case_name):
+def create_dropsonde_bufr_temp(data_library_name, dir_case, case_name):
 
     module = importlib.import_module(f"data_library_{data_library_name}")
     attributes = getattr(module, 'attributes')
@@ -117,10 +117,10 @@ def create_Dropsonde_bufr_temp(data_library_name, dir_case, case_name):
     total_da_cycles=attributes[(dir_case, case_name)]['total_da_cycles']
 
     dir_data = os.path.join(dir_exp, 'data')
-    dir_HALO = os.path.join(dir_data, 'HALO')
-    dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
-    os.makedirs(dir_HALO, exist_ok=True)
-    os.makedirs(dir_HALO_bufr_temp, exist_ok=True)
+    dir_dropsonde = os.path.join(dir_data, 'Dropsonde')
+    dir_dropsonde_bufr_temp = os.path.join(dir_dropsonde, 'bufr_temp')
+    os.makedirs(dir_dropsonde, exist_ok=True)
+    os.makedirs(dir_dropsonde_bufr_temp, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -129,13 +129,15 @@ def create_Dropsonde_bufr_temp(data_library_name, dir_case, case_name):
         time_e = anl_end_time + timedelta(hours=cycling_interval/2.0)
         anl_end_time_YYYYMMDD = anl_end_time.strftime('%Y%m%d')
         anl_end_time_HH = anl_end_time.strftime('%H')
+        print(time_s)
+        print(time_e)
 
-        dir_bufr_temp = os.path.join(dir_HALO_bufr_temp, anl_end_time_YYYYMMDD)
+        dir_bufr_temp = os.path.join(dir_dropsonde_bufr_temp, anl_end_time_YYYYMMDD)
         os.makedirs(dir_bufr_temp, exist_ok=True)
         dir_bufr_temp = os.path.join(dir_bufr_temp, anl_end_time_HH)
         os.system(f"rm -rf {dir_bufr_temp}")
         os.makedirs(dir_bufr_temp, exist_ok=True)
-        filenames = os.popen(f"ls {dir_HALO}/*HALO*.h5").readlines()
+        filenames = os.popen(f"ls {dir_dropsonde}/Dropsonde_DC8*csv").readlines()
         n_total_data = 0
         YEAR = []
         MNTH = []
@@ -154,93 +156,59 @@ def create_Dropsonde_bufr_temp(data_library_name, dir_case, case_name):
         QMDD = []
         SPFH = []
         REHU = []
+        QMWN = []
+        WDIR = []
+        WSPD = []
+        PKWDSP = []
 
-        for file_HALO in filenames:
-            date = re.search(r"\d{8}", file_HALO).group()
-            initial_time = datetime.strptime(date, "%Y%m%d")
-            time_s_hours = (time_s - initial_time).total_seconds()/3600.0
-            time_e_hours = (time_e - initial_time).total_seconds()/3600.0
+        for file_dropsonde in filenames:
+            print(file_dropsonde)
+            df = pd.read_csv(file_dropsonde.strip('\n'))
+            dropsonde_datetime = np.array([datetime.strptime(str(d), '%Y%m%d%H%M%S') for d in df['TIME']])
+            dropsonde_year = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).year for d in df['TIME']], dtype='int64')
+            dropsonde_mnth = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).month for d in df['TIME']], dtype='int64')
+            dropsonde_days = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).day for d in df['TIME']], dtype='int64')
+            dropsonde_hour = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).hour for d in df['TIME']], dtype='int64')
+            dropsonde_minu = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).minute for d in df['TIME']], dtype='int64')
+            dropsonde_seco = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).second for d in df['TIME']])
+            dropsonde_mcse = np.array([(datetime.strptime(str(d), '%Y%m%d%H%M%S')).microsecond for d in df['TIME']])
+            dropsonde_seco = dropsonde_seco + dropsonde_mcse/1000000.0
+            dropsonde_latitude = np.array(df['LAT'])
+            dropsonde_longitude = np.array(df['LON'])
+            dropsonde_pressure = np.array(df['PRLC'])
+            dropsonde_geopotential = np.array(df['GP10'])
+            dropsonde_temperature = np.array(df['TMDB'])
+            dropsonde_specific_humidity = np.array(df['SPFH'])
+            dropsonde_relative_humidity = np.array(df['REHU'])
+            dropsonde_wind_direction = np.array(df['WDIR'])
+            dropsonde_wind_speed = np.array(df['WSPD'])
 
-            if 'CV' in dir_case:
-                HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
-                n_loc = np.array(HALO['Nav_Data']['gps_lat']).size
-                n_hgt = np.array(HALO['z']).size
-
-                HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
-                HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
-                HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
-                HALO_year = np.array([(initial_time + timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
-                HALO_mnth = np.array([(initial_time + timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
-                HALO_days = np.array([(initial_time + timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
-                HALO_hour = np.array([(initial_time + timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
-                HALO_minu = np.array([(initial_time + timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
-                HALO_seco = np.array([(initial_time + timedelta(hours = d)).second for d in HALO_datetime])
-                HALO_mcse = np.array([(initial_time + timedelta(hours = d)).microsecond for d in HALO_datetime])
-                HALO_seco = HALO_seco + HALO_mcse/1000000.0
-                HALO_altitude = np.tile(HALO['z'], (n_loc, 1)).flatten()
-                HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
-                HALO_pressure = np.array(HALO['State']['Pressure']).flatten()
-                HALO_pressure = HALO_pressure*101325.0
-                HALO_temperature = np.array(HALO['State']['Temperature']).flatten()
-                HALO_mixing_ratio = np.array(HALO['h2o_mmr_v']).flatten()
-                HALO_mixing_ratio = HALO_mixing_ratio/1000.0
-                HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
-                HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
-                HALO_relative_humidity = HALO_relative_humidity*100.0
-                HALO.close()
-
-            if 'AW' in dir_case:
-                HALO = h5py.File(file_HALO.rstrip('\n'), 'r')
-                n_loc = np.array(HALO['Nav_Data']['gps_lat']).size
-                n_hgt = np.array(HALO['DataProducts']['Altitude']).size
-
-                HALO_latitude = np.tile(np.array(HALO['Nav_Data']['gps_lat']), (1, n_hgt)).flatten()
-                HALO_longitude = np.tile(np.array(HALO['Nav_Data']['gps_lon']), (1, n_hgt)).flatten()
-                HALO_datetime = np.tile(np.array(HALO['Nav_Data']['gps_time']), (1, n_hgt)).flatten()
-                HALO_year = np.array([(initial_time + timedelta(hours = d)).year for d in HALO_datetime], dtype='int64')
-                HALO_mnth = np.array([(initial_time + timedelta(hours = d)).month for d in HALO_datetime], dtype='int64')
-                HALO_days = np.array([(initial_time + timedelta(hours = d)).day for d in HALO_datetime], dtype='int64')
-                HALO_hour = np.array([(initial_time + timedelta(hours = d)).hour for d in HALO_datetime], dtype='int64')
-                HALO_minu = np.array([(initial_time + timedelta(hours = d)).minute for d in HALO_datetime], dtype='int64')
-                HALO_seco = np.array([(initial_time + timedelta(hours = d)).second for d in HALO_datetime])
-                HALO_mcse = np.array([(initial_time + timedelta(hours = d)).microsecond for d in HALO_datetime])
-                HALO_seco = HALO_seco + HALO_mcse/1000000.0
-                HALO_altitude = np.tile(HALO['DataProducts']['Altitude'], (n_loc, 1)).flatten()
-                HALO_geopotential = np.array(metpy.calc.height_to_geopotential(HALO_altitude*units.m))
-                HALO_pressure = np.array(HALO['State']['Pressure']).flatten()
-                HALO_pressure = HALO_pressure*101325.0
-                HALO_temperature = np.array(HALO['State']['Temperature']).flatten()
-                HALO_mixing_ratio = np.array(HALO['DataProducts']['h2o_mmr_v']).flatten()
-                HALO_mixing_ratio = HALO_mixing_ratio/1000.0
-                HALO_specific_humidity = HALO_mixing_ratio/(1+HALO_mixing_ratio)
-                HALO_relative_humidity = np.array(HALO['State']['Relative_Humidity']).flatten()
-                HALO.close()
-
-            index = (HALO_datetime >= time_s_hours) & (HALO_datetime <= time_e_hours) & \
-                    (~np.isnan(HALO_mixing_ratio)) & (HALO_mixing_ratio > 0) & \
-                    (HALO_altitude > 0)
+            index = (dropsonde_datetime >= time_s) & (dropsonde_datetime <= time_e)
 
             n_data = sum(index==True)
             if n_data > 0:
-
                 n_total_data += n_data
-                YEAR += HALO_year[index].tolist()
-                MNTH += HALO_mnth[index].tolist()
-                DAYS += HALO_days[index].tolist()
-                HOUR += HALO_hour[index].tolist()
-                MINU += HALO_minu[index].tolist()
-                SECO += HALO_seco[index].tolist()
+                YEAR += dropsonde_year[index].tolist()
+                MNTH += dropsonde_mnth[index].tolist()
+                DAYS += dropsonde_days[index].tolist()
+                HOUR += dropsonde_hour[index].tolist()
+                MINU += dropsonde_minu[index].tolist()
+                SECO += dropsonde_seco[index].tolist()
                 QHDOP += np.full((n_data), 0, dtype='int').tolist()
                 QHDOM += np.full((n_data), 0, dtype='int').tolist()
-                CLAT += HALO_latitude[index].tolist()
-                CLON += HALO_longitude[index].tolist()
-                PRLC += HALO_pressure[index].tolist()
-                GP10 += HALO_geopotential[index].tolist()
+                CLAT += dropsonde_latitude[index].tolist()
+                CLON += dropsonde_longitude[index].tolist()
+                PRLC += dropsonde_pressure[index].tolist()
+                GP10 += dropsonde_geopotential[index].tolist()
                 QMAT += np.full((n_data), 2, dtype='int').tolist()
-                TMDB += HALO_temperature[index].tolist()
+                TMDB += dropsonde_temperature[index].tolist()
                 QMDD += np.full((n_data), 2, dtype='int').tolist()
-                SPFH += HALO_specific_humidity[index].tolist()
-                REHU += HALO_relative_humidity[index].tolist()
+                SPFH += dropsonde_specific_humidity[index].tolist()
+                REHU += dropsonde_relative_humidity[index].tolist()
+                QMWN += np.full((n_data), 2, dtype='int').tolist()
+                WDIR += dropsonde_wind_direction[index].tolist()
+                WSPD += dropsonde_wind_speed[index].tolist()
+                PKWDSP += np.full((n_data), 0, dtype='int').tolist()
 
         with open(os.path.join(dir_bufr_temp,  '1.txt'), 'ab') as f:
             np.savetxt(f, YEAR)
