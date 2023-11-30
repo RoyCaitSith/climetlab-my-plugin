@@ -358,6 +358,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     dir_goesbufr = os.path.join(dir_data, 'GOES', 'bufr')
     dir_dawnbufr = os.path.join(dir_data, 'DAWN', 'bufr')
     dir_halobufr = os.path.join(dir_data, 'HALO', 'bufr')
+    dir_dropsondebufr = os.path.join(dir_data, 'Dropsonde', 'bufr')
     dir_cygnssbufr = os.path.join(dir_data, 'CYGNSS', 'bufr')
     if 'OLD' in exp_name or 'old' in exp_name:
         if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_AS', 'bufr_old')
@@ -433,6 +434,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
                 if 'ASRBC4CLD' in exp_name: os.system(f"cp {dir_goesbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.goesrabi.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.goesrabi.tm00.bufr_d ")
                 if 'DAWN' in exp_name: os.system(f"cp {dir_dawnbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.dawn.tm00.bufr_d ")
                 if 'HALO' in exp_name: os.system(f"cp {dir_halobufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.halo.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.halo.tm00.bufr_d ")
+                if 'DS' in exp_name: os.system(f"cp {dir_dropsondebufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.dropsonde.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.dropsonde.tm00.bufr_d ")
                 if 'CYG' in exp_name: os.system(f"cp {dir_cygnssbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.cygnss.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.cygnss.tm00.bufr_d ")
                 if 'V1_AS' in exp_name or 'V2_AS' in exp_name or 'V1_CS' in exp_name or 'V2_CS' in exp_name:
                     os.system(f"cp {dir_tropicsbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.tropics.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.tropics.tm00.bufr_d ")
