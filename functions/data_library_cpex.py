@@ -128,7 +128,7 @@ attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/CPEX/06_RF01_AEW03', 'AEW03')] = {
+attributes[('/CPEX/06_CV_RF01_AEW03', 'AEW03')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_RF01_AEW03',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_RF01_AEW03/namelists',
@@ -152,7 +152,7 @@ attributes[('/CPEX/06_RF01_AEW03', 'AEW03')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/CPEX/07_RF02_AEW03', 'AEW03')] = {
+attributes[('/CPEX/07_CV_RF02_AEW03', 'AEW03')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/07_RF02_AEW03',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/07_RF02_AEW03/namelists',
@@ -176,7 +176,7 @@ attributes[('/CPEX/07_RF02_AEW03', 'AEW03')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/CPEX/08_RF03_AEW04', 'AEW04')] = {
+attributes[('/CPEX/08_CV_RF03_AEW04', 'AEW04')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/08_RF03_AEW04',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/08_RF03_AEW04/namelists',
@@ -200,7 +200,7 @@ attributes[('/CPEX/08_RF03_AEW04', 'AEW04')] = {
     'ensemble_members': 60,
 }
 
-attributes[('/CPEX/09_RF04_AEW04', 'AEW04')] = {
+attributes[('/CPEX/09_CV_RF04_AEW04', 'AEW04')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/09_RF04_AEW04',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/09_RF04_AEW04/namelists',
@@ -208,7 +208,7 @@ attributes[('/CPEX/09_RF04_AEW04', 'AEW04')] = {
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
     'GSMaP_version': '05A',
-    'itime': (2022, 9,  9,  0, 0, 0),
+    'itime': (2022, 9, 10,  0, 0, 0),
     'forecast_hours': 48,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 4,
