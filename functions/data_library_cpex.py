@@ -129,9 +129,9 @@ attributes[('/CPEX/05_CV_RF07_AEW06', 'AEW06')] = {
 }
 
 attributes[('/CPEX/06_CV_RF01_AEW03', 'AEW03')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_RF01_AEW03',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/06_CV_RF01_AEW03',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
-    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_RF01_AEW03/namelists',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/06_CV_RF01_AEW03/namelists',
     'AEW_best_track': '2022_AEW03.csv',
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
@@ -153,9 +153,9 @@ attributes[('/CPEX/06_CV_RF01_AEW03', 'AEW03')] = {
 }
 
 attributes[('/CPEX/07_CV_RF02_AEW03', 'AEW03')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/07_RF02_AEW03',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/07_CV_RF02_AEW03',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
-    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/07_RF02_AEW03/namelists',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/07_CV_RF02_AEW03/namelists',
     'AEW_best_track': '2022_AEW03.csv',
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
@@ -177,9 +177,9 @@ attributes[('/CPEX/07_CV_RF02_AEW03', 'AEW03')] = {
 }
 
 attributes[('/CPEX/08_CV_RF03_AEW04', 'AEW04')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/08_RF03_AEW04',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/08_CV_RF03_AEW04',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
-    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/08_RF03_AEW04/namelists',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/08_CV_RF03_AEW04/namelists',
     'AEW_best_track': '2022_AEW04.csv',
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
@@ -201,9 +201,9 @@ attributes[('/CPEX/08_CV_RF03_AEW04', 'AEW04')] = {
 }
 
 attributes[('/CPEX/09_CV_RF04_AEW04', 'AEW04')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/09_RF04_AEW04',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX/09_CV_RF04_AEW04',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
-    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/09_RF04_AEW04/namelists',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CPEX/09_CV_RF04_AEW04/namelists',
     'AEW_best_track': '2022_AEW04.csv',
     'IMERG_version': {'run': 'HHR-L', 'version': 'V06C'},
     'CMORPH_version': '8km-30min',
