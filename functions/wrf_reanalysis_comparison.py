@@ -1,15 +1,16 @@
 import os
-import panda as pd
-from datetime import timedelta
+import importlib
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
+from netCDF4 import Dataset
 
-def wrf_reanalysis_comparison_6h(data_library_names, dir_cases, case_names, exp_names,
-                                 models=['ERA5', 'GFS'],
-                                 variables=['u', 'v', 't', 'q'],
-                                 levels=[1000, 975, 950, 925, 900, 850, 800, 700, 600, 500, 400, 300, 200, 100]):
+def comapre_wrfanl_reanl(data_library_names, dir_cases, case_names, exp_names,
+                         models=['ERA5', 'GFS'],
+                         variables=['u_anl', 'v_anl', 't_anl', 'q_anl'],
+                         levels=[1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]):
     
-    time_interval = 6
-
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
         # Import the necessary library
@@ -18,7 +19,6 @@ def wrf_reanalysis_comparison_6h(data_library_names, dir_cases, case_names, exp_
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
         module = importlib.import_module(f"set_parameters_{data_library_name}")
-        set_variables = getattr(module, 'set_variables')
 
         itime = attributes[(dir_case, case_name)]['itime']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
@@ -28,70 +28,71 @@ def wrf_reanalysis_comparison_6h(data_library_names, dir_cases, case_names, exp_
         initial_time = datetime(*itime)
 
         dir_weather_map = os.path.join(dir_exp, 'weather_map')
-        dir_reanalysis = os.path.join(dir_exp, 'reanalysis')
-        os.makedirs(dir_reanalysis, exist_ok=True)
+        dir_score = os.path.join(dir_exp, 'score')
+        dir_wrfanl_reanl = os.path.join(dir_score, 'wrfanl_reanl')
+        os.makedirs(dir_score, exist_ok=True)
+        os.makedirs(dir_wrfanl_reanl, exist_ok=True)
 
-        anl_start_time = initial_time + timedelta(hours=cycling_interval)
-        anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
-        n_time = int(total_da_cycles*cycling_interval/time_interval)
+        n_model = len(models)
+        n_variable = len(variables)
         n_level = len(levels)
+        n_total = n_model*total_da_cycles*n_variable*n_level
 
         for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
 
-            columns_lists = ['Date_Time', 'DA_Cycle', 'Variables', 'Level', 'Bias', 'RMSE']
-            for lev in levels: columns_lists += str(lev)
-            df = pd.DataFrame(0.0, index=n_variables*n_time*n_level, \
-                columns=columns_lists)
+            columns_lists = ['Model', 'Date_Time', 'DA_Cycle', 'Variable', 'Level', 'MBE', 'MAE', 'MSE', 'RMSE']
+            df = pd.DataFrame(index=np.arange(n_total), columns=columns_lists)
 
             idc = 0
-            for idt in tqdm(range(n_time), desc='Times', position=0, leave=True):
-                for var in tqdm(variables, desc='Variables', position=0, leave=True):
-                    for lev in tqdm(levels, desc='Levels', position=0, leave=True):
+            for model in tqdm(models, desc='Models', position=0, leave=True):
+                print(model)
+                for da_cycle in range(1, total_da_cycles+1):
+                    for var in variables:
+                        for lev in levels:
+                # for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Times', position=0, leave=False):
+                #     for var in tqdm(variables, desc='Variables', position=0, leave=False):
+                #         for lev in tqdm(levels, desc='Levels', position=0, leave=False):
 
-                        df['Date_Time'][idc] = anl_start_time + timedelta(hours=idt*time_interval)
-                        df['DA_Cycle'][idc] = int((idt+1)*time_interval/cycling_interval)
-                        df[str(lev)][idc] = 
-                        idc += 1
+                            time_now = initial_time + timedelta(hours=da_cycle*cycling_interval)
+                            var_time = int(time_now.strftime('%Y%m%d%H%M00'))
 
+                            df['Model'][idc] = model
+                            df['Date_Time'][idc] = time_now
+                            df['DA_Cycle'][idc] = int(da_cycle)
+                            df['Variable'][idc] = var
+                            df['Level'][idc] = int(lev)
+                            
+                            specific_case = '_'.join([case_name, model, 'C'+str(total_da_cycles).zfill(2)])
+                            dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
+                            reanl_filename = os.path.join(dir_weather_map_case, f"{var}_{lev}_{dom}.nc")
+                            reanl_ncfile = Dataset(reanl_filename)
+                            reanl_times = reanl_ncfile.variables['time'][:]
+                            idt = np.where(reanl_times == var_time)[0][0]
+                            reanl_var = reanl_ncfile.variables[var][idt,:,:]
+                            reanl_ncfile.close()
 
-            # Import the necessary library
-            (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
-            specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
-            dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
-            
-            # print(exp_name)
+                            specific_case = '_'.join([case_name, exp_name, 'C'+str(total_da_cycles).zfill(2)])
+                            dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
+                            wrfanl_filename = os.path.join(dir_weather_map_case, f"{var}_{lev}_{dom}.nc")
+                            wrfanl_ncfile = Dataset(wrfanl_filename)
+                            wrfanl_times = wrfanl_ncfile.variables['time'][:]
+                            idt = np.where(wrfanl_times == var_time)[0][0]
+                            wrfanl_var = wrfanl_ncfile.variables[var][idt,:,:]
+                            wrfanl_ncfile.close()
 
-            filename = (
-                f"{str(var_time)}_{contourf_var}_{str(contour_var_level)}_"
-                f"{contour_var}_{str(contour_var_level)}_"
-                f"{quiver_var_1}_{quiver_var_2}_{str(quiver_var_level)}_"
-                f"{region_type}_{dom}_C{str(da_cycle).zfill(2)}"
-            )
-            pdfname = os.path.join(dir_weather_map_case, filename+'.pdf')
-            pngname = os.path.join(dir_weather_map_case, filename+'.png')
-            image_files.append(pngname)
+                            diff = wrfanl_var - reanl_var
+                            diff_abs = np.abs(diff)
+                            diff_square = np.square(diff)
+                            MBE = np.nanmean(diff)
+                            MAE = np.nanmean(diff_abs)
+                            MSE = np.nanmean(diff_square)
+                            RMSE = np.sqrt(MSE)
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_{dom}.nc")
-            contourf_var_ncfile = Dataset(contourf_var_filename)
-            contourf_var_times = contourf_var_ncfile.variables['time'][:]
-            idt = np.where(contourf_var_times == var_time)[0][0]
-            lat = contourf_var_ncfile.variables['lat'][:,:]
-            lon = contourf_var_ncfile.variables['lon'][:,:]
-            contourf_var_value = contourf_var_ncfile.variables[contourf_var][idt,:,:]
-            contourf_var_ncfile.close()
+                            df['MBE'][idc] = MBE
+                            df['MAE'][idc] = MAE
+                            df['MSE'][idc] = MSE
+                            df['RMSE'][idc] = RMSE
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_d01.nc")
-            contourf_var_ncfile = Dataset(contourf_var_filename)
-            lat_d01 = contourf_var_ncfile.variables['lat'][:,:]
-            lon_d01 = contourf_var_ncfile.variables['lon'][:,:]
-            contourf_var_ncfile.close()
+                            idc += 1
 
-            contourf_var_filename = os.path.join(dir_weather_map_case, f"{contourf_var}_{contourf_var_level}_d02.nc")
-            contourf_var_ncfile = Dataset(contourf_var_filename)
-            lat_d02 = contourf_var_ncfile.variables['lat'][:,:]
-            lon_d02 = contourf_var_ncfile.variables['lon'][:,:]
-            contourf_var_ncfile.close()
-
-
-
-            error_df.to_csv(f"{dir_reanalysis}/{case_name}_{exp_name}_{dom}.csv", index=False)
+            df.to_csv(f"{dir_wrfanl_reanl}/{case_name}_{exp_name}_{dom}.csv", index=False)

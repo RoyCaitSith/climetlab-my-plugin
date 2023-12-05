@@ -205,6 +205,7 @@ def set_variables(var):
         information.update({'lb_title': 'WV MR ($\mathregular{gkg^{-1}}$)'})
         information.update({'factor': 1000.0})
         information.update({'extend': 'max'})
+        information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'q'})
 
         levels = {}
@@ -230,6 +231,7 @@ def set_variables(var):
         information.update({'lb_title': 'Inc. of WV MR ($\mathregular{gkg^{-1}}$)'})
         information.update({'factor': 1000.0})
         information.update({'extend': 'both'})
+        information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'q'})
 
         levels = {}

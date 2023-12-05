@@ -77,8 +77,9 @@ def create_DAWN_bufr_temp(data_library_name, dir_case, case_name):
 
             if 'CV' in dir_case:
                 ncfile = Dataset(file_DAWN.rstrip('\n'))
-                altitude = np.arange(-0.015, 12.980, 0.030)*1000.0
                 (n_loc, n_hgt) = ncfile.variables['smoothed_Wind_Speed'][:, :].shape
+                altitude_temp = np.arange(-0.015, 12.980, 0.030)*1000.0
+                altitude = altitude_temp[0:n_hgt]
 
                 DAWN_latitude = np.transpose(np.tile(ncfile.variables['lat'][:], (n_hgt, 1))).flatten('F')
                 DAWN_longitude = np.transpose(np.tile(ncfile.variables['lon'][:], (n_hgt, 1))).flatten('F')
