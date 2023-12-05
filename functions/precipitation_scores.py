@@ -17,8 +17,8 @@ from IPython.display import Image as IPImage
 from IPython.display import display
 
 def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
-           observations=['IMERG', 'CMORPH', 'GSMaP'],
-           resolutions=[12, 4],
+           observations=['CMORPH', 'GSMaP', 'IMERG'],
+           resolutions={'d01':12, 'd02':4},
            thresholds=[1.0, 5.0, 10.0, 15.0],
            region_types=['tc', 'domain']):
 
@@ -48,12 +48,18 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
         os.makedirs(dir_score, exist_ok=True)
         os.makedirs(dir_ETS_6h, exist_ok=True)
 
-        for idd, dom in tqdm(enumerate(da_domains), desc='Domains', position=0, leave=True):
+        n_observation = len(observations)
+        n_forecast_hour = int(forecast_hours/time_interval) + 1
+        n_threshold = len(thresholds)
+        n_region_type = len(region_types)
+        n_total = n_observation*total_da_cycles*n_forecast_hour*n_threshold*n_region_type
 
-            columns_lists = ['Observation', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Threshold', 'Region_type', 'ETS']
-            df = pd.DataFrame(columns=columns_lists)
+        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
 
-            idc = 0
+            columns_lists = ['Observation', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Threshold', 'Region_Type', 'ETS']
+            df = pd.DataFrame(index=np.arange(n_total), columns=columns_lists)
+
+            iddf = 0
             for observation in tqdm(observations, desc='Observations', position=0, leave=True):
                 for da_cycle in range(1, total_da_cycles+1):
                     for fhour in range(0, forecast_hours+1, time_interval):
@@ -90,11 +96,11 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
 
                                     if rtype == 'tc':
                                         best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
-                                        df = pd.read_csv(best_track)
-                                        bt_lats = list(df['LAT'][:])
-                                        bt_lons = list(df['LON'][:])
-                                        bt_dates = list(df['Date_Time'][:])
-                                        del df
+                                        bt_df = pd.read_csv(best_track)
+                                        bt_lats = list(bt_df['LAT'][:])
+                                        bt_lons = list(bt_df['LON'][:])
+                                        bt_dates = list(bt_df['Date_Time'][:])
+                                        del bt_df
 
                                         var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
                                         for id_bt, bt_date in enumerate(bt_dates):
@@ -107,17 +113,17 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
                                         bt_dlat = wrfanl_lat - bt_lat
                                         bt_distrance_square = np.square(bt_dlon) + np.square(bt_dlat)
                                         bt_min_pos = np.unravel_index(np.argmin(bt_distrance_square, axis=None), bt_distrance_square.shape)
-                                        tc_box_index = math.floor(tc_box_range/resolutions[idd])
-                                        reanl_var = reanl_var[bt_min_pos[0]-tc_box_index:bt_min_pos[0]+tc_box_index+1, bt_min_pos[1]-tc_box_index:bt_min_pos[1]+tc_box_index+1]
+                                        tc_box_index = math.floor(tc_box_range/resolutions[dom])
+                                        reanl_rain = reanl_var[bt_min_pos[0]-tc_box_index:bt_min_pos[0]+tc_box_index+1, bt_min_pos[1]-tc_box_index:bt_min_pos[1]+tc_box_index+1]
 
                                         best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", f"{dom}.csv"]))
                                         if not os.path.exists(best_track):
                                             best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'd01.csv']))
-                                        df = pd.read_csv(best_track)
-                                        wrf_lats = list(df['LAT'][:])
-                                        wrf_lons = list(df['LON'][:])
-                                        wrf_dates = list(df['Date_Time'][:])
-                                        del df
+                                        wrf_df = pd.read_csv(best_track)
+                                        wrf_lats = list(wrf_df['LAT'][:])
+                                        wrf_lons = list(wrf_df['LON'][:])
+                                        wrf_dates = list(wrf_df['Date_Time'][:])
+                                        del wrf_df
 
                                         var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
                                         for id_wrf, wrf_date in enumerate(wrf_dates):
@@ -130,33 +136,36 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
                                         wrf_dlat = wrfanl_lat - wrf_lat
                                         wrf_distrance_square = np.square(wrf_dlon) + np.square(wrf_dlat)
                                         wrf_min_pos = np.unravel_index(np.argmin(wrf_distrance_square, axis=None), wrf_distrance_square.shape)
-                                        tc_box_index = math.floor(tc_box_range/resolutions[idd])
-                                        wrfanl_var = wrfanl_var[wrf_min_pos[0]-tc_box_index:wrf_min_pos[0]+tc_box_index+1, wrf_min_pos[1]-tc_box_index:wrf_min_pos[1]+tc_box_index+1]
-                                        wrfanl_lat = wrfanl_lat[wrf_min_pos[0]-tc_box_index:wrf_min_pos[0]+tc_box_index+1, wrf_min_pos[1]-tc_box_index:wrf_min_pos[1]+tc_box_index+1]
-                                        wrfanl_lon = wrfanl_lon[wrf_min_pos[0]-tc_box_index:wrf_min_pos[0]+tc_box_index+1, wrf_min_pos[1]-tc_box_index:wrf_min_pos[1]+tc_box_index+1]
+                                        tc_box_index = math.floor(tc_box_range/resolutions[dom])
+                                        wrfanl_rain = wrfanl_var[wrf_min_pos[0]-tc_box_index:wrf_min_pos[0]+tc_box_index+1, wrf_min_pos[1]-tc_box_index:wrf_min_pos[1]+tc_box_index+1]
 
-                                    Hit         = (reanl_var >= thres) & (wrfanl_var >= thres)
-                                    False_Alarm = (reanl_var  < thres) & (wrfanl_var >= thres)
-                                    Miss        = (reanl_var >= thres) & (wrfanl_var  < thres)
-                                    Correct_Neg = (reanl_var  < thres) & (wrfanl_var  < thres)
+                                    elif rtype == 'domain':
+                                        reanl_rain = reanl_var
+                                        wrfanl_rain = wrfanl_var
 
-                                    N_H  = len(wrfanl_var[Hit])
-                                    N_FA = len(wrfanl_var[False_Alarm])
-                                    N_M  = len(wrfanl_var[Miss])
-                                    N_CN = len(wrfanl_var[Correct_Neg])
+                                    Hit         = (reanl_rain >= thres) & (wrfanl_rain >= thres)
+                                    False_Alarm = (reanl_rain  < thres) & (wrfanl_rain >= thres)
+                                    Miss        = (reanl_rain >= thres) & (wrfanl_rain  < thres)
+                                    Correct_Neg = (reanl_rain  < thres) & (wrfanl_rain  < thres)
+
+                                    N_H  = len(wrfanl_rain[Hit])
+                                    N_FA = len(wrfanl_rain[False_Alarm])
+                                    N_M  = len(wrfanl_rain[Miss])
+                                    N_CN = len(wrfanl_rain[Correct_Neg])
                                     Total = N_H + N_FA + N_M + N_CN
 
                                     ref = (N_H + N_FA)*(N_H + N_M)/Total
                                     ETS = (N_H - ref)/(N_H + N_FA + N_M - ref)
+                                    
+                                    df['Observation'][iddf] = observation
+                                    df['DA_Cycle'][iddf] = int(da_cycle)
+                                    df['Forecast_Hour'][iddf] = int(fhour)
+                                    df['Date_Time'][iddf] = time_now
+                                    df['Threshold'][iddf] = int(thres)
+                                    df['Region_Type'][iddf] = rtype
+                                    df['ETS'][iddf] = ETS
 
-                                    df['Observation'][idc] = observation
-                                    df['DA_Cycle'][idc] = int(da_cycle)
-                                    df['Forecast_Hour'][idc] = int(fhour)
-                                    df['Date_Time'][idc] = time_now
-                                    df['Threshold'][idc] = int(thres)
-                                    df['Region_type'][idc] = rtype
-                                    df['ETS'][idc] = ETS
-
-                                    idc += 1
+                                    iddf += 1
 
             df.to_csv(f"{dir_ETS_6h}/{case_name}_{exp_name}_{dom}.csv", index=False)
+            print(df)

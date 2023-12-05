@@ -35,12 +35,18 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
         os.makedirs(dir_score, exist_ok=True)
         os.makedirs(dir_wrf_reanl, exist_ok=True)
 
+        n_model = len(models)
+        n_forecast_hour = int(forecast_hours/time_interval)+1
+        n_variable = len(variables)
+        n_level = len(levels)
+        n_total = n_model*total_da_cycles*n_forecast_hour*n_variable*n_level
+
         for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
 
             columns_lists = ['Model', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Variable', 'Level', 'MBE', 'MAE', 'MSE', 'RMSE']
-            df = pd.DataFrame(columns=columns_lists)
+            df = pd.DataFrame(index=np.arange(n_total), columns=columns_lists)
 
-            idc = 0
+            iddf = 0
             for model in tqdm(models, desc='Models', position=0, leave=True):
                 for da_cycle in range(1, total_da_cycles+1):
                     for fhour in range(0, forecast_hours+1, time_interval):
@@ -81,17 +87,18 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
                                     MSE = np.nanmean(diff_square)
                                     RMSE = np.sqrt(MSE)
 
-                                    df['Model'][idc] = model
-                                    df['DA_Cycle'][idc] = int(da_cycle)
-                                    df['Forecast_Hour'][idc] = int(fhour)
-                                    df['Date_Time'][idc] = time_now
-                                    df['Variable'][idc] = var
-                                    df['Level'][idc] = int(lev)
-                                    df['MBE'][idc] = MBE
-                                    df['MAE'][idc] = MAE
-                                    df['MSE'][idc] = MSE
-                                    df['RMSE'][idc] = RMSE
+                                    df['Model'][iddf] = model
+                                    df['DA_Cycle'][iddf] = int(da_cycle)
+                                    df['Forecast_Hour'][iddf] = int(fhour)
+                                    df['Date_Time'][iddf] = time_now
+                                    df['Variable'][iddf] = var
+                                    df['Level'][iddf] = int(lev)
+                                    df['MBE'][iddf] = MBE
+                                    df['MAE'][iddf] = MAE
+                                    df['MSE'][iddf] = MSE
+                                    df['RMSE'][iddf] = RMSE
 
-                                    idc += 1
+                                    iddf += 1
 
             df.to_csv(f"{dir_wrf_reanl}/{case_name}_{exp_name}_{dom}.csv", index=False)
+            print(df)
