@@ -45,7 +45,10 @@ def dropsonde_to_csv(data_library_name, dir_case, case_name):
                 first_line = int(items[0])
 
                 #Get the date
-                line = lines[29:30][0].rstrip('\n')
+                if 'AW' in filename:
+                    line = lines[27:28][0].rstrip('\n')
+                elif 'CV' in filename:
+                    line = lines[29:30][0].rstrip('\n')
                 pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'
                 pattern_match = re.search(pattern, line)
                 launch_time_str = pattern_match.group(1)

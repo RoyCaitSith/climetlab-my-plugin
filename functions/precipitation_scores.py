@@ -15,95 +15,100 @@ from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
 from IPython.display import display
 
-def calculate_ETS(data_library_names, dir_cases, case_names, exp_names, ref_exp_names, domain, region_type):
+def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
+           observations=['IMERG', 'CMORPH', 'GSMaP'],
+           thresholds=[1.0, 5.0, 10.0, 15.0],
+           region_types=['domain', 'tc']):
+
+    time_interval = 6
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
         # Import the necessary library
-        data_library_name = data_library_names[idc]
-        dir_case = dir_cases[idc]
-        case_name = case_names[idc]
-        exp_name = exp_names[idc]
-        ref_exp_name = ref_exp_names[idc]
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
 
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
+        module = importlib.import_module(f"set_parameters_{data_library_name}")
 
-        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         itime = attributes[(dir_case, case_name)]['itime']
-        initial_time = datetime(*itime)
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-        dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
-        dir_best_track = os.path.join(dir_track_intensity, 'best_track')
+        da_domains = attributes[(dir_case, case_name)]['da_domains']
+        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+        initial_time = datetime(*itime)
 
-        for da_cycle in range(1, total_da_cycles+1, 1):
+        dir_weather_map = os.path.join(dir_exp, 'weather_map')
+        dir_score = os.path.join(dir_exp, 'score')
+        dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
+        os.makedirs(dir_score, exist_ok=True)
+        os.makedirs(dir_ETS_6h, exist_ok=True)
 
-            
+        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
 
-        if region_type == 'tc':
-            NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
-            ref_best_track = os.path.join(dir_best_track, NHC_best_track)
-            ref_df = pd.read_csv(ref_best_track)
-            ref_bt_lats = list(ref_df['LAT'][:])
-            ref_bt_lons = list(ref_df['LON'][:])
-            ref_bt_dates = list(ref_df['Date_Time'][:])
-            del ref_df
+            columns_lists = ['Observation', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Threshold', 'Region_type', 'ETS']
+            df = pd.DataFrame(columns=columns_lists)
 
-            best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", f"{dom}.csv"]))
-            if not os.path.exists(best_track):
-                best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", 'd01.csv']))
-            df = pd.read_csv(best_track)
-            bt_lats = list(df['LAT'][:])
-            bt_lons = list(df['LON'][:])
-            bt_dates = list(df['Date_Time'][:])
-            del df
+            idc = 0
+            for observation in tqdm(observations, desc='Observations', position=0, leave=True):
+                for da_cycle in range(1, total_da_cycles+1):
+                    for fhour in range(0, forecast_hours+1, time_interval):
+                    
+                        time_now = initial_time + timedelta(hours=da_cycle*time_interval+fhour)
+                        var_time = int(time_now.strftime('%Y%m%d%H%M00'))
+                            
+                        specific_case = '_'.join([case_name, observation, 'C'+str(da_cycle).zfill(2)])
+                        dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
+                        reanl_filename = os.path.join(dir_weather_map_case, f"rain_6h_9999_{dom}.nc")
 
-                var_time_datetime = datetime.strptime(str(var_time), '%Y%m%d%H%M%S')
-                for id_bt, bt_date in enumerate(bt_dates):
-                    bt_datetime = datetime.strptime(bt_date, '%Y-%m-%d %H:%M:%S')
-                    if bt_datetime == var_time_datetime:
-                        bt_lat = bt_lats[id_bt]
-                        bt_lon = bt_lons[id_bt]
-                        if region_type == 'tc':
-                            extent = [bt_lon-5.0, bt_lon+5.0, bt_lat-5.0, bt_lat+5.0]
+                        specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+                        dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
+                        wrfanl_filename = os.path.join(dir_weather_map_case, f"rain_6h_9999_{dom}.nc")
 
+                        if os.path.exists(reanl_filename) and os.path.exists(wrfanl_filename):
+                            
+                            reanl_ncfile = Dataset(reanl_filename)
+                            reanl_times = reanl_ncfile.variables['time'][:]
+                            idt = np.where(reanl_times == var_time)[0][0]
+                            reanl_var = reanl_ncfile.variables['rain_6h'][idt,:,:]
+                            reanl_ncfile.close()
 
+                            wrfanl_ncfile = Dataset(wrfanl_filename)
+                            wrfanl_times = wrfanl_ncfile.variables['time'][:]
+                            idt = np.where(wrfanl_times == var_time)[0][0]
+                            wrfanl_var = wrfanl_ncfile.variables['rain_6h'][idt,:,:]
+                            wrfanl_lat = wrfanl_ncfile.variables['lat'][idt,:,:]
+                            wrfanl_lon = wrfanl_ncfile.variables['lon'][idt,:,:]
+                            wrfanl_ncfile.close()
 
-    dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
-    dir_best_track = os.path.join(dir_track_intensity, 'best_track')
-    data = cml.load_source('file', os.path.join(dir_best_track, NHC_best_track))
-    bt_df = data.to_pandas()
+                            for thres in thresholds:
+                                for rtype in region_types:
 
-    for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
-        for dom in GFDL_domains:
+                                    if rtype == 'tc':
+                                        reanl_var 
 
-            case = '_'.join([case_name, exp_name, 'C' + str(da_cycle).zfill(2)])
-            file_track_intensity = os.path.join(dir_exp, 'track_intensity', case, 'multi', 'fort.69')
-            df = pd.read_csv(file_track_intensity, header=None, usecols=[2, 5, 6, 7, 8, 9])
-            df.columns = ['Initial_Time', 'Forecast_Hour', 'LAT', 'LON', 'MWS (Knot)', 'MSLP (hPa)']
-            df.drop_duplicates(subset=['Forecast_Hour'], keep='last', inplace=True)
+                                    Hit         = (reanl_var >= thres) & (wrfanl_var >= thres)
+                                    False_Alarm = (reanl_var  < thres) & (wrfanl_var >= thres)
+                                    Miss        = (reanl_var >= thres) & (wrfanl_var  < thres)
+                                    Correct_Neg = (reanl_var  < thres) & (wrfanl_var  < thres)
 
-            df.insert(loc=0, column='Date_Time', value=df.apply(lambda row: datetime.strptime(str(row['Initial_Time']), '%Y%m%d%H') +
-                                                     timedelta(hours=row['Forecast_Hour'] / 100.0), axis=1))
-            df.drop(columns=['Initial_Time', 'Forecast_Hour'], inplace=True)
-            df['LAT'] = df['LAT'].str.extract('(\d+\.?\d*)N', expand=False).astype(float) * 0.1
-            df['LON'] = df['LON'].str.extract('(\d+\.?\d*)W', expand=False).astype(float) * -0.1
-            df.reset_index(drop=True, inplace=True)
-            df.to_csv(dir_best_track + '/' + case + '_' + dom + '.csv', index=False)
+                                    N_H  = len(wrfanl_var[Hit])
+                                    N_FA = len(wrfanl_var[False_Alarm])
+                                    N_M  = len(wrfanl_var[Miss])
+                                    N_CN = len(wrfanl_var[Correct_Neg])
+                                    Total = N_H + N_FA + N_M + N_CN
 
-            n_lead_time = df.shape[0]
-            error_df = pd.DataFrame(0.0, index=np.arange(n_lead_time), columns=['Forecast_Hour', 'Track_Error (km)', 'MSLP_Error (hPa)', 'MWS_Error (Knot)'])
-            error_df['Forecast_Hour'] = df['Date_Time'].apply(lambda x: (datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
-            bt_df_Forecast_Hour = bt_df['Date_Time'].apply(lambda x: (datetime.strptime(str(x), '%Y-%m-%d %H:%M:%S')-initial_time).total_seconds()/3600 if not pd.isna(x) else x)
+                                    ref = (N_H + N_FA)*(N_H + N_M)/Total
+                                    ETS = (N_H - ref)/(N_H + N_FA + N_M - ref)
 
-            bt_df_lat = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['LAT']))
-            bt_df_lon = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['LON']))
-            bt_df_MSLP = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['MSLP (hPa)']))
-            bt_df_MWS = np.interp(np.array(error_df['Forecast_Hour']), np.array(bt_df_Forecast_Hour), np.array(bt_df['MWS (Knot)']))
-            for idl in range(n_lead_time):
-                loc = (df['LAT'][idl], df['LON'][idl])
-                bt_loc = (bt_df_lat[idl], bt_df_lon[idl])
-                error_df['Track_Error (km)'][idl] = great_circle(loc, bt_loc).kilometers
-            error_df['MSLP_Error (hPa)'] = df['MSLP (hPa)'] - bt_df_MSLP
-            error_df['MWS_Error (Knot)'] = df['MWS (Knot)'] - bt_df_MWS
-            error_df.to_csv(dir_best_track + '/Error_' + case + '_' + dom + '.csv', index=False)
+                                    df['Observation'][idc] = observation
+                                    df['DA_Cycle'][idc] = int(da_cycle)
+                                    df['Forecast_Hour'][idc] = int(fhour)
+                                    df['Date_Time'][idc] = time_now
+                                    df['Threshold'][idc] = int(thres)
+                                    df['Region_type'][idc] = rtype
+                                    df['ETS'][idc] = ETS
+
+                                    idc += 1
+
+            df.to_csv(f"{dir_ETS_6h}/{case_name}_{exp_name}_{dom}.csv", index=False)
