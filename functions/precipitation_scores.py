@@ -50,7 +50,7 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
         os.makedirs(dir_ETS_6h, exist_ok=True)
 
         n_observation = len(observations)
-        n_forecast_hour = int(forecast_hours/time_interval) + 1
+        n_forecast_hour = total_da_cycles+int(forecast_hours/time_interval)
         n_threshold = len(thresholds)
         n_region_type = len(region_types)
         n_total = n_observation*total_da_cycles*n_forecast_hour*n_threshold*n_region_type
