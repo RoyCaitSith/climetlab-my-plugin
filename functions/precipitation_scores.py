@@ -20,10 +20,10 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
            observations=['CMORPH', 'GSMaP', 'IMERG'],
            resolutions={'d01':12, 'd02':4},
            thresholds=[1.0, 5.0, 10.0, 15.0],
+           tc_box_range = 300,
            region_types=['tc', 'domain']):
 
     time_interval = 6
-    tc_box_range = 500
 
     for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -36,7 +36,6 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
 
         itime = attributes[(dir_case, case_name)]['itime']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-        da_domains = attributes[(dir_case, case_name)]['da_domains']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
@@ -55,7 +54,7 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
         n_region_type = len(region_types)
         n_total = n_observation*total_da_cycles*n_forecast_hour*n_threshold*n_region_type
 
-        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
+        for dom in tqdm(resolutions.keys(), desc='Domains', position=0, leave=True):
 
             columns_lists = ['Observation', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Threshold', 'Region_Type', 'ETS']
             df = pd.DataFrame(index=np.arange(n_total), columns=columns_lists)
