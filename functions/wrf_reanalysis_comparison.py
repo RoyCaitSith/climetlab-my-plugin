@@ -26,6 +26,7 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         da_domains = attributes[(dir_case, case_name)]['da_domains']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
         forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
         initial_time = datetime(*itime)
 
@@ -36,7 +37,7 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
         os.makedirs(dir_wrf_reanl, exist_ok=True)
 
         n_model = len(models)
-        n_forecast_hour = int(forecast_hours/time_interval)+1
+        n_forecast_hour = total_da_cycles+int(forecast_hours/time_interval)
         n_variable = len(variables)
         n_level = len(levels)
         n_total = n_model*total_da_cycles*n_forecast_hour*n_variable*n_level
@@ -49,9 +50,9 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
             iddf = 0
             for model in tqdm(models, desc='Models', position=0, leave=True):
                 for da_cycle in range(1, total_da_cycles+1):
-                    for fhour in range(0, forecast_hours+1, time_interval):
+                    for fhour in range(time_interval, da_cycle*cycling_interval+forecast_hours+1, time_interval):
                     
-                        time_now = initial_time + timedelta(hours=da_cycle*time_interval+fhour)
+                        time_now = initial_time + timedelta(hours=fhour)
                         var_time = int(time_now.strftime('%Y%m%d%H%M00'))
 
                         for var in variables:
