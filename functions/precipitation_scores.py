@@ -169,3 +169,154 @@ def ETS_6h(data_library_names, dir_cases, case_names, exp_names,
 
             df.to_csv(f"{dir_ETS_6h}/{case_name}_{exp_name}_{dom}.csv", index=False)
             print(df)
+
+def compare_ETS(data_library_names, dir_cases, case_names, exp_names, ref_exp_name):
+
+                n_lead_time = int(forecast_hours/6.0 + 1.0)
+                ETS_ref = np.zeros(n_lead_time)
+                filename = f"{dir_ETS}/{cases[idb]}_{exps[ide]}_{domain}.csv"
+                df = pd.read_csv(filename)
+
+                for da_cycle in range(1, total_da_cycles+1):
+                    mask = (df['Forecast_Hour'] >= da_cycle * 6.0) & (df['Forecast_Hour'] <= da_cycle * 6.0 + forecast_hours) & (df['DA_Cycle'] == da_cycle) & (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                    ETS_ref += df.loc[mask, var].to_numpy()
+                ETS_ref = ETS_ref/total_da_cycles
+
+    n_lead_time = int(forecast_hours/6.0 + 1.0)
+    ETS_ref = np.zeros(n_lead_time)
+    filename = f"{dir_ETS}/{cases[idb]}_{exps[ide]}_{domain}.csv"
+    df = pd.read_csv(filename)
+
+                for da_cycle in range(1, total_da_cycles+1):
+                    mask = (df['Forecast_Hour'] >= da_cycle * 6.0) & (df['Forecast_Hour'] <= da_cycle * 6.0 + forecast_hours) & (df['DA_Cycle'] == da_cycle) & (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                    ETS_ref += df.loc[mask, var].to_numpy()
+                ETS_ref = ETS_ref/total_da_cycles
+
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    compare_schemes = getattr(module, 'compare_schemes')
+    attributes = getattr(module, 'attributes')
+
+    (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
+    total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+    GFDL_domains = attributes[(dir_case, case_name)]['GFDL_domains']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
+    dir_save = compare_schemes[scheme]['dir_save']
+    labels = compare_schemes[scheme]['labels']
+    colors = compare_schemes[scheme]['colors']
+    linestyles = compare_schemes[scheme]['linestyles']
+
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+    grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+
+    for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        for dom in GFDL_domains:
+
+            if 'MSLP' in variable: varname = 'MSLP'
+            if 'MWS' in variable:  varname = 'MWS'
+
+            pdfname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.pdf"
+            pngname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.png"
+
+            with PdfPages(pdfname) as pdf:
+
+                fig, axs   = plt.subplots(1, 1, figsize=(3.25, 3.0))
+                #fig.subplots_adjust(left=0.125, bottom=0.075, right=0.975, top=0.975, wspace=0.250, hspace=0.100)
+
+                (dir_case, case_name, exp_name) = compare_schemes[scheme]['cases'][0]
+                itime = attributes[(dir_case, case_name)]['itime']
+                forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+                cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+                NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
+                dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+                dir_track_intensity = os.path.join(dir_exp, 'track_intensity')
+                dir_best_track = os.path.join(dir_track_intensity, 'best_track')
+
+                initial_time = datetime(*itime)
+                anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
+                forecast_start_time = anl_end_time
+                forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
+
+                df = pd.read_csv(os.path.join(dir_best_track, NHC_best_track))
+
+                index = []
+                formatted_date_labels = []
+                for idx, Date_Time in enumerate(df['Date_Time']):
+                    time_now = datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S')
+                    if time_now >= forecast_start_time and time_now <= forecast_end_time:
+                        index.append(idx)
+                        #formatted_date_labels.append(time_now.strftime("%H UTC\n%d %b"))
+                        formatted_date_labels.append(time_now.strftime("%d"))
+
+                var_bt = list(df[variable][index])
+
+                idx_forecast_start_time = int((24-float(forecast_start_time.strftime('%H')))%24/6)
+                extent = [0, len(var_bt)-1, 10.0*math.floor(min(var_bt)/10.0)-10.0, 10.0*math.ceil(max(var_bt)/10.0)+10.0]
+                x_tick_labels = ['']*len(var_bt)
+                x_tick_labels[idx_forecast_start_time::4] = formatted_date_labels[idx_forecast_start_time::4]
+
+                # Draw best track
+                ax = axs
+                ax.plot(np.arange(len(var_bt)), var_bt, 'o', color='k', ls='-', ms=4.00, linewidth=2.50, label='NHC', zorder=3)
+                ax.plot(np.arange(idx_forecast_start_time, len(var_bt), 4), var_bt[idx_forecast_start_time::4], 'o', color='w', ms=1.50, zorder=3)
+
+                for idc, (dir_case, case_name, exp_name) in enumerate(compare_schemes[scheme]['cases']):
+
+                    itime = attributes[(dir_case, case_name)]['itime']
+                    forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+                    cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+                    history_interval = attributes[(dir_case, case_name)]['history_interval']
+
+                    initial_time = datetime(*itime)
+                    anl_start_time = initial_time + timedelta(hours=cycling_interval)
+                    anl_end_time = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
+                    forecast_start_time = anl_end_time
+                    forecast_end_time = forecast_start_time + timedelta(hours=forecast_hours)
+
+                    case = '_'.join([case_name, exp_name + '_C' + str(da_cycle).zfill(2)])
+                    filename = f"{dir_best_track}/{case}_{dom}.csv"
+                    df = pd.read_csv(filename)
+                    index = []
+                    time_now = forecast_start_time
+                    while time_now <= forecast_end_time:
+                        for idx, Date_Time in enumerate(df['Date_Time']):
+                            if time_now == datetime.strptime(Date_Time, '%Y-%m-%d %H:%M:%S'): index.append(idx)
+                        time_now = time_now + timedelta(hours=history_interval)
+                    var = list(df[variable][index])
+
+                    idx_forecast_start_time = int(int((24-float(forecast_start_time.strftime('%H')))%24/6)*(6/history_interval))
+                    ax.plot(np.arange(0, len(var))/(6.0/history_interval), var, color=colors[idc], ls=linestyles[idc], ms=2.00, linewidth=1.25, label=labels[idc]+'_C'+str(da_cycle).zfill(2), zorder=3)
+                    ax.plot(np.arange(0, len(var), 6/history_interval)/(6.0/history_interval), var[::int(6/history_interval)], 'o', color=colors[idc], ms=2.00, zorder=3)
+                    ax.plot(np.arange(idx_forecast_start_time, len(var), 24/history_interval)/(6.0/history_interval), var[idx_forecast_start_time::int(24/history_interval)], 'o', color='w', ms=0.75, zorder=3)
+
+                ax.set_xticks(np.arange(0, len(var_bt), 1))
+                ax.set_xticklabels(x_tick_labels)
+                ax.set_yticks(np.arange(extent[2], extent[3]+1, 10))
+                ax.set_ylabel(variable, fontsize=10.0)
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.axis(extent)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+                if 'MSLP' in variable: ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
+                if 'MWS' in variable:  ax.legend(loc='best', fontsize=5.0, handlelength=2.5).set_zorder(102)
+
+                plt.tight_layout()
+                plt.savefig(pngname, dpi=600)
+                pdf.savefig(fig)
+                plt.cla()
+                plt.clf()
+                plt.close()
+
+    for dom in GFDL_domains:
+        image_files = []
+        if 'MSLP' in variable: output_file = dir_save + f"/{scheme}_{dom}_all_MSLP.png"
+        if 'MWS' in variable:  output_file = dir_save + f"/{scheme}_{dom}_all_MWS.png"
+        for da_cycle in range(1, total_da_cycles+1):
+            if 'MSLP' in variable: image_files.append(dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_MSLP.png")
+            if 'MWS' in variable:  image_files.append(dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_MWS.png")
+
+        combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
+        image = IPImage(filename=output_file)
+        display(image)
