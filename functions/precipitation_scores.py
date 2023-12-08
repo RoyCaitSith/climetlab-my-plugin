@@ -353,7 +353,7 @@ def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp
 
     time_interval = 6
 
-    for dom in domains:
+    for domain in domains:
 
         (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
         module = importlib.import_module(f"data_library_{data_library_name}")
@@ -366,23 +366,21 @@ def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp
         NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+
         dir_score = os.path.join(dir_exp, 'score')
         dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
+        pdfname = dir_ETS_6h + f"/ETS_6h_{domain}_{display_mode}.pdf"
+        pngname = dir_ETS_6h + f"/ETS_6h_{domain}_{display_mode}.png"
 
-        pdfname = dir_save + f"/ETS_6h_{dom}_{display_mode}_{varname}.pdf"
-        pngname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.png"
+        n_lead_time = int(forecast_hours/6.0 + 1.0)
+        ETS_ref = np.zeros(n_lead_time)
+        filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
+        df = pd.read_csv(filename)
 
 
 #     for idc in range(len(dir_cases)):
 
-#         # Import the necessary library
 
-
-
-#         n_lead_time = int(forecast_hours/6.0 + 1.0)
-#         ETS_ref = np.zeros(n_lead_time)
-#         filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
-#         df = pd.read_csv(filename)
 
 #         for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
