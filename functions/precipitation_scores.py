@@ -348,32 +348,36 @@ def ETS_24h(data_library_names, dir_cases, case_names, exp_names,
             df.to_csv(f"{dir_ETS_24h}/{case_name}_{exp_name}_{dom}.csv", index=False)
             print(df)
 
-# def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name,
-#                    domains=['d01', 'd02'], display_mode='lead_time'):
+def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name,
+                   domains=['d01', 'd02'], display_mode='lead_time'):
 
-#     time_interval = 6
+    time_interval = 6
 
-#     for dom in domains:
+    for dom in domains:
 
-#         (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
-#         module = importlib.import_module(f"data_library_{data_library_name}")
-#         compare_schemes = getattr(module, 'compare_schemes')
-#         attributes = getattr(module, 'attributes')
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        compare_schemes = getattr(module, 'compare_schemes')
+        attributes = getattr(module, 'attributes')
 
-#         itime = attributes[(dir_case, case_name)]['itime']
-#         forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-#         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-#         NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
-#         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-#         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        itime = attributes[(dir_case, case_name)]['itime']
+        forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+        cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+        NHC_best_track = attributes[(dir_case, case_name)]['NHC_best_track']
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        dir_score = os.path.join(dir_exp, 'score')
+        dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
+
+        pdfname = dir_save + f"/ETS_6h_{dom}_{display_mode}_{varname}.pdf"
+        pngname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.png"
+
 
 #     for idc in range(len(dir_cases)):
 
 #         # Import the necessary library
 
 
-#         dir_score = os.path.join(dir_exp, 'score')
-#         dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
 
 #         n_lead_time = int(forecast_hours/6.0 + 1.0)
 #         ETS_ref = np.zeros(n_lead_time)
@@ -410,8 +414,7 @@ def ETS_24h(data_library_names, dir_cases, case_names, exp_names,
 #             if 'MSLP' in variable: varname = 'MSLP'
 #             if 'MWS' in variable:  varname = 'MWS'
 
-#             pdfname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.pdf"
-#             pngname = dir_save + f"/{scheme}_{dom}_C{da_cycle:02}_{varname}.png"
+
 
             # with PdfPages(pdfname) as pdf:
 
