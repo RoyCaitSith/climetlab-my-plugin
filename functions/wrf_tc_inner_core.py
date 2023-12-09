@@ -172,7 +172,7 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
                             temp_var_value = np.array(temp_var_value)
 
                             for idl, lev in enumerate(levels):
-                                print(lev)
+                                # print(lev)
                                 wrf_temp_1d = temp_var_value[idl, tc_index]
                                 ncfile_output.variables[var][idt,idl,:,:] = griddata((wrf_lon_1d, wrf_lat_1d), wrf_temp_1d, \
                                          (ncfile_output.variables['lon'][:,:], ncfile_output.variables['lat'][:,:]), method='linear')
