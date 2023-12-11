@@ -348,54 +348,126 @@ def ETS_24h(data_library_names, dir_cases, case_names, exp_names,
             df.to_csv(f"{dir_ETS_24h}/{case_name}_{exp_name}_{dom}.csv", index=False)
             print(df)
 
-# def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name,
-#                    domains=['d01', 'd02'], observation='IMERG', threshold=10,
-#                    region_type='domain', display_mode='lead_time'):
+def compare_ETS_6h(data_library_names, dir_cases, case_names, exp_names, ref_exp_name,
+                   domains=['d01', 'd02'], observation='IMERG', threshold=10,
+                   region_type='domain', display_mode='lead_time'):
 
-#     time_interval = 6
+    time_interval = 6
+    
+    for domain in domains:
 
-#     for domain in domains:
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
 
-#         (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
-#         module = importlib.import_module(f"data_library_{data_library_name}")
-#         attributes = getattr(module, 'attributes')
+        forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
+        cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
 
-#         itime = attributes[(dir_case, case_name)]['itime']
-#         forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
-#         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
-#         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-#         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        dir_score = os.path.join(dir_exp, 'score')
+        dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
 
-#         dir_score = os.path.join(dir_exp, 'score')
-#         dir_ETS_6h = os.path.join(dir_score, 'ETS_6h')
+        pdfname = os.path.join(dir_ETS_6h, f"{observation}_{str(int(threshold))}_{display_mode}_{region_type}_{domain}.pdf")
+        pngname = os.path.join(dir_ETS_6h, f"{observation}_{str(int(threshold))}_{display_mode}_{region_type}_{domain}.png")
 
-#         if display_mode == 'lead_time':
-#             n_lead_time = int(forecast_hours/6.0 + 1.0)
-#             ETS_ref = np.zeros(n_lead_time)
-#             filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
-#             df = pd.read_csv(filename)
+        with PdfPages(pdfname) as pdf:
 
-#             for da_cycle in range(1, total_da_cycles+1):
-#                 mask = (df['Forecast_Hour'] >= da_cycle * 6.0) & (df['Forecast_Hour'] <= da_cycle * 6.0 + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
-#                        (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
-#                 ETS_ref += df.loc[mask, 'ETS'].to_numpy()
-#             ETS_ref = ETS_ref/total_da_cycles
+            fig, axs = plt.subplots(1, 1, figsize=(6.0, 3.50))
+            # fig.subplots_adjust(left=0.050, bottom=0.100, right=0.975, top=0.975, wspace=0.300, hspace=0.225)
+            cmap_tableau_20 = cmaps.tableau_20.colors
+            n_case = len(case_names)
+            width = 0.618/n_case
 
-#         elif display_mode == 'da_cycle':
-#             ETS_ref = np.zeros(total_da_cycles)
-#             filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
-#             df = pd.read_csv(filename)
+            ax = axs
 
-#             for da_cycle in range(1, total_da_cycles+1):
-#                 mask = (df['Forecast_Hour'] >= da_cycle * 6.0) & (df['Forecast_Hour'] <= da_cycle * 6.0 + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
-#                        (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
-#                 ETS_ref[da_cycle-1] == np.average(df.loc[mask, 'ETS'].to_numpy())
+            if display_mode == 'lead_time':
+                n_lead_time = int(forecast_hours/time_interval + 1)
+                ETS_ref = np.zeros(n_lead_time)
+                filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
+                df = pd.read_csv(filename)
 
+                for da_cycle in range(1, total_da_cycles+1):
+                    mask = (df['Forecast_Hour'] >= da_cycle * cycling_interval) & (df['Forecast_Hour'] <= da_cycle * cycling_interval + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
+                           (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                    ETS_ref += df.loc[mask, 'ETS'].to_numpy()
+                ETS_ref = ETS_ref/total_da_cycles
 
-#         for idc in range(len(dir_cases)):
-#             (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+            elif display_mode == 'da_cycle':
+                ETS_ref = np.zeros(total_da_cycles)
+                filename = f"{dir_ETS_6h}/{case_name}_{ref_exp_name}_{domain}.csv"
+                df = pd.read_csv(filename)
 
-#             if display_mode == 'lead_time':
-#                 for da_cycle in range(1, total_da_cycles+1):
-#                     mask = (df['Forecast_Hour'] >= da_cycle * 6.0) & (df['Forecast_Hour'] <= da_cycle * 6.0 + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
-#                            (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                for da_cycle in range(1, total_da_cycles+1):
+                    mask = (df['Forecast_Hour'] >= da_cycle * cycling_interval) & (df['Forecast_Hour'] <= da_cycle * cycling_interval + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
+                           (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                    ETS_ref[da_cycle-1] = np.average(df.loc[mask, 'ETS'].to_numpy())
+
+            for idc in range(n_case):
+                (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+
+                if display_mode == 'lead_time':
+                    ETS_exp = np.zeros(n_lead_time)
+                    ETS_dif = np.zeros(n_lead_time)
+                    filename = f"{dir_ETS_6h}/{case_name}_{exp_name}_{domain}.csv"
+                    df = pd.read_csv(filename)
+
+                    for da_cycle in range(1, total_da_cycles+1):
+                        mask = (df['Forecast_Hour'] >= da_cycle * cycling_interval) & (df['Forecast_Hour'] <= da_cycle * cycling_interval + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
+                               (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                        ETS_exp += df.loc[mask, 'ETS'].to_numpy()
+                    ETS_exp = ETS_exp/total_da_cycles
+                    ETS_dif = ETS_exp - ETS_ref
+
+                    for idl in range(n_lead_time):
+                        if idl == 0:
+                            ax.bar(idl+(idc-1)*width-0.5*(n_case-1)*width, ETS_dif[idl], width, color=cmap_tableau_20[idc], label=exp_name, zorder=3)
+                            ax.text(idl, 0.0, str(np.around(ETS_ref[idl], 3)), ha='center', va='center', color='black', fontsize=7.5)
+                        else:
+                            ax.bar(idl+(idc-1)*width-0.5*(n_case-1)*width, ETS_dif[idl], width, color=cmap_tableau_20[idc], zorder=3)
+                            ax.text(idl, 0.0, str(np.around(ETS_ref[idl], 3)), ha='center', va='center', color='black', fontsize=7.5)
+                
+                    ax.set_xticks(np.arange(0, n_lead_time, 1))
+                    ax.set_xlabel('Forecast Hours', fontsize=10.0)
+                    ax.set_xticklabels([str(x) for x in range(0, n_lead_time*time_interval, time_interval)])
+
+                elif display_mode == 'da_cycle':
+                    ETS_exp = np.zeros(total_da_cycles)
+                    ETS_dif = np.zeros(total_da_cycles)
+
+                    filename = f"{dir_ETS_6h}/{case_name}_{exp_name}_{domain}.csv"
+                    df = pd.read_csv(filename)
+
+                    for da_cycle in range(1, total_da_cycles+1):
+                        mask = (df['Forecast_Hour'] >= da_cycle * cycling_interval) & (df['Forecast_Hour'] <= da_cycle * cycling_interval + forecast_hours) & (df['DA_Cycle'] == da_cycle) & \
+                               (df['Threshold'] == threshold) & (df['Region_Type'] == region_type) & (df['Observation'] == observation)
+                        ETS_exp[da_cycle-1] = np.average(df.loc[mask, 'ETS'].to_numpy())
+                        ETS_dif[da_cycle-1] = ETS_exp[da_cycle-1] - ETS_ref[da_cycle-1]
+                    
+                    for idt in range(1, total_da_cycles+1, 1):
+                        if idt == 1:
+                            ax.bar(idt+(idc-1)*width-0.5*(n_case-1)*width, ETS_dif[idt-1], width, color=cmap_tableau_20[idc], label=exp_name, zorder=3)
+                            ax.text(idt, 0.0, str(np.around(ETS_ref[idt-1], 3)), ha='center', va='center', color='black', fontsize=7.5)
+                        else:
+                            ax.bar(idt+(idc-1)*width-0.5*(n_case-1)*width, ETS_dif[idt-1], width, color=cmap_tableau_20[idc], zorder=3)
+                            ax.text(idt, 0.0, str(np.around(ETS_ref[idt-1], 3)), ha='center', va='center', color='black', fontsize=7.5)
+
+                    ax.set_xticks(np.arange(1, total_da_cycles+1, 1))
+                    ax.set_xlabel('DA Cycle', fontsize=10.0)
+
+            ax.set_ylabel('Improvement of ETS', fontsize=10.0)
+            ax.tick_params('both', direction='in', labelsize=10.0)
+            ax.grid(linewidth=0.5, color='gray', axis='y')
+            ax.legend(loc='best', fontsize=7.5, handlelength=2.5).set_zorder(102)
+
+            plt.tight_layout()
+            plt.savefig(pngname, dpi=600)
+            pdf.savefig(fig)
+            plt.cla()
+            plt.clf()
+            plt.close()
+
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
+            image = IPImage(filename=pngname)
+            display(image)
