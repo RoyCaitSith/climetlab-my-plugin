@@ -1,18 +1,26 @@
 import os
-import h5py
 import importlib
 import requests
 import pygrib
 import metpy.calc
+import subprocess
 import numpy as np
 import pandas as pd
+import colormaps as cmaps
 import cal_polar_to_latlon as clatlon
+import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords, interplevel, g_geoht
 from netCDF4 import Dataset, num2date
 from scipy.interpolate import griddata
 from metpy.units import units
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.backends.backend_pdf import PdfPages
+from combine_and_show_images import combine_images_grid
+from IPython.display import Image as IPImage
+from IPython.display import display
 
 def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, da_cycle,
                          variables=['u']):
@@ -79,14 +87,14 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
                 ncfile_output.createDimension('n_radius', n_radius)
                 ncfile_output.createVariable('time',   'f8', ('n_time'))
                 ncfile_output.createVariable('level',  'f8', ('n_level'))
-                ncfile_output.createVariable('angle',  'f8', ('n_angle'))
                 ncfile_output.createVariable('radius', 'f8', ('n_radius'))
+                ncfile_output.createVariable('angle',  'f8', ('n_angle'))
                 ncfile_output.createVariable('lat',   'f8', ('n_angle', 'n_radius'))
                 ncfile_output.createVariable('lon',   'f8', ('n_angle', 'n_radius'))
-                ncfile_output.createVariable(var,     'f8', ('n_time', 'n_level', 'n_angle', 'n_radius'))
+                ncfile_output.createVariable(var,     'f8', ('n_time', 'n_level', 'n_radius', 'n_angle'))
                 ncfile_output.variables['level'][:]  = levels
-                ncfile_output.variables['angle'][:]  = angles
                 ncfile_output.variables['radius'][:] = radii 
+                ncfile_output.variables['angle'][:]  = angles
                 ncfile_output.variables['lat'][:,:] = 0.0
                 ncfile_output.variables['lon'][:,:] = 0.0
                 ncfile_output.variables[var][:,:,:] = 0.0
@@ -106,13 +114,6 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
                         ncfile_output.variables[var][idt,:,:] = ncfile_anl.variables[var_anl][idt,:,:] - ncfile_bkg.variables[var_bkg][idt,:,:]
                         ncfile_bkg.close()
                         ncfile_anl.close()
-                    
-                    elif 'anl' in var:
-                        var_bkg = var.replace('_anl', '')
-                        filename_bkg = filename.replace('_anl', '')
-                        ncfile_bkg = Dataset(filename_bkg)
-                        ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
-                        ncfile_bkg.close()
 
                     else:
                         wrfout = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:%M:00')}")
@@ -178,3 +179,144 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
                                          (ncfile_output.variables['lon'][:,:], ncfile_output.variables['lat'][:,:]), method='linear')
 
                 ncfile_output.close()
+
+def draw_wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names,
+                              contourf_var, contourf_labels, contourf_cmap, 
+                              contour_var='null',
+                              draw_contour_positive=False, contour_positive_clabel=False,
+                              contour_positive_levels=[0.75], contour_positive_color='k',
+                              draw_contour_negative=False, contour_negative_clabel=False,
+                              contour_negative_levels=[-0.75], contour_negative_color='k',
+                              domains=['d01'], da_cycle=1,
+                              var_time=20000101010000):                       
+
+    # Import the necessary library
+    (data_library_name, dir_case, case_name, exp_name) = (data_library_names[0], dir_cases[0], case_names[0], exp_names[0])
+    module = importlib.import_module(f"data_library_{data_library_name}")
+    attributes = getattr(module, 'attributes')
+    module = importlib.import_module(f"set_parameters_{data_library_name}")
+    set_variables = getattr(module, 'set_variables')
+
+    dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+    dir_colormaps = attributes[(dir_case, case_name)]['dir_colormaps']
+    dir_inner_core = os.path.join(dir_exp, 'inner_core')
+    dir_ScientificColourMaps7 = os.path.join(dir_colormaps, 'ScientificColourMaps7')
+    grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
+
+    for dom in tqdm(domains, desc='Domains', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+        
+        image_files = []
+        dir_save = os.path.join(dir_inner_core, 'figures')
+        output_filename = (
+            f"{str(var_time)}_{contourf_var}_{contour_var}_"
+            f"{dom}_C{str(da_cycle).zfill(2)}"
+        )
+        output_file = os.path.join(dir_save, output_filename+'.png')
+
+        for idc in tqdm(range(len(dir_cases)), desc='Cases', position=0, leave=True):
+
+            # Import the necessary library
+            (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+            specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
+            dir_inner_core_case = os.path.join(dir_inner_core, specific_case)
+            # print(exp_name)
+
+            filename = (
+                f"{str(var_time)}_{contourf_var}_{contour_var}_"
+                f"{dom}_C{str(da_cycle).zfill(2)}"
+            )
+            pdfname = os.path.join(dir_inner_core_case, filename+'.pdf')
+            pngname = os.path.join(dir_inner_core_case, filename+'.png')
+            image_files.append(pngname)
+
+            contourf_var_filename = os.path.join(dir_inner_core_case, f"{contourf_var}_{dom}.nc")
+            contourf_var_ncfile = Dataset(contourf_var_filename)
+            contourf_var_times = contourf_var_ncfile.variables['time'][:]
+            idt = np.where(contourf_var_times == var_time)[0][0]
+            level = contourf_var_ncfile.variables['level'][:]
+            angle = contourf_var_ncfile.variables['angle'][:]
+            radius = contourf_var_ncfile.variables['radius'][:]
+            contourf_var_value = np.nanmean(contourf_var_ncfile.variables[contourf_var][idt,:,:,:], axis=1)
+            print(contourf_var_ncfile.variables[contourf_var][idt,:,:,:])
+            contourf_var_ncfile.close()
+
+            extent = [np.min(radius), np.max(radius), np.min(level), np.max(level)]
+            # print(extent)
+
+            if 'null' not in contour_var:
+                dir_inner_core_case = os.path.join(dir_inner_core, specific_case)
+                contour_var_filename = os.path.join(dir_inner_core_case, f"{contour_var}_{dom}.nc")
+                contour_var_ncfile = Dataset(contour_var_filename)
+                contour_var_times = contour_var_ncfile.variables['time'][:]
+                idt = np.where(contour_var_times == var_time)[0][0]
+                contour_var_value = np.nanmean(contourf_var_ncfile.variables[contourf_var][idt,:,:], axis=1)
+                contour_var_ncfile.close()
+            
+            fig_width = 2.75
+            fig_height = 2.75+0.75
+            clb_aspect = 25
+
+            with PdfPages(pdfname) as pdf:
+
+                fig, axs = plt.subplots(1, 1, figsize=(fig_width, fig_height))
+                ax = axs
+
+                (contourf_information, contourf_levels) = set_variables(contourf_var)
+                pcm = ax.contourf(radius, level, contourf_information['factor']*contourf_var_value, \
+                                  levels=list(map(float, contourf_labels)), cmap=contourf_cmap, extend=contourf_information['extend'], zorder=1)
+                # print(np.nanmax(contourf_var_value))
+                # print(np.nanmin(contourf_var_value))
+                                
+                if 'null' not in contour_var:
+                    (contour_information, contour_levels) = set_variables(contour_var)
+                    if draw_contour_positive:
+                        CS1 = ax.contour(radius, level, contour_information['factor']*contour_var_value, \
+                                         levels=contour_positive_levels, linestyles='solid',  \
+                                         colors=contour_positive_color, linewidths=1.0, zorder=2)
+                        if contour_positive_clabel == True: ax.clabel(CS1, inline=True, fontsize=5.0)
+                    if draw_contour_negative:
+                        CS2 = ax.contour(radius, level, contour_information['factor']*contour_var_value, \
+                                         levels=contour_negative_levels, linestyles='dashed',  \
+                                         colors=contour_negative_color, linewidths=1.0, zorder=2)
+                        if contour_negative_clabel == True: ax.clabel(CS2, inline=True, fontsize=5.0)
+                    # print(np.nanmax(contour_var_value))
+                    # print(np.nanmin(contour_var_value))
+
+                ax.set_xticks(np.arange(np.min(radius), 301, 50))
+                ax.set_yticks(np.arange(100, 1001, 100))
+                ax.axis(extent)
+                ax.tick_params('both', direction='in', labelsize=10.0)
+                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+
+                clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
+                clb.set_label(f"{contourf_information['lb_title']}", fontsize=10.0, labelpad=4.0)
+                clb.ax.tick_params(axis='both', direction='in', pad=4.0, length=3.0, labelsize=10.0)
+                clb.ax.minorticks_off()
+                if len(contourf_labels)-1 <= 8:
+                    clb.set_ticks(list(map(float, contourf_labels[0::2])))
+                    clb.set_ticklabels(contourf_labels[0::2])
+                elif len(contourf_labels)-1 <= 16:
+                    clb.set_ticks(list(map(float, contourf_labels[0::4])))
+                    clb.set_ticklabels(contourf_labels[0::4])
+                elif len(contourf_labels)-1 <= 32:
+                    clb.set_ticks(list(map(float, contourf_labels[0::8])))
+                    clb.set_ticklabels(contourf_labels[0::8])
+                else:
+                    clb.set_ticks(list(map(float, contourf_labels[0::16])))
+                    clb.set_ticklabels(contourf_labels[0::16])
+
+                plt.tight_layout()
+                plt.savefig(pngname, dpi=600)
+                pdf.savefig(fig)
+                plt.cla()
+                plt.clf()
+                plt.close()
+
+            command = f"convert {pngname} -trim {pngname}"
+            subprocess.run(command, shell=True)
+
+        combine_images_grid(image_files, output_file)
+        command = f"convert {output_file} -trim {output_file}"
+        subprocess.run(command, shell=True)
+        image = IPImage(filename=output_file)
+        display(image)
