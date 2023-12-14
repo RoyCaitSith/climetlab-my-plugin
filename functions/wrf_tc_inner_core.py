@@ -61,7 +61,6 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
         anl_start_time = initial_time + timedelta(hours=cycling_interval)
         n_time = da_cycle*cycling_interval/time_interval + int(forecast_hours/history_interval)
         n_time = int(n_time)
-        n_time = 1
 
         specific_case = '_'.join([case_name, exp_name, 'C'+str(da_cycle).zfill(2)])
         dir_inner_core_case = os.path.join(dir_inner_core, specific_case)
@@ -97,7 +96,7 @@ def wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_names, d
                 ncfile_output.variables['angle'][:]  = angles
                 ncfile_output.variables['lat'][:,:] = 0.0
                 ncfile_output.variables['lon'][:,:] = 0.0
-                ncfile_output.variables[var][:,:,:] = 0.0
+                ncfile_output.variables[var][:,:,:,:] = 0.0
 
                 for idt in tqdm(range(n_time), desc='Times', position=0, leave=True):
                     time_now = anl_start_time + timedelta(hours = idt*time_interval)
@@ -237,7 +236,7 @@ def draw_wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_nam
             angle = contourf_var_ncfile.variables['angle'][:]
             radius = contourf_var_ncfile.variables['radius'][:]
             contourf_var_value = np.nanmean(contourf_var_ncfile.variables[contourf_var][idt,:,:,:], axis=1)
-            print(contourf_var_ncfile.variables[contourf_var][idt,:,:,:])
+            # print(contourf_var_ncfile.variables[contourf_var][idt,:,:,:])
             contourf_var_ncfile.close()
 
             extent = [np.min(radius), np.max(radius), np.min(level), np.max(level)]
@@ -287,6 +286,9 @@ def draw_wrf_tc_inner_core_6h(data_library_names, dir_cases, case_names, exp_nam
                 ax.axis(extent)
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+                ax.invert_yaxis()
+                ax.text(25, 100, exp_name, \
+                        ha='right', va='top', color='k', fontsize=10.0, bbox=dict(boxstyle='round', ec=grayC_cm_data[53], fc=grayC_cm_data[0]), zorder=7)
 
                 clb = fig.colorbar(pcm, ax=axs, orientation='horizontal', pad=0.075, aspect=clb_aspect, shrink=1.00)
                 clb.set_label(f"{contourf_information['lb_title']}", fontsize=10.0, labelpad=4.0)

@@ -8,7 +8,7 @@ from netCDF4 import Dataset
 
 def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
                          models=['ERA5', 'GFS'],
-                         variables=['u_anl', 'v_anl', 't_anl', 'q_anl'],
+                         variables=['u', 'v', 't', 'q', 'u_anl', 'v_anl', 't_anl', 'q_anl'],
                          levels=[1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]):
     
     time_interval = 6
