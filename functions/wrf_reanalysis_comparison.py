@@ -24,7 +24,7 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
 
         itime = attributes[(dir_case, case_name)]['itime']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-        da_domains = attributes[(dir_case, case_name)]['da_domains']
+        forecast_domains = attributes[(dir_case, case_name)]['forecast_domains']
         total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
         forecast_hours = attributes[(dir_case, case_name)]['forecast_hours']
@@ -42,7 +42,8 @@ def comapre_wrf_reanl_6h(data_library_names, dir_cases, case_names, exp_names,
         n_level = len(levels)
         n_total = n_model*total_da_cycles*n_forecast_hour*n_variable*n_level
 
-        for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
+        # for dom in tqdm(['d02'], desc='Domains', position=0, leave=True):
+        for dom in tqdm(forecast_domains, desc='Domains', position=0, leave=True):
 
             columns_lists = ['Model', 'DA_Cycle', 'Forecast_Hour', 'Date_Time', 'Variable', 'Level', 'MBE', 'MAE', 'MSE', 'RMSE']
             df = pd.DataFrame(index=np.arange(n_total), columns=columns_lists)
