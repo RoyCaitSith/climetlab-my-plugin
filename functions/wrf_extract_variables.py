@@ -208,10 +208,18 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                         ncfile_bkg.close()
                         ncfile_anl.close()
                     
+                    elif var == 'vo' and var == 'vo_anl':
+                        var_avo = var.replace('vo', 'avo')
+                        filename_avo = filename.replace('vo', 'avo')
+                        ncfile_avo = Dataset(filename_avo)
+                        lat_avo = ncfile_output.variables['lat'][:,:]
+                        ncfile_output.variables[var][idt,:,:] = ncfile_avo.variables[var_avo][idt,:,:] - metpy.calc.coriolis_parameter(lat_avo)
+                        print(metpy.calc.coriolis_parameter(lat_avo))
+                        ncfile_avo.close()
+                    
                     else:
                         if 'GFS' in exp_name:
                             if 'anl' in var:
-                                
                                 var_bkg = var.replace('_anl', '')
                                 filename_bkg = filename.replace('_anl', '')
                                 ncfile_bkg = Dataset(filename_bkg)
