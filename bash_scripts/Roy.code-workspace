@@ -25,6 +25,14 @@
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance"
 		},
 		{
+			"name": "GOES-R-deep-learning",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-deep-learning"
+		},
+		{
+			"name": "RoyCaitSith.github.io",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/RoyCaitSith.github.io"
+		},
+		{
             "name": "software",
 			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software"
 		},
