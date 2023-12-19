@@ -215,6 +215,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                         lat_avo = ncfile_output.variables['lat'][:,:]
                         ncfile_output.variables[var][idt,:,:] = ncfile_avo.variables[var_avo][idt,:,:] - metpy.calc.coriolis_parameter(lat_avo)
                         print(metpy.calc.coriolis_parameter(lat_avo))
+                        print(miao)
                         ncfile_avo.close()
                     
                     else:
