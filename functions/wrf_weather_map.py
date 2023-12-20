@@ -251,7 +251,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
                     index = (lon >= extent[0]) & (lon <= extent[1]) & (lat >= extent[2]) & (lat <= extent[3])
                     tc_information += f"{float(np.nanmin(contour_var_value[index])):.0f} hPa, {float(np.nanmax(contourf_var_value[index])):.0f} " + '$\mathregular{ms^{-1}}$'
 
-                if region_type == 'tc' or region_type == 'aew' or target_on:
+                if region_type == 'tc' or region_type == 'aew' or target_on == 'tc' or target_on == 'aew':
                     cross_h_lons = np.arange(-180.0, 180.1, 1.0)
                     cross_h_lats = np.array([bt_lat]*len(cross_h_lons))
                     cross_v_lats = np.arange(-90.0, 90.1, 1.0)
