@@ -208,14 +208,12 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                         ncfile_bkg.close()
                         ncfile_anl.close()
                     
-                    elif var == 'vo' and var == 'vo_anl':
-                        var_avo = var.replace('vo', 'avo')
-                        filename_avo = filename.replace('vo', 'avo')
+                    elif 'rvo' in var:
+                        var_avo = var.replace('rvo', 'avo')
+                        filename_avo = filename.replace('rvo', 'avo')
                         ncfile_avo = Dataset(filename_avo)
                         lat_avo = ncfile_output.variables['lat'][:,:]
-                        ncfile_output.variables[var][idt,:,:] = ncfile_avo.variables[var_avo][idt,:,:] - metpy.calc.coriolis_parameter(lat_avo)
-                        print(metpy.calc.coriolis_parameter(lat_avo))
-                        print(miao)
+                        ncfile_output.variables[var][idt,:,:] = ncfile_avo.variables[var_avo][idt,:,:] - metpy.calc.coriolis_parameter(lat_avo*np.pi/180.0)*100000.0
                         ncfile_avo.close()
                     
                     else:
