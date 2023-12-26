@@ -560,7 +560,7 @@ def set_variables(var):
         levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
         levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
 
-    if var == 'vo' or var == 'vo_anl':
+    if var == 'rvo' or var == 'rvo_anl':
         information = {}
         information.update({'name': 'vo'})
         information.update({'unit': 'null'})
@@ -586,7 +586,7 @@ def set_variables(var):
         levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
         levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
-    if var == 'vo_inc':
+    if var == 'rvo_inc':
         information = {}
         information.update({'name': 'vo'})
         information.update({'unit': 'null'})
