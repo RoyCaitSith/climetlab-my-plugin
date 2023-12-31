@@ -610,6 +610,58 @@ def set_variables(var):
         levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
         levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
 
+    if var == 'rvo_gau' or var == 'rvo_anl_gau':
+        information = {}
+        information.update({'name': 'vo'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Rel. vor. ($\mathregular{10^{-5}s^{-1}}$)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': 'Absolute vorticity'})
+        information.update({'ERA5': 'vo'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 975: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 950: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 900: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+        levels.update({ 800: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({ 700: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({ 600: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({ 500: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
+        levels.update({ 400: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+        levels.update({ 300: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+        levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+        levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
+
+    if var == 'rvo_inc_gau':
+        information = {}
+        information.update({'name': 'vo'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of Rel. vor. ($\mathregular{10^{-5}s^{-1}}$)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        information.update({'GFS': 'Absolute vorticity'})
+        information.update({'ERA5': 'vo'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 975: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 950: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 925: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 900: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 850: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 800: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 700: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 600: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 500: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 400: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 300: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+        levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+
     if var == 'rh' or var == 'rh_anl':
         information = {}
         information.update({'name': 'rh'})

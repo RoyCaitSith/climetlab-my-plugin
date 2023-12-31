@@ -25,7 +25,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
     dir_data = os.path.join(dir_exp, 'data')
     dir_MetNav = os.path.join(dir_data, 'MetNav')
 
-    filenames = glob.glob(os.path.join(dir_MetNav, '*MetNav*ict'))
+    filenames = glob.glob(os.path.join(dir_MetNav, '*MetNav*R0.ict'))
     for filename in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         if filename != '':
             df = pd.DataFrame(columns=['Time', 'LAT', 'LON'])

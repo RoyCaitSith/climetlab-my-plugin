@@ -5,6 +5,7 @@ import requests
 import pygrib
 import metpy.calc
 import numpy as np
+from scipy.ndimage import gaussian_filter
 from datetime import datetime, timedelta
 from tqdm.notebook import tqdm
 from wrf import getvar, latlon_coords, interplevel, g_geoht
@@ -207,6 +208,13 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                         ncfile_output.variables[var][idt,:,:] = ncfile_anl.variables[var_anl][idt,:,:] - ncfile_bkg.variables[var_bkg][idt,:,:]
                         ncfile_bkg.close()
                         ncfile_anl.close()
+                    
+                    elif 'gau' in var:
+                        var_ori = var.replace('_gau', '')
+                        filename_ori = filename.replace('_gau', '')
+                        ncfile_ori = Dataset(filename_ori)
+                        ncfile_output.variables[var][idt,:,:] = gaussian_filter(ncfile_ori.variables[var_ori][idt,:,:], sigma=7.5)
+                        ncfile_ori.close()
                     
                     elif 'rvo' in var:
                         var_avo = var.replace('rvo', 'avo')
