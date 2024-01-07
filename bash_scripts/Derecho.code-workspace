@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+            		"name": "royfeng",
+			"path": "/glade/u/home/royfeng"
+		},
+		{
+            		"name": "cfeng",
+			"path": "/glade/u/home/royfeng"
+		},
+		{
+			"name": "climetlab-my-plugin",
+			"path": "/glade/u/home/royfeng/climetlab-my-plugin"
+		},
+		{
+            		"name": "software",
+			"path": "/glade/work/royfeng/software"
+		},
+	],
+	"settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+    }
+}
