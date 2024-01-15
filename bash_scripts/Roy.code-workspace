@@ -1,12 +1,16 @@
 {
 	"folders": [
 		{
-            "name": "u1237353",
+            		"name": "home",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353"
 		},
 		{
-            "name": "cfeng",
+            		"name": "work",
 			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng"
+		},
+		{
+            		"name": "scratch",
+			"path": "/scratch/general/nfs1/u1237353"
 		},
 		{
 			"name": "climetlab-my-plugin",
@@ -31,10 +35,6 @@
 		{
 			"name": "RoyCaitSith.github.io",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/RoyCaitSith.github.io"
-		},
-		{
-            		"name": "software",
-			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software"
 		},
 	],
 	"settings": {

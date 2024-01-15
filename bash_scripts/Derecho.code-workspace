@@ -1,20 +1,24 @@
 {
 	"folders": [
 		{
-            		"name": "royfeng",
+            		"name": "home",
 			"path": "/glade/u/home/royfeng"
 		},
 		{
-            		"name": "cfeng",
-			"path": "/glade/u/home/royfeng"
+            		"name": "work",
+			"path": "/glade/work/royfeng"
+		},
+		{
+            		"name": "scratch",
+			"path": "/glade/derecho/scratch/royfeng"
 		},
 		{
 			"name": "climetlab-my-plugin",
 			"path": "/glade/u/home/royfeng/climetlab-my-plugin"
 		},
 		{
-            		"name": "software",
-			"path": "/glade/work/royfeng/software"
+			"name": "CFACT",
+			"path": "/glade/u/home/royfeng/CFACT"
 		},
 	],
 	"settings": {
