@@ -1,20 +1,24 @@
 {
 	"folders": [
 		{
-            		"name": "home",
+            "name": "home",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353"
 		},
 		{
-            		"name": "work",
+            "name": "work",
 			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng"
 		},
 		{
-            		"name": "scratch",
+            "name": "scratch",
 			"path": "/scratch/general/nfs1/u1237353"
 		},
 		{
 			"name": "climetlab-my-plugin",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin"
+		},
+		{
+			"name": "CFACT",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CFACT"
 		},
 		{
 			"name": "CPEX",
