@@ -142,7 +142,7 @@ def draw_weather_map_6h(data_library_names, dir_cases, case_names, exp_names,
             if region_type == 'd02': extent = [lon_d02[0,0], lon_d02[-1,-1], lat_d02[0,0], lat_d02[-1,-1]]
             
             if region_type == 'tc' or (region_type != 'tc' and region_type !='aew' and target_on == 'tc'):
-                if exp_name  == 'GFS' or exp_name == 'ERA5':
+                if exp_name  == 'GFS' or exp_name == 'ERA5' or exp_name == 'IMERG' or exp_name == 'CMORPH' or exp_name == 'GSMaP':
                     best_track = os.path.join(dir_best_track, attributes[(dir_case, case_name)]['NHC_best_track'])
                 else:
                     best_track = os.path.join(dir_best_track, '_'.join([case_name, exp_name, f"C{str(da_cycle).zfill(2)}", f"{dom}.csv"]))
