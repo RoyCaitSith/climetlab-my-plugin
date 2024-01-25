@@ -247,8 +247,8 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     with open(GFS_file, "wb") as f:
                                         f.write(response.content)
                                 GFS_pygrib = pygrib.open(GFS_file)
-                                # for grb in GFS_pygrib:
-                                #     print(grb)
+                                for grb in GFS_pygrib:
+                                    print(grb)
                                 if specific_level == 9999:
                                     if var == 'u10' or var == 'v10':
                                         GFS_temp = GFS_pygrib.select(name=information['GFS'], typeOfLevel='heightAboveGround', level=10)[0]
@@ -287,14 +287,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     GFS_lon_1d = GFS_lon[GFS_index]
                                     GFS_temp_1d = GFS_temp.values[GFS_index]
                                     if var == 'avo': GFS_temp_1d = GFS_temp_1d*100000.0
-                                    if var == 'q':
-                                        GFS_temperature = GFS_pygrib.select(name='Temperature', typeOfLevel='isobaricInhPa', level=specific_level)[0]
-                                        GFS_temperature_1d = GFS_temperature.values[GFS_index]
-                                        GFS_temp_1d = np.array(GFS_temp_1d)
-                                        GFS_temperature_1d = np.array(GFS_temperature_1d)
-                                        GFS_dewpoint_1d = np.array(metpy.calc.dewpoint_from_relative_humidity(GFS_temperature_1d*units.K, GFS_temp_1d*units.percent))
-                                        GFS_temp_1d = np.array(metpy.calc.specific_humidity_from_dewpoint(specific_level*units.hPa, GFS_dewpoint_1d*units.degC).to('kg/kg'))
-
+                                    if var == 'q': GFS_temp_1d = GFS_temp_1d/(1.0-GFS_temp_1d)
                                 ncfile_output.variables[var][idt,:,:] = griddata((GFS_lon_1d, GFS_lat_1d), GFS_temp_1d, (lon, lat), method='linear')
                                 GFS_pygrib.close()
                         elif 'ERA5' in exp_name:
@@ -347,6 +340,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     ERA5_coriolis_parameter = metpy.calc.coriolis_parameter(np.deg2rad(ERA5_lat_1d))
                                     ERA5_temp_1d = ERA5_temp_1d+ERA5_coriolis_parameter
                                     ERA5_temp_1d = ERA5_temp_1d*100000.0
+                                if var == 'div': ERA5_temp_1d = ERA5_temp_1d*100000.0
                                 if var == 'geopt': ERA5_temp_1d = ERA5_temp_1d/9.80665
                                 if var == 'slp': ERA5_temp_1d = ERA5_temp_1d/100.0
                                 ncfile_output.variables[var][idt,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
