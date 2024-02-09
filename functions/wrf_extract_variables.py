@@ -12,6 +12,7 @@ from wrf import getvar, latlon_coords, interplevel, g_geoht
 from netCDF4 import Dataset, num2date
 from scipy.interpolate import griddata
 from metpy.units import units
+from metpy.calc import divergence
 
 def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_names,
                              specific_level, da_cycle, ref_exp_name='CTRL', variables=['u']):
@@ -370,5 +371,11 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                     ncfile_output.variables[var][idt,:,:] = var_value
                                 else:
                                     temp_var_value = interplevel(var_value, p, specific_level)
+                                    if var == 'div' or var == 'div_anl':
+                                        temp_u_value = temp_var_value[0,:,:]
+                                        temp_v_value = temp_var_value[1,:,:]
+                                        temp_var_value = divergence(np.array(temp_u_value)*units('m/s'), np.array(temp_v_value)*units('m/s'), \
+                                                                    dx=information[dom]*units('m'), dy=information[dom]*units('m'), x_dim=-1, y_dim=-2)
+                                        temp_var_value = temp_var_value*100000.0
                                     ncfile_output.variables[var][idt,:,:] = temp_var_value
                 ncfile_output.close()

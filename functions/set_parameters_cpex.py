@@ -198,6 +198,50 @@ def set_variables(var):
         levels.update({ 200: [[f'{float(i/ 10):.1f}' for i in range(-20, 21, 5)], cmaps.vik]})
         levels.update({ 100: [[f'{float(i/ 10):.1f}' for i in range( -4,  5, 1)], cmaps.vik]})
 
+    if var == 'theta' or var == 'theta_anl':
+        information = {}
+        information.update({'name': 'theta'})
+        information.update({'unit': 'K'})
+        information.update({'lb_title': 'Theta (K)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
+
+    if var == 'theta_inc':
+        information = {}
+        information.update({'name': 'theta'})
+        information.update({'unit': 'K'})
+        information.update({'lb_title': 'Inc. of Theta (K)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/100):.2f}' for i in range( -4,  5, 1)], cmaps.vik]})
+
+    if var == 'theta_e' or var == 'theta_e_anl':
+        information = {}
+        information.update({'name': 'theta_e'})
+        information.update({'unit': 'K'})
+        information.update({'lb_title': 'Theta_e (K)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+        
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
+
+    if var == 'theta_e_inc':
+        information = {}
+        information.update({'name': 'theta_e'})
+        information.update({'unit': 'K'})
+        information.update({'lb_title': 'Inc. of Theta_e (K)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/100):.2f}' for i in range( -4,  5, 1)], cmaps.vik]})
+
     if var == 'q' or var == 'q_anl':
         information = {}
         information.update({'name': 'QVAPOR'})
@@ -666,8 +710,10 @@ def set_variables(var):
 
     if var == 'div' or var == 'div_anl':
         information = {}
-        information.update({'name': 'vo'})
-        information.update({'unit': 'null'})
+        information.update({'name': 'uvmet'})
+        information.update({'unit': 'ms-1'})
+        information.update({'d01': 12000.0})
+        information.update({'d02': 4000.0})
         information.update({'lb_title': 'Div. ($\mathregular{10^{-5}s^{-1}}$)'})
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
@@ -675,24 +721,13 @@ def set_variables(var):
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 975: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 950: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 925: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 900: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 850: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
-        levels.update({ 800: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
-        levels.update({ 700: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
-        levels.update({ 600: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
-        levels.update({ 500: [[f'{float(i/1):.0f}' for i in range(-20, 21, 4)], cmaps.vik]})
-        levels.update({ 400: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
-        levels.update({ 300: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
-        levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
-        levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-32, 33, 8)], cmaps.vik]})
 
     if var == 'div_inc':
         information = {}
-        information.update({'name': 'vo'})
-        information.update({'unit': 'null'})
+        information.update({'name': 'uvmet'})
+        information.update({'unit': 'ms-1'})
+        information.update({'d01': 12000.0})
+        information.update({'d02': 4000.0})
         information.update({'lb_title': 'Inc. of Div. ($\mathregular{10^{-5}s^{-1}}$)'})
         information.update({'factor': 1.0})
         information.update({'extend': 'both'})
@@ -700,19 +735,28 @@ def set_variables(var):
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 975: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 950: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 925: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 900: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 850: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 800: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 700: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 600: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 500: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 400: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 300: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 200: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
-        levels.update({ 100: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
+
+    if var == 'pvo' or var == 'pvo_anl':
+        information = {}
+        information.update({'name': 'pvo'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'PV (PVU)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
+
+    if var == 'pvo_inc':
+        information = {}
+        information.update({'name': 'pvo'})
+        information.update({'unit': 'null'})
+        information.update({'lb_title': 'Inc. of PV (PVU)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'both'})
+
+        levels = {}
+        levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
 
     if var == 'rh' or var == 'rh_anl':
         information = {}
@@ -858,5 +902,53 @@ def set_variables(var):
         
         levels = {}
         levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
-    
+
+    if var == 'mcape' or var == 'mcape_anl':
+        information = {}
+        information.update({'name': 'cape_2d'})
+        information.update({'unit': 'null'})
+        information.update({'index': 0})
+        information.update({'lb_title': 'MCAPE ($\mathregular{Jkg^{-1}}$)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'max'})
+        
+        levels = {}
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+
+    if var == 'mcin' or var == 'mcin_anl':
+        information = {}
+        information.update({'name': 'cape_2d'})
+        information.update({'unit': 'null'})
+        information.update({'index': 1})
+        information.update({'lb_title': 'MCIN ($\mathregular{Jkg^{-1}}$)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'max'})
+        
+        levels = {}
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+
+    if var == 'lcl' or var == 'lcl_anl':
+        information = {}
+        information.update({'name': 'cape_2d'})
+        information.update({'unit': 'null'})
+        information.update({'index': 2})
+        information.update({'lb_title': 'LCL (m)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'max'})
+        
+        levels = {}
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+
+    if var == 'lfc' or var == 'lfc_anl':
+        information = {}
+        information.update({'name': 'cape_2d'})
+        information.update({'unit': 'null'})
+        information.update({'index': 3})
+        information.update({'lb_title': 'LFC (m)'})
+        information.update({'factor': 1.0})
+        information.update({'extend': 'max'})
+        
+        levels = {}
+        levels.update({9999: [[f'{float(i/1):.0f}' for i in range(1000, 1041, 5)], cmaps.vik]})
+
     return (information, levels)
