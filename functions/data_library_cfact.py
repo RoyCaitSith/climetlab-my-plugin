@@ -29,7 +29,7 @@ attributes[('/CFACT/06_CV_RF01_AEW03', 'AEW03')] = {
     'itime': (2022, 2,  18,  12, 0, 0),
     'forecast_hours': 24,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
-    'total_da_cycles': 4,
+    'total_da_cycles': 5,
     'time_window_max': 3.0,
     'da_domains': ['d01', 'd02', 'd03', 'd04'],
     'forecast_domains': ['d01', 'd02', 'd03', 'd04'],
