@@ -253,9 +253,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
         if boundary_data_deterministic == 'NAM':
-            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
-
+            namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
         namelist_input.save_content()
 
         print(f"Create Geogrid_Data in {folder_dir}")
