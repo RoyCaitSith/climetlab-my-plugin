@@ -42,6 +42,7 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
         dir_cycling_da = os.path.join(dir_exp, 'cycling_da')
         dir_weather_map = os.path.join(dir_exp, 'weather_map')
         dir_data = os.path.join(dir_exp, 'data')
+        dir_HRES = os.path.join(dir_data, 'HRES')
         dir_ERA5 = os.path.join(dir_data, 'ERA5')
         dir_GFS = os.path.join(dir_data, 'GFS')
         dir_CMORPH = os.path.join(dir_data, 'CMORPH')
@@ -68,7 +69,8 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                'CMORPH' in exp_name or \
                'GSMaP'  in exp_name or \
                'GFS'    in exp_name or \
-               'ERA5'   in exp_name:
+               'ERA5'   in exp_name or \
+               'HRES'   in exp_name:
                 dir_wrfout = os.path.join(dir_cycling_da, f"{case_name}_{ref_exp_name}_C{str(da_cycle).zfill(2)}", 'bkg')
             else:
                 dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'bkg')
@@ -233,7 +235,6 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 ncfile_bkg = Dataset(filename_bkg)
                                 ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
                                 ncfile_bkg.close()
-                            
                             else:
                                 YYYY = time_now.strftime('%Y')
                                 YYMMDDHH = time_now.strftime('%Y%m%d%H')
@@ -293,13 +294,11 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 GFS_pygrib.close()
                         elif 'ERA5' in exp_name:
                             if 'anl' in var:
-                                
                                 var_bkg = var.replace('_anl', '')
                                 filename_bkg = filename.replace('_anl', '')
                                 ncfile_bkg = Dataset(filename_bkg)
                                 ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
                                 ncfile_bkg.close()
-                            
                             else:
                                 if specific_level == 9999:
                                     ERA5_filename = os.path.join(dir_ERA5, 'ERA5_single_level.nc')
@@ -346,6 +345,42 @@ def wrf_extract_variables_6h(data_library_names, dir_cases, case_names, exp_name
                                 if var == 'slp': ERA5_temp_1d = ERA5_temp_1d/100.0
                                 ncfile_output.variables[var][idt,:,:] = griddata((ERA5_lon_1d, ERA5_lat_1d), ERA5_temp_1d, (lon, lat), method='linear')
                                 ERA5_ncfile.close()
+                        elif 'HRES' in exp_name:
+                            if 'anl' in var:    
+                                var_bkg = var.replace('_anl', '')
+                                filename_bkg = filename.replace('_anl', '')
+                                ncfile_bkg = Dataset(filename_bkg)
+                                ncfile_output.variables[var][idt,:,:] = ncfile_bkg.variables[var_bkg][idt,:,:]
+                                ncfile_bkg.close()
+                            else:
+                                (HRES_var, HRES_label) = information['HRES']
+                                if specific_level == 9999:
+                                    print('Require development!')
+                                else:
+                                    YYMMDDHH = time_now.strftime('%Y%m%d%H')
+                                    HRES_filename = os.path.join(dir_HRES, f"ec.oper.an.pl.128_{HRES_label}.{YYMMDDHH}.nc")
+                                    HRES_ncfile = Dataset(HRES_filename)
+                                    HRES_level = HRES_ncfile.variables['level'][:]
+                                    HRES_idl = np.where(HRES_level == specific_level)[0][0]
+                                    HRES_temp = HRES_ncfile.variables[HRES_var][0,HRES_idl,:,:]
+                                    HRES_lat = np.transpose(np.tile(HRES_ncfile.variables['latitude'][:], (5120, 1)))
+                                    HRES_lon = np.tile(HRES_ncfile.variables['longitude'][:], (2560, 1))
+                                    HRES_lon[HRES_lon>180.0] = HRES_lon[HRES_lon>180.0] - 360.0
+                                    HRES_index = (HRES_lat < np.array(lat[-1, -1]) + 15.0) & (HRES_lat > np.array(lat[0, 0]) - 15.0) & \
+                                                 (HRES_lon < np.array(lon[-1, -1]) + 15.0) & (HRES_lon > np.array(lon[0, 0]) - 15.0)
+                                
+                                HRES_lat_1d = HRES_lat[HRES_index]
+                                HRES_lon_1d = HRES_lon[HRES_index]
+                                HRES_temp_1d = HRES_temp[HRES_index]
+                                if var == 'q': HRES_temp_1d = HRES_temp_1d/(1.0-HRES_temp_1d)
+                                if var == 'avo':
+                                    HRES_coriolis_parameter = metpy.calc.coriolis_parameter(np.deg2rad(HRES_lat_1d))
+                                    HRES_temp_1d = HRES_temp_1d+HRES_coriolis_parameter
+                                    HRES_temp_1d = HRES_temp_1d*100000.0
+                                if var == 'div': HRES_temp_1d = HRES_temp_1d*100000.0
+                                if var == 'geopt': HRES_temp_1d = HRES_temp_1d/9.80665
+                                ncfile_output.variables[var][idt,:,:] = griddata((HRES_lon_1d, HRES_lat_1d), HRES_temp_1d, (lon, lat), method='linear')
+                                HRES_ncfile.close()
                         else:
                             wrfout = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:%M:00')}")
                             if 'anl' in var:
