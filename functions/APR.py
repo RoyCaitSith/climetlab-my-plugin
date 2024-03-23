@@ -124,3 +124,96 @@ def wrf_extract_APR(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['dbz_anl'][:,idl] = griddata((wrf_lon_1d, wrf_lat_1d), anl_dbz_interpolate_1d, (lons, lats), method='linear')
 
                     ncfile_output.close()
+
+def wrf_extract_APR3_composite(data_library_names, dir_cases, case_names, exp_names):
+
+    for idc in tqdm(range(len(dir_cases)), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        # Import the necessary library
+        (data_library_name, dir_case, case_name, exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], exp_names[idc])
+
+        module = importlib.import_module(f"data_library_{data_library_name}")
+        attributes = getattr(module, 'attributes')
+        itime = attributes[(dir_case, case_name)]['itime']
+        dir_exp = attributes[(dir_case, case_name)]['dir_exp']
+        cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
+        total_da_cycles = attributes[(dir_case, case_name)]['total_da_cycles']
+        initial_time = datetime(*itime)
+
+        dir_weather_map = os.path.join(dir_exp, 'weather_map')
+        dir_data = os.path.join(dir_exp, 'data')
+        dir_APR = os.path.join(dir_data, 'APR-3')
+        os.makedirs(dir_weather_map, exist_ok=True)
+
+        anl_start_time = initial_time + timedelta(hours=cycling_interval)
+        specific_case = '_'.join([case_name, exp_name, 'C'+str(total_da_cycles).zfill(2)])
+        dir_weather_map_case = os.path.join(dir_weather_map, specific_case)
+        os.makedirs(dir_weather_map_case, exist_ok=True)
+
+        anl_start_time_YYYYMMDD = anl_start_time.strftime('%Y%m%d')
+        dir_cpexcv_APR3 = os.path.join(dir_APR, f"cpexcv-APR3_DC8_{anl_start_time_YYYYMMDD}_R0") 
+
+        filenames = os.popen(f"ls {dir_cpexcv_APR3}/cpexcv-APR3*.nc").readlines()
+        n_times = 0
+        n_cross = 0
+        n_geopt = 0
+        for filename in filenames:
+            filename_APR3nad = os.path.join(filename.rstrip('\n'))
+            ncfile_APR3nad = Dataset(filename_APR3nad, 'r')
+            lores_zhh14 = ncfile_APR3nad.variables['lores_zhh14'][:,:,:]
+            (Ns, Nb, Nr) = lores_zhh14.shape
+            n_times += Ns
+            n_cross = np.max([n_cross, Nb])
+            n_geopt = np.max([n_geopt, Nr])
+            ncfile_APR3nad.close()
+                
+        print(n_times)
+        print(n_cross)
+        print(n_geopt)
+
+        filename = os.path.join(dir_weather_map_case, f"{anl_start_time_YYYYMMDD}_APR3_3D.nc")
+        os.system(f"rm -rf {filename}")
+
+        ncfile_output = Dataset(filename, 'w', format='NETCDF4')
+        ncfile_output.createDimension('n_times', n_times)
+        ncfile_output.createDimension('n_cross', n_cross)
+        ncfile_output.createDimension('n_geopt', n_geopt)
+        ncfile_output.createVariable('zhh14', 'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('zhh35', 'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('zZN35', 'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('lat',   'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('lon',   'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('geopt', 'f8', ('n_times', 'n_cross', 'n_geopt'))
+        ncfile_output.createVariable('time',  'f8', ('n_times', 'n_cross', 'n_geopt'))
+
+        n_times = 0
+        for filename in filenames:
+
+            filename_APR3nad = os.path.join(filename.rstrip('\n'))
+            ncfile_APR3nad = Dataset(filename_APR3nad, 'r')
+            lores_zhh14 = ncfile_APR3nad.variables['lores_zhh14'][:,:,:]
+            lores_zhh35 = ncfile_APR3nad.variables['lores_zhh35'][:,:,:]
+            lores_zZN35 = ncfile_APR3nad.variables['lores_zZN35'][:,:,:]
+            lores_lat3D = ncfile_APR3nad.variables['lores_lat3D'][:,:,:]
+            lores_lon3D = ncfile_APR3nad.variables['lores_lon3D'][:,:,:]
+            lores_alt3D = ncfile_APR3nad.variables['lores_alt3D'][:,:,:]
+            lores_times = ncfile_APR3nad.variables['time'][:]
+            ncfile_APR3nad.close()
+
+            (Ns, Nb, Nr) = lores_zhh14.shape
+            print(filename.rstrip('\n'))
+            print(lores_zhh14.shape)
+            print(n_times)
+            print(n_times+Ns)
+
+            ncfile_output.variables['zhh14'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_zhh14
+            ncfile_output.variables['zhh35'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_zhh35
+            ncfile_output.variables['zZN35'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_zZN35
+            ncfile_output.variables['lat'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_lat3D
+            ncfile_output.variables['lon'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_lon3D
+            ncfile_output.variables['geopt'][n_times:n_times+Ns,0:Nb,0:Nr] = lores_alt3D
+            ncfile_output.variables['time'][n_times:n_times+Ns,0:Nb,0:Nr] = np.transpose(np.tile(lores_times, (Nr, Nb, 1)))
+
+            n_times += int(Ns)
+
+        ncfile_output.close()
