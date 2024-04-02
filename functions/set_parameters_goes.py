@@ -12,6 +12,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'U component of wind'})
         information.update({'ERA5': 'u'})
+        information.update({'HRES': ('U', '131_u.regn1280uv')})
         
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -36,6 +37,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'U component of wind'})
         information.update({'ERA5': 'u'})
+        information.update({'HRES': ('U', '131_u.regn1280uv')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
@@ -77,6 +79,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'V component of wind'})
         information.update({'ERA5': 'v'})
+        information.update({'HRES': ('V', '132_v.regn1280uv')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -101,6 +104,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'V component of wind'})
         information.update({'ERA5': 'v'})
+        information.update({'HRES': ('V', '132_v.regn1280uv')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-4, 5, 1)], cmaps.vik]})
@@ -155,6 +159,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Temperature'})
         information.update({'ERA5': 't'})
+        information.update({'HRES': ('T', '130_t.regn1280sc')})
         
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(284, 309, 3)], cmaps.lajolla]})
@@ -181,6 +186,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Temperature'})
         information.update({'ERA5': 't'})
+        information.update({'HRES': ('T', '130_t.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/100):.2f}' for i in range( -4,  5, 1)], cmaps.vik]})
@@ -207,6 +213,7 @@ def set_variables(var):
         information.update({'extend': 'max'})
         information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'q'})
+        information.update({'HRES': ('Q', '133_q.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
@@ -233,6 +240,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'q'})
+        information.update({'HRES': ('Q', '133_q.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/100):.2f}' for i in range( -8,  9, 2)], cmaps.cork]})
@@ -517,6 +525,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
         information.update({'ERA5': 'vo'})
+        information.update({'HRES': ('VO', '138_vo.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -543,6 +552,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
         information.update({'ERA5': 'vo'})
+        information.update({'HRES': ('VO', '138_vo.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
@@ -569,6 +579,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
         information.update({'ERA5': 'vo'})
+        information.update({'HRES': ('VO', '138_vo.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
@@ -595,6 +606,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
         information.update({'ERA5': 'vo'})
+        information.update({'HRES': ('VO', '138_vo.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-8, 9, 2)], cmaps.vik]})
@@ -621,6 +633,7 @@ def set_variables(var):
         information.update({'extend': 'max'})
         information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'r'})
+        information.update({'HRES': ('R', '157_r.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(0, 101, 10)], cmaps.div3_green_brown_r]})
@@ -647,6 +660,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Relative humidity'})
         information.update({'ERA5': 'r'})
+        information.update({'HRES': ('R', '157_r.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range( -4,  5, 1)], cmaps.div3_green_brown_r]})
@@ -673,6 +687,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Geopotential Height'})
         information.update({'ERA5': 'z'})
+        information.update({'HRES': ('Z', '129_z.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})
@@ -699,6 +714,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Geopotential Height'})
         information.update({'ERA5': 'z'})
+        information.update({'HRES': ('Z', '129_z.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/  1):.0f}' for i in range(0, 17, 2)], cmaps.imola]})

@@ -623,7 +623,7 @@ def set_variables(var):
         information.update({'extend': 'both'})
         information.update({'GFS': 'Absolute vorticity'})
         information.update({'ERA5': 'vo'})
-        information.update({'HRES': ('VO', '138_vo')})
+        information.update({'HRES': ('VO', '138_vo.regn1280sc')})
 
         levels = {}
         levels.update({1000: [[f'{float(i/1):.0f}' for i in range(-16, 17, 4)], cmaps.vik]})
