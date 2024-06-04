@@ -163,7 +163,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
     run_wrf_dir        = os.path.join(dir_namelists, 'run_wrf.sh')
 
     if period == 'cycling_da': da_cycle_start = total_da_cycles
-    if period == 'forecast': da_cycle_start = 1
+    if period == 'forecast' and total_da_cycles > 0: da_cycle_start = 1
+    if period == 'forecast' and total_da_cycles == 0: da_cycle_start = 0
     for da_cycle in range(da_cycle_start, total_da_cycles+1):
 
         # Set the folder name of the new case
@@ -177,8 +178,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
         initial_time     = datetime(*itime)
         initial_time_str = initial_time.strftime('%Y%m%d%H')
-        anl_start_time   = initial_time + timedelta(hours=cycling_interval)
-        anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-1))
+        anl_start_time   = initial_time + timedelta(hours=cycling_interval*da_cycle_start)
+        anl_end_time     = anl_start_time + timedelta(hours=cycling_interval*(da_cycle-da_cycle_start))
         analysis_hours   = da_cycle*cycling_interval
 
         if period == 'cycling_da':
@@ -288,8 +289,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
 
             if boundary_data_deterministic == 'NAM':
-                bc_filename = f"{time_now_YYYYMMDD}.nam.t{time_now_HH}z.awphys00.tm00.grib2"
+                bc_filename = f"nam.{time_now_YYYYMMDD}/nam.t{time_now_HH}z.awphys{str(fhours).zfill(2)}.tm00.grib2"
                 dir_bc_filename = os.path.join(dir_NAM, bc_filename)
+            
             print(dir_bc_filename)
 
             if (boundary_data_deterministic == 'GFS') and (not os.path.exists(dir_bc_filename)):

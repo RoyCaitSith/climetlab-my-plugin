@@ -40,3 +40,21 @@ attributes[('/CFACT/01_IOP8', 'IOP8')] = {
     'boundary_data_ensemble': 'NAM',
     'ensemble_members': 60,
 }
+
+attributes[('/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study', 'IOP8')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study/namelists',
+    'itime': (2022, 2,  19,   0, 0, 0),
+    'forecast_hours': 18,
+    'dir_scratch': '/scratch/general/nfs1/u1237353',
+    'total_da_cycles': 0,
+    'time_window_max': 1.0,
+    'da_domains': ['d01', 'd02', 'd03'],
+    'forecast_domains': ['d01', 'd02', 'd03'],
+    'wps_interval': 6,
+    'cycling_interval': 6,
+    'history_interval': 0.25,
+    'boundary_data_deterministic': 'NAM',
+    'boundary_data_ensemble': 'NAM',
+    'ensemble_members': 60,
+}
