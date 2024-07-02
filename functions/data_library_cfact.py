@@ -44,8 +44,8 @@ attributes[('/CFACT/01_IOP8', 'IOP8')] = {
 attributes[('/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study', 'IOP8')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study/namelists',
-    'itime': (2022, 2, 18, 0, 0, 0),
-    'forecast_hours': 42,
+    'itime': (2022, 2, 19, 0, 0, 0),
+    'forecast_hours': 18,
     'dir_scratch': '/scratch/general/nfs1/u1237353',
     'total_da_cycles': 0,
     'time_window_max': 1.0,
@@ -54,7 +54,7 @@ attributes[('/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study', 'IOP8')] = {
     'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 0.25,
-    'boundary_data_deterministic': 'NAM',
-    'boundary_data_ensemble': 'NAM',
+    'boundary_data_deterministic': 'HRRR',
+    'boundary_data_ensemble': 'HRRR',
     'ensemble_members': 60,
 }

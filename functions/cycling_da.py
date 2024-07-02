@@ -149,7 +149,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_GFS = os.path.join(dir_data, 'GFS')
+    dir_HRRR = os.path.join(dir_data, 'HRRR')
     dir_NAM = os.path.join(dir_data, 'NAM')
+    dir_NAM_HIRES = os.path.join(dir_data, 'NAM_HIRES')
     print(dir_data)
     os.makedirs(dir_data, exist_ok=True)
     os.makedirs(dir_GFS, exist_ok=True)
@@ -187,7 +189,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             start_date = initial_time
             total_hours = analysis_hours
             if boundary_data_deterministic == 'GFS': wps_interval = 6
+            if boundary_data_deterministic == 'HRRR': wps_interval = 6
             if boundary_data_deterministic == 'NAM': wps_interval = 6
+            if boundary_data_deterministic == 'NAM_HIRES': wps_interval = 6
         if period == 'forecast':
             max_dom = len(forecast_domains)
             start_date = anl_end_time
@@ -257,6 +261,14 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
             namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
+        if boundary_data_deterministic == 'NAM_HIRES':
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
+            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
+            namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
+        if boundary_data_deterministic == 'HRRR':
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
+            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
+            namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
         namelist_input.save_content()
 
         print(f"Create Geogrid_Data in {folder_dir}")
@@ -291,7 +303,15 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             if boundary_data_deterministic == 'NAM':
                 bc_filename = f"nam.{time_now_YYYYMMDD}/nam.t{time_now_HH}z.awphys{str(fhours).zfill(2)}.tm00.grib2"
                 dir_bc_filename = os.path.join(dir_NAM, bc_filename)
-            
+
+            if boundary_data_deterministic == 'NAM_HIRES':
+                bc_filename = f"nam.{time_now_YYYYMMDD}/nam.t{time_now_HH}z.conusnest.hiresf{str(fhours).zfill(2)}.tm00.grib2"
+                dir_bc_filename = os.path.join(dir_NAM_HIRES, bc_filename)
+
+            if boundary_data_deterministic == 'HRRR':
+                bc_filename = f"hrrr.{time_now_YYYYMMDD}/hrrr.t{time_now_HH}z.wrfprsf{str(fhours).zfill(2)}.grib2"
+                dir_bc_filename = os.path.join(dir_HRRR, bc_filename)
+
             print(dir_bc_filename)
 
             if (boundary_data_deterministic == 'GFS') and (not os.path.exists(dir_bc_filename)):
@@ -304,7 +324,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
         # Set the variable in the run_wps.sh
         if boundary_data_deterministic == 'GFS': vtable = 'Vtable.GFS'
+        if boundary_data_deterministic == 'HRRR': vtable = 'Vtable.HRRR'
         if boundary_data_deterministic == 'NAM': vtable = 'Vtable.NAM'
+        if boundary_data_deterministic == 'NAM_HIRES': vtable = 'Vtable.NAM'
         print(f"Vtable of Boundary Condition: {vtable}")
 
         run_wps = fo.change_content(run_wps_dir)
@@ -314,9 +336,13 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
         if boundary_data_deterministic == 'GFS':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gfs* $RUN_WRF_DIRECTORY')
+        if boundary_data_deterministic == 'HRRR':
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*hrrr*grib2 $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'NAM':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*nam*grib2 $RUN_WRF_DIRECTORY')
-
+        if boundary_data_deterministic == 'NAM_HIRES':
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*nam*grib2 $RUN_WRF_DIRECTORY')
+        
         run_wps.save_content()
 
         # Set the variable in the run_wrf.sh
