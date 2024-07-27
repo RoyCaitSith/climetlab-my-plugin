@@ -4,6 +4,32 @@ attributes = {}
 compare_schemes = {}
 sns_bright_cmap = sns.color_palette('bright')
 
+attributes[('/TROPICS/12_Sam_Cycling_DA', 'Sam')] = {
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/TROPICS/12_Sam_Cycling_DA',
+    'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
+    'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/TROPICS/12_Sam_Cycling_DA/namelists',
+    'NHC_best_track': '2021_18L_Sam.csv',
+    'hwrf_header': 'hwrf.18x18.AL182021.2021092318',
+    'ibtracs': {'filename': 'ibtracs.ALL.list.v04r00.csv', 'season': 2021, 'name': 'SAM'},
+    'IMERG_version': {'run': 'HHR', 'version': 'V06B'},
+    'CMORPH_version': '8km-30min',
+    'GSMaP_version': '04G',
+    'itime': (2021, 9, 23, 12, 0, 0),
+    'forecast_hours': 72,
+    'dir_scratch': '/scratch/general/nfs1/u1237353',
+    'total_da_cycles': 8,
+    'time_window_max': 3.0,
+    'da_domains': ['d01', 'd02'],
+    'forecast_domains': ['d01', 'd02'],
+    'GFDL_domains': ['d01'],
+    'wps_interval': 6,
+    'cycling_interval': 6,
+    'history_interval': 6,
+    'boundary_data_deterministic': 'GFS',
+    'boundary_data_ensemble': 'GEFS',
+    'ensemble_members': 60,
+}
+
 attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
     'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group16/cfeng/05_TROPICS/05_cycling_da',
     'dir_colormaps': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/colormaps/colormaps/colormaps',
