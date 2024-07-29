@@ -137,6 +137,9 @@ def create_TROPICS_bufr_temp(data_library_name, dir_case, case_name, version='V2
                     Clear_Sky_Flag = np.transpose(np.tile(np.transpose(ncfile_tpw.variables['clear_sky'][:,:]), (n_vertical_levels, 1, 1))).flatten()
                     print(file_tpw)
 
+                    TROPICS_CLAT = np.array(TROPICS_CLAT.tolist())
+                    TROPICS_CLAT[np.array(TROPICS_CLAT.tolist()) == None] = 666666.0
+
                     if 'OLD' in version or 'old' in version:
                         if 'AS' in version:
                             index = (np.array(TROPICS_TMDB.tolist()) != None) & (np.array(TROPICS_SPFH.tolist()) != None)
