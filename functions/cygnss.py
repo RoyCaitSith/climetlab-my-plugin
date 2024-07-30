@@ -138,7 +138,7 @@ def create_CYGNSS_bufr_temp(data_library_name, dir_case, case_name):
                     CYGNSS_DHR[idt] = (date_st + timedelta(seconds=cyg_time) - anl_end_time).total_seconds()/3600.0
 
                 index = (CYGNSS_DHR >= -1.0*cycling_interval/2.0) & (CYGNSS_DHR <= cycling_interval/2.0) & \
-                        (np.array(CYGNSS_UOB.tolist()) != None)
+                        (np.array(CYGNSS_XOB.tolist()) != None) & (np.array(CYGNSS_UOB.tolist()) != None)
 
                 n_data = sum(index==True)
                 print(n_data)
