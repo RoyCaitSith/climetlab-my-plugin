@@ -319,7 +319,7 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
     n_cases = len(dir_cases)
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (data_library_names, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
+        (data_library_name, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
 
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
