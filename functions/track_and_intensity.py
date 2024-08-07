@@ -148,6 +148,7 @@ def compare_track_scheme(data_library_name, scheme):
                 lon = list(df['LON'][index])
                 dt = list(df['Date_Time'][index])
                 idx_forecast_start_time = int((24-float(forecast_start_time.strftime('%H')))%24/6)
+                # print(df)
 
                 clon = 5*(lon[0]+lon[-1])/2.0//5
                 clat = 5*(lat[0]+lat[-1])/2.0//5
@@ -389,12 +390,14 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
         pdfname = dir_save + f"/{scheme}_{dom}_{varname}_averaged_RMSE_time_series.pdf"
         pngname = dir_save + f"/{scheme}_{dom}_{varname}_averaged_RMSE_time_series.png"
 
-        n_lead_time = int((forecast_hours-6.0)/history_interval+1)
+        n_lead_time = int(forecast_hours/history_interval+1)
         RMSE_ref = np.zeros(n_lead_time)
         for da_cycle in range(0, total_da_cycles):
             filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
             mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
+            print(mask)
+            print(np.square(df.loc[mask, variable].to_numpy()))
             RMSE_ref += np.square(df.loc[mask, variable].to_numpy())
         RMSE_ref = np.sqrt(RMSE_ref/total_da_cycles)
 
@@ -436,7 +439,7 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
             ymin = ymin*1.25
             ymax = ymax*1.25
             ax.set_xticks(np.arange(0, n_lead_time, 6/history_interval))
-            ax.set_xticklabels([str(idx) for idx in range(0, forecast_hours, 6)])
+            ax.set_xticklabels([str(idx) for idx in range(0, forecast_hours+1, 6)])
             ax.set_xlabel('Forecast Hours', fontsize=10.0)
             if 'Track' in variable: ax.set_ylabel('Improvement of Track (km)', fontsize=10.0)
             if 'MSLP' in variable:  ax.set_ylabel('Improvement of MSLP (hPa)', fontsize=10.0)
