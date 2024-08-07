@@ -396,8 +396,6 @@ def compare_averaged_RMSE_time_series_scheme(data_library_name, scheme, variable
             filename = f"{dir_best_track}/Error_{case_name}_{exp_name}_C{str(da_cycle+1).zfill(2)}_{dom}.csv"
             df = pd.read_csv(filename)
             mask = (df['Forecast_Hour'] >= (da_cycle + 1) * 6.0) & (df['Forecast_Hour'] <= (da_cycle + 1) * 6.0 + forecast_hours) & (df['Forecast_Hour']%6 == 0)
-            print(mask)
-            print(np.square(df.loc[mask, variable].to_numpy()))
             RMSE_ref += np.square(df.loc[mask, variable].to_numpy())
         RMSE_ref = np.sqrt(RMSE_ref/total_da_cycles)
 

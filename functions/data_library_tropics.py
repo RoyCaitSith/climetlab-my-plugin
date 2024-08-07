@@ -409,9 +409,12 @@ compare_schemes['TROPICS_Ida_scheme_23'] = {
 }
 compare_schemes['TROPICS_Sam_scheme_01'] = {
     'cases': [('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'CONV'), \
-              ('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'V1_AS_Q')],
+              ('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'V1_AS_Q'), \
+            #   ('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'V1_AS_T'), \
+              ('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'V1_AS_QT'), \
+              ('/TROPICS/12_Sam_Cycling_DA', 'Sam', 'CYG_V1_AS_QT')],
     'dir_save': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/TROPICS/12_Sam_Cycling_DA/track_intensity/figures',
-    'labels': ['CONV', 'V1_AS_Q'],
-    'colors': [sns_bright_cmap[0], sns_bright_cmap[1]],
-    'linestyles': ['-', '-'],
+    'labels': ['CONV', 'V1_AS_Q', 'V1_AS_QT', 'CYG_V1_AS_QT'],
+    'colors': [sns_bright_cmap[0], sns_bright_cmap[1], sns_bright_cmap[2], sns_bright_cmap[3], sns_bright_cmap[4]],
+    'linestyles': ['-', '-', '-', '-', '-'],
 }
