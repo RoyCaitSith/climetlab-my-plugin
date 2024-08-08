@@ -312,14 +312,14 @@ def create_CYGNSS_bufr(data_library_name, dir_case, case_name):
 
             os.system(f"mv {file_fortran_bufr} {file_bufr}")
 
-def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp_name):
+def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp_names):
 
     sns_bright_cmap = sns.color_palette('bright')
 
     n_cases = len(dir_cases)
     for idc in tqdm(range(n_cases), desc='Cases', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        (data_library_name, dir_case, case_name) = (data_library_names[idc], dir_cases[idc], case_names[idc])
+        (data_library_name, dir_case, case_name, cygnss_exp_name) = (data_library_names[idc], dir_cases[idc], case_names[idc], cygnss_exp_names[idc])
 
         module = importlib.import_module(f"data_library_{data_library_name}")
         attributes = getattr(module, 'attributes')
@@ -328,12 +328,10 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
         cycling_interval = attributes[(dir_case, case_name)]['cycling_interval']
         time_window_max = attributes[(dir_case, case_name)]['time_window_max']
         dir_exp = attributes[(dir_case, case_name)]['dir_exp']
-        dir_ScientificColourMaps7 = attributes[(dir_case, case_name)]['dir_ScientificColourMaps7']
-        dir_cygnss = '/'.join([attributes[(dir_case, case_name)]['dir_cygnss'], case_name])
+        dir_data = os.path.join(dir_exp, 'data')
+        dir_cygnss = os.path.join(dir_data, 'CYGNSS')
         dir_wrfout = '/'.join([dir_exp, 'cycling_da', f"{case_name}_{cygnss_exp_name}_C{str(total_da_cycles).zfill(2)}", 'bkg'])
-        dir_save = '/'.join([dir_exp, 'draw_Tropics', 'cygnss'])
-        grayC_cm_data = np.loadtxt(os.path.join(dir_ScientificColourMaps7, 'grayC', 'grayC.txt'))
-        grayC_map = LinearSegmentedColormap.from_list('grayC', grayC_cm_data[::1])
+        dir_save = '/'.join([dir_exp, 'observations', 'cygnss'])
 
         initial_time = datetime(*itime)
         anl_start_time = initial_time + timedelta(hours=cycling_interval)
@@ -421,7 +419,7 @@ def draw_CYGNSS_wind_speed(data_library_names, dir_cases, case_names, cygnss_exp
                 ax.set_yticklabels(["$\\mathrm{{{0}^\\circ {1}}}$".format(abs(x), "S" if x < 0 else ("N" if x > 0 else "")) for x in range(int(-90),  int(90)+1,  10)])
                 ax.tick_params('both', direction='in', labelsize=10.0)
                 ax.axis(extent)
-                ax.grid(True, linewidth=0.5, color=grayC_cm_data[53])
+                ax.grid(True, linewidth=0.5, color='k')
 
                 lb_title = 'Wind Speed (m/s) for C' + str(da_cycle+1).zfill(2)
                 clb = fig.colorbar(pcm, ax=ax, ticks=np.arange(0, 19, 3), orientation='horizontal', pad=0.075, aspect=25, shrink=1.00)
