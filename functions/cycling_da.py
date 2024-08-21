@@ -403,7 +403,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
     dir_halobufr = os.path.join(dir_data, 'HALO', 'bufr')
     dir_dropsondebufr = os.path.join(dir_data, 'Dropsonde', 'bufr')
     dir_cygnssbufr = os.path.join(dir_data, 'CYGNSS', 'bufr')
-    if 'OLD' in exp_name or 'old' in exp_name:
+    if ('OLD' in exp_name or 'old' in exp_name) and 'HVOLD' not in exp_name:
         if 'V1_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_AS', 'bufr_old')
         if 'V2_AS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V2_AS', 'bufr_old')
         if 'V1_CS' in exp_name: dir_tropicsbufr = os.path.join(dir_data, 'TROPICS_V1_CS', 'bufr_old')
