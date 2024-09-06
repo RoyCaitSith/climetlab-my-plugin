@@ -26,10 +26,10 @@ attributes[('/TROPICS/12_Sam_Cycling_DA', 'Sam')] = {
     'cycling_interval': 6,
     'history_interval': 6,
     'boundary_data_deterministic': 'GFS',
-    'boundary_data_ensemble': 'GFS',
-    'ensemble_members': 80,
-    # 'boundary_data_ensemble': 'GEFS',
-    # 'ensemble_members': 60,
+    # 'boundary_data_ensemble': 'GFS',
+    # 'ensemble_members': 80,
+    'boundary_data_ensemble': 'GEFS',
+    'ensemble_members': 60,
 }
 
 attributes[('/05_TROPICS/05_cycling_da', 'Ida')] = {
