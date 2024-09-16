@@ -28,7 +28,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
     filenames = glob.glob(os.path.join(dir_MetNav, '*MetNav*R0.ict'))
     for filename in tqdm(filenames, desc='Files', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
         if filename != '':
-            df = pd.DataFrame(columns=['Time', 'LAT', 'LON'])
+            df = pd.DataFrame(columns=['Time', 'LAT', 'LON', 'ALT'])
             with open(filename) as f:
                 lines = f.readlines()
 
@@ -46,6 +46,7 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
                 time_list = []
                 lat_list = []
                 lon_list = []
+                alt_list = []
                 for line in lines[first_line:]:
                     line = line.rstrip('\n')
                     items = line.split(',')
@@ -57,10 +58,12 @@ def metnav_to_csv(data_library_name, dir_case, case_name):
                         time_list += [time_now_str]
                         lat_list += [float(items[2])]
                         lon_list += [float(items[3])]
+                        alt_list += [float(items[4])]
 
             row = pd.DataFrame({'Time': time_list, \
                                 'LAT': lat_list, \
-                                'LON': lon_list})
+                                'LON': lon_list, \
+                                'ALT': alt_list})
             # df = pd.concat([df, row], ignore_index=True)
             df = pd.concat([row.iloc[0:2], row.iloc[2:]], ignore_index=True)
 
