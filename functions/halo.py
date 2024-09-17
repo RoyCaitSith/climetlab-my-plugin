@@ -287,9 +287,10 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
         dir_HALO_bufr_temp = os.path.join(dir_HALO, 'bufr_temp')
         os.makedirs(dir_cross_section, exist_ok=True)
 
+        da_domains = ['d01']
         for dom in tqdm(da_domains, desc='Domains', position=0, leave=True):
-            # for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', position=0, leave=True):
-            for da_cycle in tqdm(range(4, 5, 1), desc='Cycles', position=0, leave=True):
+            for da_cycle in tqdm(range(1, total_da_cycles+1), desc='Cycles', position=0, leave=True):
+            # for da_cycle in tqdm(range(4, 5, 1), desc='Cycles', position=0, leave=True):
 
                 anl_start_time = initial_time + timedelta(hours=cycling_interval)
                 n_time = int(da_cycle)
@@ -311,7 +312,8 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                     
                     if n_time > 0:
 
-                        filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_HALO_{dom}.nc")
+                        # filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_HALO_{dom}.nc")
+                        filename = os.path.join(dir_cross_section_case, f"{time_now_YYYYMMDDHH}_HALO_new_{dom}.nc")
                         os.system(f"rm -rf {filename}")
 
                         ncfile_output = Dataset(filename, 'w', format='NETCDF4')
@@ -331,6 +333,7 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.createVariable('q_anl',  'f8', ('n_time'))
                         ncfile_output.createVariable('q_OmB',  'f8', ('n_time'))
                         ncfile_output.createVariable('q_OmA',  'f8', ('n_time'))
+                        ncfile_output.createVariable('rh_obs', 'f8', ('n_time'))
 
                         df = pd.read_csv(os.path.join(dir_bufr_temp,  '1.txt'), header=None)
                         year = np.array(df[0])
@@ -361,6 +364,9 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                         sh = np.array(df[0])
                         q = sh/(1-sh)
 
+                        df = pd.read_csv(os.path.join(dir_bufr_temp, '17.txt'), header=None)
+                        rh = np.array(df[0])
+
                         ncfile_output.variables['year'][:] = year
                         ncfile_output.variables['month'][:] = month
                         ncfile_output.variables['days'][:] = days
@@ -372,6 +378,7 @@ def wrf_extract_HALO(data_library_names, dir_cases, case_names, exp_names):
                         ncfile_output.variables['p'][:] = p
                         ncfile_output.variables['geopt'][:] = height
                         ncfile_output.variables['q_obs'][:] = q
+                        ncfile_output.variables['rh_obs'][:] = rh
 
                         dir_wrfout = os.path.join(dir_cycling_da, specific_case, 'bkg')
                         wrfout = os.path.join(dir_wrfout, f"wrfout_{dom}_{time_now.strftime('%Y-%m-%d_%H:%M:00')}")
