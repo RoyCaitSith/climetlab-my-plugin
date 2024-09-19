@@ -54,7 +54,7 @@ attributes[('/CFACT/02_IOP8_TEST_CTRL_Sensitivity_Study', 'IOP8')] = {
     'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 0.25,
-    'boundary_data_deterministic': 'HRRR',
-    'boundary_data_ensemble': 'HRRR',
+    'boundary_data_deterministic': 'NAM',
+    'boundary_data_ensemble': 'NAM',
     'ensemble_members': 60,
 }
