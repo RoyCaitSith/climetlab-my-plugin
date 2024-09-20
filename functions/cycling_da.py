@@ -262,12 +262,12 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
             namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
         if boundary_data_deterministic == 'NAM_HIRES':
-            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '43, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
             namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
         if boundary_data_deterministic == 'HRRR':
-            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
-            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '41, ')
+            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '9, ')
             namelist_input.substitude_string('p_top_requested',         ' = ', '5000, ')
         namelist_input.save_content()
 
