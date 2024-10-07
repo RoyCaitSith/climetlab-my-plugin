@@ -149,6 +149,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
     dir_data = os.path.join(dir_exp, 'data')
     dir_GFS = os.path.join(dir_data, 'GFS')
+    dir_GDAS = os.path.join(dir_data, 'GDAS')
     dir_HRRR = os.path.join(dir_data, 'HRRR')
     dir_NAM = os.path.join(dir_data, 'NAM')
     dir_NAM_HIRES = os.path.join(dir_data, 'NAM_HIRES')
@@ -189,6 +190,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
             start_date = initial_time
             total_hours = analysis_hours
             if boundary_data_deterministic == 'GFS': wps_interval = 6
+            if boundary_data_deterministic == 'GDAS': wps_interval = 6
             if boundary_data_deterministic == 'HRRR': wps_interval = 6
             if boundary_data_deterministic == 'NAM': wps_interval = 6
             if boundary_data_deterministic == 'NAM_HIRES': wps_interval = 6
@@ -257,6 +259,9 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
         if boundary_data_deterministic == 'GFS':
             namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
+        if boundary_data_deterministic == 'GDAS':
+            namelist_input.substitude_string('num_metgrid_levels',      ' = ', '34, ')
+            namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
         if boundary_data_deterministic == 'NAM':
             namelist_input.substitude_string('num_metgrid_levels',      ' = ', '40, ')
             namelist_input.substitude_string('num_metgrid_soil_levels', ' = ', '4, ')
@@ -299,20 +304,33 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
                 bc_filename = f"gfs.0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(3)}.grib2"
                 dir_bc_filename = os.path.join(dir_GFS, bc_filename)
                 dir_rda = 'https://data.rda.ucar.edu/ds084.1'
+                dst_bc_filename = os.path.join(folder_dir, "Boundary_Condition_Data", bc_filename)
+
+            if boundary_data_deterministic == 'GDAS':
+                bc_filename = f"gdas1.fnl0p25.{time_now_YYYYMMDDHH}.f{str(fhours).zfill(2)}.grib2"                
+                dir_bc_filename = os.path.join(dir_GDAS, bc_filename)
+                dst_bc_filename = os.path.join(folder_dir, "Boundary_Condition_Data", bc_filename)
 
             if boundary_data_deterministic == 'NAM':
                 bc_filename = f"nam.{time_now_YYYYMMDD}/nam.t{time_now_HH}z.awphys{str(fhours).zfill(2)}.tm00.grib2"
+                bc_filename_out = f"nam.{time_now_YYYYMMDD}.t{time_now_HH}z.awphys{str(fhours).zfill(2)}.tm00.grib2"
                 dir_bc_filename = os.path.join(dir_NAM, bc_filename)
+                dst_bc_filename = os.path.join(folder_dir, "Boundary_Condition_Data", bc_filename_out)
 
             if boundary_data_deterministic == 'NAM_HIRES':
                 bc_filename = f"nam.{time_now_YYYYMMDD}/nam.t{time_now_HH}z.conusnest.hiresf{str(fhours).zfill(2)}.tm00.grib2"
+                bc_filename_out = f"nam.{time_now_YYYYMMDD}.t{time_now_HH}z.conusnest.hiresf{str(fhours).zfill(2)}.tm00.grib2"
                 dir_bc_filename = os.path.join(dir_NAM_HIRES, bc_filename)
+                dst_bc_filename = os.path.join(folder_dir, "Boundary_Condition_Data", bc_filename_out)
 
             if boundary_data_deterministic == 'HRRR':
                 bc_filename = f"hrrr.{time_now_YYYYMMDD}/hrrr.t{time_now_HH}z.wrfprsf{str(fhours).zfill(2)}.grib2"
+                bc_filename_out = f"hrrr.{time_now_YYYYMMDD}.t{time_now_HH}z.wrfprsf{str(fhours).zfill(2)}.grib2"
                 dir_bc_filename = os.path.join(dir_HRRR, bc_filename)
+                dst_bc_filename = os.path.join(folder_dir, "Boundary_Condition_Data", bc_filename_out)
 
             print(dir_bc_filename)
+            print(dst_bc_filename)
 
             if (boundary_data_deterministic == 'GFS') and (not os.path.exists(dir_bc_filename)):
                 rda_bc_filename = os.path.join(dir_rda, time_now_YYYY, time_now_YYYYMMDD, bc_filename)
@@ -320,10 +338,11 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
                 with open(dir_bc_filename, "wb") as f:
                     f.write(response.content)
 
-            os.system(f"cp {dir_bc_filename} {folder_dir}/Boundary_Condition_Data")
+            os.system(f"cp {dir_bc_filename} {dst_bc_filename}")
 
         # Set the variable in the run_wps.sh
         if boundary_data_deterministic == 'GFS': vtable = 'Vtable.GFS'
+        if boundary_data_deterministic == 'GDAS': vtable = 'Vtable.GFS'
         if boundary_data_deterministic == 'HRRR': vtable = 'Vtable.HRRR'
         if boundary_data_deterministic == 'NAM': vtable = 'Vtable.NAM'
         if boundary_data_deterministic == 'NAM_HIRES': vtable = 'Vtable.NAM'
@@ -336,6 +355,8 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
 
         if boundary_data_deterministic == 'GFS':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gfs* $RUN_WRF_DIRECTORY')
+        if boundary_data_deterministic == 'GDAS':
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gdas* $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'HRRR':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*hrrr*grib2 $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'NAM':
