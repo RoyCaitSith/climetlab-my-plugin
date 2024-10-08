@@ -394,11 +394,11 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
         if boundary_data_deterministic == 'GDAS':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'gdas* $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'HRRR':
-            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*hrrr*grib2 $RUN_WRF_DIRECTORY')
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'hrrr*grib2 $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'NAM':
-            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*nam*grib2 $RUN_WRF_DIRECTORY')
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'nam*grib2 $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'NAM_HIRES':
-            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', '*nam*grib2 $RUN_WRF_DIRECTORY')
+            run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'nam*grib2 $RUN_WRF_DIRECTORY')
         if boundary_data_deterministic == 'EC_HIRES':
             run_wps.substitude_string('$RUN_WRF_DIRECTORY/link_grib.csh $SCRATCH_DIRECTORY/Boundary_Condition_Data', '/', 'ec.oper*grib $RUN_WRF_DIRECTORY')
         
