@@ -72,7 +72,7 @@ attributes[('/CFACT/03_IOP8', 'IOP8')] = {
     'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 0.25,
-    'boundary_data_deterministic': 'NAM',
-    'boundary_data_ensemble': 'NAM',
+    'boundary_data_deterministic': 'GDAS',
+    'boundary_data_ensemble': 'GDAS',
     'ensemble_members': 60,
 }
