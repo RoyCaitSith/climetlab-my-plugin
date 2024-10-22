@@ -5,8 +5,12 @@
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353"
 		},
 		{
-            "name": "work",
+            "name": "work1",
 			"path": "/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng"
+		},
+		{
+            "name": "work2",
+			"path": "/uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2"
 		},
 		{
             "name": "scratch",
