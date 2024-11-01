@@ -91,7 +91,7 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 nnavp_surface = nnavp.groups['surface']
                 nnavp_masks = nnavp.groups['masks']
 
-                # Extract Dimension
+                # Extract dimensions
                 (n_bands, n_scans, n_spots) = uradl2a.variables['latitude'][:,:,:].shape
                 (n_channels, n_scans, n_spots) = uradl2a.variables['brightness_temperature'][:,:,:].shape
                 (n_vertical_levels, n_scans, n_spots) = nnavp_profiles.variables['t'][:,:,:].shape
@@ -106,26 +106,36 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 TROPICS_HOUR = np.array([date.hour for date in TROPICS_DATE])
                 TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
                 TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
-                print(TROPICS_YEAR[0])
                 # Quality for observed position
                 TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
                 # Quality for observed meteorological parameters
                 TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
+                # Latitude (coarse accuracy)
                 TROPICS_CLAT = np.tile(uradl2a.variables['latitude'][0,:,:], (n_vertical_levels, 1, 1)).flatten()
+                # Longitude (coarse accuracy)
                 TROPICS_CLON = np.tile(uradl2a.variables['longitude'][0,:,:], (n_vertical_levels, 1, 1)).flatten()
                 TROPICS_CLON[TROPICS_CLON<0] = TROPICS_CLON[TROPICS_CLON<0] + 360.0
-                print(TROPICS_CLON)
-                print(miao)
-
-
-                TROPICS_PRLC = (ncfile.variables['press'][:,:,:]*100.0).flatten()
+                # Pressure (Pa)
+                TROPICS_PRLC = nnavp_profiles.variables['press'][:,:,:].flatten()
+                TROPICS_PRLC = 100.0*TROPICS_PRLC
+                # Geopotential (m2s-2)
                 TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
+                # SDMEDIT/QUIPS quality mark for air temperature
                 TROPICS_QMAT = np.full((n_data), 1, dtype='int')
-                TROPICS_TMDB = ncfile.variables['t'][:,:,:].flatten()
+                # Temperature/air temperature (K)
+                TROPICS_TMDB = nnavp_profiles.variables['t'][:,:,:].flatten()
+                # SDMEDIT/QUIPS quality mark for moisture
                 TROPICS_QMDD = np.full((n_data), 1, dtype='int')
-                TROPICS_SPFH = ncfile.variables['q'][:,:,:].flatten()/(ncfile.variables['q'][:,:,:].flatten()+1.0)
-                TROPICS_es = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
-                TROPICS_ws = 0.622*TROPICS_es/(TROPICS_PRLC/100.0)
+                # Specific humidity (kgkg-1)
+                TROPICS_SPFH = nnavp_profiles.variables['q'][:,:,:].flatten()
+
+
+                
+                # Calculate relative humidity
+                TROPICS_ES = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
+                TROPICS_E = (specific_humidity*pressure)/(0.622+(specific_humidity*(1-0.622)))
+
+                TROPICS_ws = 0.622*TROPICS_ES/(TROPICS_PRLC/100.0)
                 TROPICS_REHU = 100.0*ncfile.variables['q'][:,:,:].flatten()/TROPICS_ws
                 TROPICS_QMWN = np.full((n_data), 2, dtype='int')
                 TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
