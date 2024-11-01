@@ -10,7 +10,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from pathlib import Path
-from netCDF4 import Dataset
+from netCDF4 import Dataset, num2date
 from tqdm.notebook import tqdm
 from mpl_toolkits.basemap import Basemap
 from IPython.display import Image as IPImage
@@ -31,11 +31,10 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
     dir_tropics_bufr_temp_version = os.path.join(dir_tropics_bufr_temp, version)
     os.makedirs(dir_tropics_bufr_temp, exist_ok=True)
     os.makedirs(dir_tropics_bufr_temp_version, exist_ok=True)
-    print(total_da_cycles)
 
-    for idc in tqdm(range(0, total_da_cycles), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
-        anl_now_time = anl_start_time + timedelta(hours=cycling_interval*idc)
+        anl_now_time = anl_start_time + timedelta(hours=cycling_interval*(idc-1))
         time_s = anl_start_time - timedelta(hours=cycling_interval/2.0)
         time_e = anl_start_time + timedelta(hours=cycling_interval/2.0)
         anl_now_time_YYYYMMDD = anl_now_time.strftime('%Y%m%d')
@@ -92,24 +91,33 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 nnavp_surface = nnavp.groups['surface']
                 nnavp_masks = nnavp.groups['masks']
 
-                #Extract Dimension
+                # Extract Dimension
                 (n_bands, n_scans, n_spots) = uradl2a.variables['latitude'][:,:,:].shape
                 (n_channels, n_scans, n_spots) = uradl2a.variables['brightness_temperature'][:,:,:].shape
                 (n_vertical_levels, n_scans, n_spots) = nnavp_profiles.variables['t'][:,:,:].shape
                 n_data = n_vertical_levels*n_scans*n_spots
-                
-                TROPICS_YEAR = np.tile(np.transpose(np.tile(ncfile.variables['Year'][:],   (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_MNTH = np.tile(np.transpose(np.tile(ncfile.variables['Month'][:],  (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_DAYS = np.tile(np.transpose(np.tile(ncfile.variables['Day'][:],    (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_HOUR = np.tile(np.transpose(np.tile(ncfile.variables['Hour'][:],   (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_MINU = np.tile(np.transpose(np.tile(ncfile.variables['Minute'][:], (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_SECO = np.tile(np.transpose(np.tile(ncfile.variables['Second'][:], (n_spots, 1))), (n_vertical_levels, 1, 1)).flatten()
+
+                TROPICS_TIME = uradl2a.variables['time'][:,:]
+                TROPICS_TIME = np.tile(TROPICS_TIME, (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_DATE = num2date(TROPICS_TIME, units='seconds since 2000-01-01 00:00:00')
+                TROPICS_YEAR = np.array([date.year for date in TROPICS_DATE])
+                TROPICS_MNTH = np.array([date.month for date in TROPICS_DATE])
+                TROPICS_DAYS = np.array([date.day for date in TROPICS_DATE])
+                TROPICS_HOUR = np.array([date.hour for date in TROPICS_DATE])
+                TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
+                TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
+                print(TROPICS_YEAR[0])
+                # Quality for observed position
                 TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
+                # Quality for observed meteorological parameters
                 TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
-                TROPICS_CLAT = np.tile(ncfile.variables['losLat_deg'][:,:], (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_Longitude = ncfile.variables['losLon_deg'][:,:]
-                TROPICS_Longitude[TROPICS_Longitude<0] = TROPICS_Longitude[TROPICS_Longitude<0] + 360.0
-                TROPICS_CLON = np.tile(TROPICS_Longitude, (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_CLAT = np.tile(uradl2a.variables['latitude'][0,:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_CLON = np.tile(uradl2a.variables['longitude'][0,:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_CLON[TROPICS_CLON<0] = TROPICS_CLON[TROPICS_CLON<0] + 360.0
+                print(TROPICS_CLON)
+                print(miao)
+
+
                 TROPICS_PRLC = (ncfile.variables['press'][:,:,:]*100.0).flatten()
                 TROPICS_GP10 = np.full((n_data), 0.0, dtype='float64')
                 TROPICS_QMAT = np.full((n_data), 1, dtype='int')
