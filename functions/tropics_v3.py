@@ -18,7 +18,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from combine_and_show_images import combine_images_grid
 from matplotlib.backends.backend_pdf import PdfPages
 from IPython.display import Image as IPImage
-from metpy.calc import height_to_geopotential, dewpoint_from_specific_humidity, precipitable_water
+from metpy.calc import height_to_geopotential, relative_humidity_from_specific_humidity, precipitable_water
 from metpy.units import units
 
 def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
@@ -48,26 +48,26 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
         os.makedirs(dir_bufr_temp_HH, exist_ok=True)
 
         n_total_data = 0
-        YEAR = []
-        MNTH = []
-        DAYS = []
-        HOUR = []
-        MINU = []
-        SECO = []
-        QHDOP = []
-        QHDOM = []
-        CLAT = []
-        CLON = []
-        PRLC = []
-        GP10 = []
-        QMAT = []
-        TMDB = []
-        QMDD = []
-        SPFH = []
-        REHU = []
-        QMWN = []
-        WDIR = []
-        WSPD = []
+        YEAR   = []
+        MNTH   = []
+        DAYS   = []
+        HOUR   = []
+        MINU   = []
+        SECO   = []
+        QHDOP  = []
+        QHDOM  = []
+        CLAT   = []
+        CLON   = []
+        PRLC   = []
+        GP10   = []
+        QMAT   = []
+        TMDB   = []
+        QMDD   = []
+        SPFH   = []
+        REHU   = []
+        QMWN   = []
+        WDIR   = []
+        WSPD   = []
         PKWDSP = []
 
         filenames = os.popen(f"ls {dir_tropics}/TROPICS03*.nc").readlines()
@@ -98,14 +98,14 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 n_data = n_vertical_levels*n_scans*n_spots
 
                 TROPICS_TIME = uradl2a.variables['time'][:,:]
-                TROPICS_TIME = np.tile(TROPICS_TIME, (n_vertical_levels, 1, 1)).flatten()
-                TROPICS_DATE = num2date(TROPICS_TIME, units='seconds since 2000-01-01 00:00:00')
-                TROPICS_YEAR = np.array([date.year for date in TROPICS_DATE])
-                TROPICS_MNTH = np.array([date.month for date in TROPICS_DATE])
-                TROPICS_DAYS = np.array([date.day for date in TROPICS_DATE])
-                TROPICS_HOUR = np.array([date.hour for date in TROPICS_DATE])
-                TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
-                TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
+                # TROPICS_TIME = np.tile(TROPICS_TIME, (n_vertical_levels, 1, 1)).flatten()
+                # TROPICS_DATE = num2date(TROPICS_TIME, units='seconds since 2000-01-01 00:00:00')
+                # TROPICS_YEAR = np.array([date.year for date in TROPICS_DATE])
+                # TROPICS_MNTH = np.array([date.month for date in TROPICS_DATE])
+                # TROPICS_DAYS = np.array([date.day for date in TROPICS_DATE])
+                # TROPICS_HOUR = np.array([date.hour for date in TROPICS_DATE])
+                # TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
+                # TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
                 # Quality for observed position
                 TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
                 # Quality for observed meteorological parameters
@@ -128,13 +128,19 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 TROPICS_QMDD = np.full((n_data), 1, dtype='int')
                 # Specific humidity (kgkg-1)
                 TROPICS_SPFH = nnavp_profiles.variables['q'][:,:,:].flatten()
-
-
-                
                 # Calculate relative humidity
+                TROPICS_REHU = []
+                for (pressure, t, sh) in zip(TROPICS_PRLC, TROPICS_TMDB, TROPICS_SPFH):
+                    if np.array(pressure.tolist()) == None and np.array(t.tolist()) == None and np.array(sh.tolist()) == None:
+                        TROPICS_REHU += [666666]
+                    else:
+                        print(relative_humidity_from_specific_humidity(pressure*units.hPa, t*units.K, sh).to('percent'))
+                        TROPICS_REHU += [relative_humidity_from_specific_humidity(pressure*units.hPa, t*units.K, sh).to('percent')]
+                        print(TROPICS_REHU)
+                        print(miao)
+
                 TROPICS_ES = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
                 TROPICS_E = (specific_humidity*pressure)/(0.622+(specific_humidity*(1-0.622)))
-
                 TROPICS_ws = 0.622*TROPICS_ES/(TROPICS_PRLC/100.0)
                 TROPICS_REHU = 100.0*ncfile.variables['q'][:,:,:].flatten()/TROPICS_ws
                 TROPICS_QMWN = np.full((n_data), 2, dtype='int')
