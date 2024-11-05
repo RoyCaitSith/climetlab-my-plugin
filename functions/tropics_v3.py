@@ -97,15 +97,13 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 (n_vertical_levels, n_scans, n_spots) = nnavp_profiles.variables['t'][:,:,:].shape
                 n_data = n_vertical_levels*n_scans*n_spots
 
-                TROPICS_TIME = uradl2a.variables['time'][:,:]
-                # TROPICS_TIME = np.tile(TROPICS_TIME, (n_vertical_levels, 1, 1)).flatten()
-                # TROPICS_DATE = num2date(TROPICS_TIME, units='seconds since 2000-01-01 00:00:00')
-                # TROPICS_YEAR = np.array([date.year for date in TROPICS_DATE])
-                # TROPICS_MNTH = np.array([date.month for date in TROPICS_DATE])
-                # TROPICS_DAYS = np.array([date.day for date in TROPICS_DATE])
-                # TROPICS_HOUR = np.array([date.hour for date in TROPICS_DATE])
-                # TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
-                # TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
+                # Year, Month, Day, Hour, Minute, Second
+                TROPICS_YEAR = np.tile(uradl2a.variables['Year'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_MNTH = np.tile(uradl2a.variables['Month'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_DAYS = np.tile(uradl2a.variables['Day'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_HOUR = np.tile(uradl2a.variables['Hour'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_MINU = np.tile(uradl2a.variables['Minute'][:,:], (n_vertical_levels, 1, 1)).flatten()
+                TROPICS_SECO = np.tile(uradl2a.variables['Second'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 # Quality for observed position
                 TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
                 # Quality for observed meteorological parameters
@@ -129,33 +127,48 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 # Specific humidity (kgkg-1)
                 TROPICS_SPFH = nnavp_profiles.variables['q'][:,:,:].flatten()
                 # Calculate relative humidity
-                TROPICS_REHU = []
-                for (pressure, t, sh) in zip(TROPICS_PRLC, TROPICS_TMDB, TROPICS_SPFH):
-                    if np.array(pressure.tolist()) == None and np.array(t.tolist()) == None and np.array(sh.tolist()) == None:
-                        TROPICS_REHU += [666666]
-                    else:
-                        print(relative_humidity_from_specific_humidity(pressure*units.hPa, t*units.K, sh).to('percent'))
-                        TROPICS_REHU += [relative_humidity_from_specific_humidity(pressure*units.hPa, t*units.K, sh).to('percent')]
-                        print(TROPICS_REHU)
-                        print(miao)
-
-                TROPICS_ES = 6.112*np.exp((17.67*(TROPICS_TMDB-273.16))/(TROPICS_TMDB-29.65))
-                TROPICS_E = (specific_humidity*pressure)/(0.622+(specific_humidity*(1-0.622)))
-                TROPICS_ws = 0.622*TROPICS_ES/(TROPICS_PRLC/100.0)
-                TROPICS_REHU = 100.0*ncfile.variables['q'][:,:,:].flatten()/TROPICS_ws
+                TROPICS_REHU = relative_humidity_from_specific_humidity(TROPICS_PRLC*units.Pa, TROPICS_TMDB*units.K, TROPICS_SPFH).to('percent').magnitude
+                print(TROPICS_REHU)
+                print(np.nammax(TROPICS_REHU))
+                print(np.nammin(TROPICS_REHU))
+                TROPICS_REHU = np.array(TROPICS_REHU)
+                # SDMEDIT/QUIPS quality mark for wind (does not include NESDIS produced satellite winds)
                 TROPICS_QMWN = np.full((n_data), 2, dtype='int')
+                # Wind direction (degree)
                 TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
+                # Wind speed (ms-1)
                 TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
                 TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
-                TROPICS_LEVEL = np.transpose(np.tile(range(n_vertical_levels), (n_spots, n_scans, 1))).flatten()
 
                 #Quality Control
                 Bad_Scan_Flag = np.tile(ncfile.variables['bad_scan_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
+
                 Bad_Latlon = np.tile(ncfile.variables['bad_latlon'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 Bad_CalQual_Flag = np.tile(ncfile.variables['bad_calQual_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 Lat_Region = np.tile(ncfile.variables['lat_region'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 Land_Flag = np.tile(ncfile.variables['land_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 Process = np.tile(ncfile.variables['process'][:,:], (n_vertical_levels, 1, 1)).flatten()
+
+
+ 46                                                                                                                                                                                                                                                                                                                                                                                                                      
+ 47             if varname == 'sensor_zenith_angle': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('URADL2A', 0, 90, 15, cmaps.acton, f"Line-of-Sight Zenith Angle (Degree)", f"sensor_zenith_angle.pdf")
+ 48             if varname == 'sensor_view_angle': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('URADL2A', 0, 90, 15, cmaps.acton, f"Line-of-Sight Scan Angle (Degree)", f"sensor_view_angle.pdf")
+ 49             if varname == 'solar_zenith_angle': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('URADL2A', 50, 140, 15, cmaps.acton, f"Line-of-Sight Solar Zenith Angle (Degree)", f"solar_zenith_angle.pdf")
+ 50             if varname == 'calQualityFlag': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('URADL2A', 120, 225, 15, cmaps.hawaii, f"Calibration Quality Flag of Channel {channel+1}", f"calQualityFlag_channel_{channel+1}.pdf")
+ 51             if varname == 'brightness_temperature': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('URADL2A', 125, 275, 25, cmaps.hawaii, f"Brightness Temperature (K) of Channel {channel+1}", f"brightness_temperature_channel_{channel+1}.pdf")
+ 52             if varname == 'skt': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('surface', 280, 310, 5, cmaps.hawaii_r, f"Skin Temperature (K)", f"skt.pdf")
+ 53             if varname == 'bad_calQual_flag': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 1, 0.2, cmaps.hawaii, f"Bad calQualityflag", f"bad_calQual_flag.pdf")
+ 54             if varname == 'land_flag': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 1, 0.2, cmaps.hawaii, f"Land Flag", f"land_flag.pdf")
+ 55             if varname == 'bad_scan_flag': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 1, 0.2, cmaps.hawaii, f"Bad Scan Flag", f"bad_scan_flag.pdf")
+ 56             if varname == 'bad_latlon': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 1, 0.2, cmaps.hawaii, f"Bad Lat Longs", f"bad_latlon.pdf")
+ 57             if varname == 'lat_region': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 3, 0.5, cmaps.hawaii, f"Lat NN Stat ID", f"lat_region.pdf")
+ 58             if varname == 'lat_region_overlap': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 3, 0.5, cmaps.hawaii, f"Lat NN Strat Overlap", f"lat_region_overlap.pdf")
+ 59             if varname == 'process': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('masks', 0, 1, 0.2, cmaps.hawaii, f"Collected Processed with NN", f"process.pdf")
+ 60             if varname == 'sp': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('GEOS_FC', 994, 1024, 5, cmaps.hawaii, f"Surface Pressure (hPa)", f"sp.pdf")
+ 61             if varname == 't': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('profiles', 265, 315, 10, cmaps.hawaii_r, f"Temperature (K) of Level {channel+1}", f"t_level_{channel+1}.pdf")
+ 62             if varname == 'q': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('profiles', 0, 0.015, 0.003, cmaps.hawaii_r, f"Specific Humidity (kgkg^-1) of Level {channel+1}", f"q_level_{channel+1}.pdf")
+ 63             if varname == 'press': (groupname, vmin, vmax, vint, cmap, clb_label, pdfname) = ('profiles', 810, 840, 5, cmaps.hawaii_r, f"Pressure (hPa) of Level {channel+1}", f"press_level_{channel+1}.pdf")
+
 
                 file_tpw = os.path.join(dir_TROPICS, f"ST{date_st_str}.ET{date_et_str}_TPW.nc")
                 ncfile_tpw = Dataset(file_tpw, 'r')
