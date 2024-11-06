@@ -35,11 +35,12 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
         anl_now_time = anl_start_time + timedelta(hours=cycling_interval*(idc-1))
-        time_s = anl_start_time - timedelta(hours=cycling_interval/2.0)
-        time_e = anl_start_time + timedelta(hours=cycling_interval/2.0)
+        time_s = anl_now_time - timedelta(hours=cycling_interval/2.0)
+        time_e = anl_now_time + timedelta(hours=cycling_interval/2.0)
         anl_now_time_YYYYMMDD = anl_now_time.strftime('%Y%m%d')
         anl_now_time_HH = anl_now_time.strftime('%H')
-        print(anl_now_time)
+        print(time_s)
+        print(time_e)
 
         dir_bufr_temp_YYYYMMDD = os.path.join(dir_tropics_bufr_temp_version, anl_now_time_YYYYMMDD)
         dir_bufr_temp_HH = os.path.join(dir_bufr_temp_YYYYMMDD, anl_now_time_HH)
@@ -191,8 +192,10 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                     PKWDSP += TROPICS_PKWDSP[index].tolist()
         
         # Calculate relative humidity
-        REHU = relative_humidity_from_specific_humidity(np.array(PRLC)*units.Pa, np.array(TMDB)*units.kelvin, np.array(SPFH)).to('percent').magnitude
-        # REHU = np.array(REHU)
+        TROPICS_REHU = relative_humidity_from_specific_humidity(np.array(PRLC)*units.Pa, np.array(TMDB)*units.kelvin, np.array(SPFH)).to('percent').magnitude
+        TROPICS_REHU = np.array(TROPICS_REHU)
+        TROPICS_REHU[TROPICS_REHU<0] = 0.0
+        REHU = TROPICS_REHU.tolist()
         # print(np.nanmax(REHU))
         # print(np.nanmin(REHU))
 
@@ -240,3 +243,68 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
             np.savetxt(f, PKWDSP)
         np.savetxt(os.path.join(dir_bufr_temp_HH, '0.txt'), [n_total_data])
         print('\n')
+
+def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
+
+    total_hours = (anl_end_time-anl_start_time).total_seconds()/3600
+    total_da_cycles = int(total_hours/cycling_interval+1)
+
+    dir_tropics = os.path.join(dir_data, 'TROPICS', case, 'TROPICS_V3')
+    dir_tropics_bufr_temp = os.path.join(dir_tropics, 'bufr_temp')
+    dir_tropics_bufr_file = os.path.join(dir_tropics, 'bufr_file')
+    dir_tropics_bufr_temp_version = os.path.join(dir_tropics_bufr_temp, version)
+    dir_tropics_bufr_file_version = os.path.join(dir_tropics_bufr_file, version)
+    os.makedirs(dir_tropics_bufr_file, exist_ok=True)
+    os.makedirs(dir_tropics_bufr_file_version, exist_ok=True)
+
+    for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
+
+        anl_now_time = anl_start_time + timedelta(hours=cycling_interval*(idc-1))
+        anl_now_time_YYYYMMDD = anl_now_time.strftime('%Y%m%d')
+        anl_now_time_HH = anl_now_time.strftime('%H')
+        print(anl_now_time)
+
+        dir_bufr_file_YYYYMMDD = os.path.join(dir_tropics_bufr_file_version, anl_now_time_YYYYMMDD)
+        bufr_file = os.path.join(dir_bufr_file_YYYYMMDD, f"gdas.t{anl_now_time_HH}z.tropics.tm00.bufr_d")
+        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'Fortran_Files')
+        bufr_file_fortran = os.path.join(dir_fortran_files, 'gdas.tropics.bufr')
+        os.makedirs(dir_bufr_file_YYYYMMDD, exist_ok=True)
+        os.system(f"rm -rf {bufr_file_fortran}")
+
+        print('Check bufr_temp: ')
+        flag = True
+        info = os.popen(f"cd {dir_tropics_bufr_temp_version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH} && ls ./*.txt").readlines()
+        if len(info) != 22:
+            flag = False
+        print(len(info))
+        print(flag)
+
+        if flag:
+
+            fdata = ''
+            with open(f"{dir_fortran_files}/bufr_encode_tropics.f90", 'r') as f:
+                for line in f.readlines():
+                    if(line.find('idate = ') == 4): line = f"    idate = {anl_now_time_YYYYMMDD}{anl_now_time_HH}\n"
+                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_tropics_bufr_temp}/{version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH}/'\n"
+                    fdata += line
+            f.close()
+
+            with open(f"{dir_fortran_files}/bufr_encode_tropics.f90", 'w') as f:
+                f.writelines(fdata)
+            f.close()
+
+            os.popen(f"cd {dir_fortran_files} && ./run_encode_tropics.sh > log_out")
+            flag = True
+            file_size = 0
+            while flag:
+                time.sleep(5)
+                file_size_temp = os.popen(f"stat -c '%s' {bufr_file_fortran}").read()
+                if file_size_temp:
+                    file_size_next = int(file_size_temp)
+                    if file_size_next == file_size:
+                        flag = False
+                    else:
+                        file_size = file_size_next
+                print(file_size)
+
+            os.system(f"mv {bufr_file_fortran} {bufr_file}")
