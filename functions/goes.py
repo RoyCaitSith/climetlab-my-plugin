@@ -21,16 +21,38 @@ from IPython.display import Image as IPImage
 from metpy.calc import height_to_geopotential, relative_humidity_from_specific_humidity, precipitable_water
 from metpy.units import units
 
-def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
+def parse_to_datetime(timestamp):
+    # Extract components
+    year = int(timestamp[:4])
+    day_of_year = int(timestamp[4:7])
+    hour = int(timestamp[7:9])
+    minute = int(timestamp[9:11])
+    second = int(timestamp[11:13])
+    tenth_of_second = int(timestamp[13]) / 10  # Convert tenth of a second to fractional seconds
+
+    # Create base date from year and Julian day
+    base_date = datetime(year, 1, 1) + timedelta(days=day_of_year - 1)
+    
+    # Construct the final datetime object
+    parsed_datetime = base_date.replace(hour=hour, minute=minute, second=second, microsecond=int(tenth_of_second * 1e6))
+
+    return parsed_datetime
+
+def create_goes_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
 
     total_hours = (anl_end_time-anl_start_time).total_seconds()/3600
     total_da_cycles = int(total_hours/cycling_interval+1)
 
-    dir_tropics = os.path.join(dir_data, 'TROPICS', case, 'TROPICS_V3')
-    dir_tropics_bufr_temp = os.path.join(dir_tropics, 'bufr_temp')
-    dir_tropics_bufr_temp_version = os.path.join(dir_tropics_bufr_temp, version)
-    os.makedirs(dir_tropics_bufr_temp, exist_ok=True)
-    os.makedirs(dir_tropics_bufr_temp_version, exist_ok=True)
+    dir_goes = os.path.join(dir_data, 'GOES', case)
+    dir_goes_bufr_temp = os.path.join(dir_goes, 'bufr_temp')
+    dir_goes_bufr_temp_version = os.path.join(dir_goes_bufr_temp, version)
+    os.makedirs(dir_goes_bufr_temp, exist_ok=True)
+    os.makedirs(dir_goes_bufr_temp_version, exist_ok=True)
+
+    interval  = 360
+    n_channel = 10
+    n_x       = 5424
+    n_y       = 5424
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -42,7 +64,7 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
         print(time_s)
         print(time_e)
 
-        dir_bufr_temp_YYYYMMDD = os.path.join(dir_tropics_bufr_temp_version, anl_now_time_YYYYMMDD)
+        dir_bufr_temp_YYYYMMDD = os.path.join(dir_goes_bufr_temp_version, anl_now_time_YYYYMMDD)
         dir_bufr_temp_HH = os.path.join(dir_bufr_temp_YYYYMMDD, anl_now_time_HH)
         os.system(f"rm -rf {dir_bufr_temp_HH}")
         os.makedirs(dir_bufr_temp_YYYYMMDD, exist_ok=True)
@@ -55,41 +77,59 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
         HOUR   = []
         MINU   = []
         SECO   = []
-        QHDOP  = []
-        QHDOM  = []
-        CLAT   = []
-        CLON   = []
-        PRLC   = []
-        GP10   = []
-        QMAT   = []
-        TMDB   = []
-        QMDD   = []
-        SPFH   = []
-        QMWN   = []
-        WDIR   = []
-        WSPD   = []
-        PKWDSP = []
+        CLATH  = []
+        CLONH  = []
+        SAZA   = []
+        SOZA   = []
+        BEARAZ = []
+        SOLAZI = []
+        HMSL   = []
+        TMBR07 = []
+        TMBR08 = []
+        TMBR09 = []
+        TMBR10 = []
+        TMBR11 = []
+        TMBR12 = []
+        TMBR13 = []
 
-        filenames = os.popen(f"ls {dir_tropics}/TROPICS03*.nc").readlines()
-        for file_tropics in filenames:
+        filenames = os.popen(f"ls {dir_goes}/*/OR_ABI-L2-CMIPF-M6C07_G16*.nc").readlines()
+        for file_goes in filenames:
                             
-            pattern = r'ST(\d{8}-\d{6}).ET(\d{8}-\d{6})'
-            pattern_match = re.search(pattern, file_tropics)
+            pattern = r's(\d{14})_e(\d{14})_c(\d{14})'
+            pattern_match = re.search(pattern, file_goes)
             date_st_str = pattern_match.group(1)
             date_et_str = pattern_match.group(2)
-            date_st = datetime.strptime(date_st_str, '%Y%m%d-%H%M%S')
-            date_et = datetime.strptime(date_et_str, '%Y%m%d-%H%M%S')
+            date_st = parse_to_datetime(date_st_str)
+            date_et = parse_to_datetime(date_et_str)
 
             if date_st <= time_e and date_et >= time_s:
                 
-                print(file_tropics.rstrip('\n'))
-                ncfile = netCDF4.Dataset(file_tropics.rstrip('\n'), mode='r', format='NETCDF4')
-                uradl2a = ncfile.groups['URADL2A']
-                geos_fc = ncfile.groups['GEOS_FC']
-                nnavp = ncfile.groups['NNAVP']
-                nnavp_profiles = nnavp.groups['profiles']
-                nnavp_surface = nnavp.groups['surface']
-                nnavp_masks = nnavp.groups['masks']
+                print(file_goes.rstrip('\n'))
+                ncfile = netCDF4.Dataset(file_goes.rstrip('\n'), mode='r', format='NETCDF4')
+                CMI  = ncfile.variables['CMI'][:,:]
+                DQF  = ncfile.variables['DQF'][:,:]
+                t    = ncfile.variables['t'][:]
+                x    = ncfile.variables['x'][:]
+                y    = ncfile.variables['y'][:]
+                gip  = ncfile.variables['goes_imager_projection']
+                r_eq = gip.semi_major_axis
+                r_pol = gip.semi_minor_axis
+                H     = gip.perspective_point_height + gip.semi_major_axis
+                phi_0    = gip.latitude_of_projection_origin
+                lambda_0 = gip.longitude_of_projection_origin
+                ncfile.close()
+                print(CMI)
+                print(DQF)
+                print(t)
+                print(x)
+                print(y)
+                print(gip)
+                print(r_eq)
+                print(r_pol)
+                print(H)
+                print(phi_0)
+                print(lambda_0)
+                print(miao)
 
                 # Extract dimensions
                 (n_bands, n_scans, n_spots) = uradl2a.variables['latitude'][:,:,:].shape
@@ -266,7 +306,7 @@ def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycli
 
         dir_bufr_file_YYYYMMDD = os.path.join(dir_tropics_bufr_file_version, anl_now_time_YYYYMMDD)
         bufr_file = os.path.join(dir_bufr_file_YYYYMMDD, f"gdas.t{anl_now_time_HH}z.tropics.tm00.bufr_d")
-        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'fortran_files')
+        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'Fortran_Files')
         bufr_file_fortran = os.path.join(dir_fortran_files, 'gdas.tropics.bufr')
         os.makedirs(dir_bufr_file_YYYYMMDD, exist_ok=True)
         os.system(f"rm -rf {bufr_file_fortran}")
