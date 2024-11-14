@@ -10,7 +10,7 @@ import seaborn as sns
 import pyorbital.orbital as po
 import matplotlib.pyplot as plt
 from pyorbital import astronomy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from netCDF4 import Dataset, num2date
 from tqdm.notebook import tqdm
@@ -52,7 +52,7 @@ def create_goes_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_
     os.makedirs(dir_goes_bufr_temp_version, exist_ok=True)
 
     (n_channel, n_x, n_y) = (10, 5424, 5424)
-    J2000 = datetime.datetime(2000, 1,  1, 12, 0, 0, tzinfo = datetime.timezone.utc)
+    J2000 = datetime(2000, 1,  1, 12, 0, 0, tzinfo = timezone.utc)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -91,6 +91,9 @@ def create_goes_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_
         TMBR11 = []
         TMBR12 = []
         TMBR13 = []
+        TMBR14 = []
+        TMBR15 = []
+        TMBR16 = []
 
         filenames = os.popen(f"ls {dir_goes}/*/OR_ABI-L2-CMIPF-M6C07_G16*.nc").readlines()
         for file_goes in filenames:
@@ -101,119 +104,130 @@ def create_goes_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_
             date_et_str = pattern_match.group(2)
             date_st = parse_to_datetime(date_st_str)
             date_et = parse_to_datetime(date_et_str)
+            print(date_st)
+            print(date_et)
 
             if date_st <= time_e and date_et >= time_s:
-                
-                print(file_goes.rstrip('\n'))
-                ncfile = netCDF4.Dataset(file_goes.rstrip('\n'), mode='r', format='NETCDF4')
-                CMI      = ncfile.variables['CMI'][:,:]
-                DQF      = ncfile.variables['DQF'][:,:]
-                t        = ncfile.variables['t'][:]
-                x        = ncfile.variables['x'][:]
-                y        = ncfile.variables['y'][:]
-                gip      = ncfile.variables['goes_imager_projection']
-                r_eq     = gip.semi_major_axis
-                r_pol    = gip.semi_minor_axis
-                H        = gip.perspective_point_height + gip.semi_major_axis
-                phi_0    = gip.latitude_of_projection_origin
-                lambda_0 = gip.longitude_of_projection_origin
+                for ich in range(7, 7+n_channel):
 
-                t     = J2000 + datetime.timedelta(seconds = t)
-                x, y  = np.meshgrid(x, y, indexing='xy')  
-                sin_x = np.sin(x)
-                cos_x = np.cos(x)
-                sin_y = np.sin(y)
-                cos_y = np.cos(y)
-                a     = np.power(sin_x, 2) + np.power(cos_x, 2)*(np.power(cos_y, 2)+np.power(r_eq*sin_y/r_pol, 2))
-                b     = -2.0*H*cos_x*cos_y
-                c     = np.power(H, 2) - np.power(r_eq, 2)
-                r_s   = (-1.0*b - np.sqrt(np.power(b, 2)-4*a*c))/(2*a)
-                s_x   = r_s*cos_x*cos_y
-                s_y   = -1.0*r_s*sin_x
-                s_z   = r_s*cos_x*sin_y
-                lat   = np.degrees(np.arctan(np.power(r_eq/r_pol, 2)*s_z/np.sqrt(np.power(H-s_x, 2)+np.power(s_y, 2))))
-                lon   = lambda_0 - np.degrees(np.arctan(s_y/(H-s_x)))
+                    cfiles   = os.popen(f"ls {dir_goes}/*/OR_ABI-L2-CMIPF-M6C*{str(ich)}_G16_s{date_st_str[0:11]}*_e{date_et_str[0:11]}*.nc").readlines()
+                    cfile    = cfiles[0].rstrip('\n')
+                    ncfile   = netCDF4.Dataset(cfile, mode='r', format='NETCDF4')
+                    CMI      = ncfile.variables['CMI'][:,:]
+                    DQF      = ncfile.variables['DQF'][:,:]
+                    t        = ncfile.variables['t'][:]
+                    x        = ncfile.variables['x'][:]
+                    y        = ncfile.variables['y'][:]
+                    gip      = ncfile.variables['goes_imager_projection']
+                    r_eq     = gip.semi_major_axis
+                    r_pol    = gip.semi_minor_axis
+                    H        = gip.perspective_point_height + gip.semi_major_axis
+                    phi_0    = gip.latitude_of_projection_origin
+                    lambda_0 = gip.longitude_of_projection_origin
+                    print(cfile)
 
-                sensor_azimuth, sensor_zenith = po.get_observer_look(np.atleast_1d(lambda_0), \
-                                                                     np.atleast_1d(phi_0), \
-                                                                     np.atleast_1d((H-r_eq)/1000.0), \
-                                                                     np.atleast_1d(t), \
-                                                                     np.atleast_1d(lon), \
-                                                                     np.atleast_1d(lat), \
-                                                                     np.atleast_1d(0.0))
-                sensor_zenith  = 90.0 - sensor_zenith
-                sensor_zenith  = np.reshape(sensor_zenith, (-1))
-                sensor_azimuth = np.reshape(sensor_azimuth, (-1))
+                    t     = J2000 + timedelta(seconds = float(t))
+                    x, y  = np.meshgrid(x, y, indexing='xy')  
+                    sin_x = np.sin(x)
+                    cos_x = np.cos(x)
+                    sin_y = np.sin(y)
+                    cos_y = np.cos(y)
+                    a     = np.power(sin_x, 2) + np.power(cos_x, 2)*(np.power(cos_y, 2)+np.power(r_eq*sin_y/r_pol, 2))
+                    b     = -2.0*H*cos_x*cos_y
+                    c     = np.power(H, 2) - np.power(r_eq, 2)
+                    r_s   = (-1.0*b - np.sqrt(np.power(b, 2)-4*a*c))/(2*a)
+                    s_x   = r_s*cos_x*cos_y
+                    s_y   = -1.0*r_s*sin_x
+                    s_z   = r_s*cos_x*sin_y
+                    lat   = np.degrees(np.arctan(np.power(r_eq/r_pol, 2)*s_z/np.sqrt(np.power(H-s_x, 2)+np.power(s_y, 2))))
+                    lon   = lambda_0 - np.degrees(np.arctan(s_y/(H-s_x)))
 
-                solar_zenith  = astronomy.sun_zenith_angle(t, lon, lat)
-                solar_altitude, solar_azimuth = astronomy.get_alt_az(t, lon, lat)
-                solar_azimuth = np.degrees(solar_azimuth)
-                solar_zenith  = np.reshape(solar_zenith, (-1))
-                solar_azimuth = np.reshape(solar_azimuth, (-1))
-                solar_azimuth[solar_azimuth < 0] = solar_azimuth[solar_azimuth < 0] + 360.0
+                    sensor_azimuth, sensor_zenith = po.get_observer_look(np.atleast_1d(lambda_0), \
+                                                                         np.atleast_1d(phi_0), \
+                                                                         np.atleast_1d((H-r_eq)/1000.0), \
+                                                                         np.atleast_1d(t), \
+                                                                         np.atleast_1d(lon), \
+                                                                         np.atleast_1d(lat), \
+                                                                         np.atleast_1d(0.0))
+                    sensor_zenith  = 90.0 - sensor_zenith
+                    sensor_zenith  = np.reshape(sensor_zenith, (-1))
+                    sensor_azimuth = np.reshape(sensor_azimuth, (-1))
 
-                # Year, Month, Day, Hour, Minute, Second
-                GOES_YEAR   = t.year
-                GOES_MNTH   = t.month
-                GOES_DAYS   = t.day
-                GOES_HOUR   = t.hour
-                GOES_MINU   = t.minute
-                GOES_SECO   = t.second + t.microsecond/1000000.0
-                GOES_CLATH  = np.reshape(lat, (-1))
-                GOES_CLONH  = np.reshape(lon, (-1))
-                GOES_SAZA   = sensor_zenith
-                GOES_SOZA   = solar_zenith
-                GOES_BEARAZ = sensor_azimuth
-                GOES_SOLAZI = solar_azimuth
-                GOES_HMSL   = H - r_eq
-                GOES_DQF    = DQF
-                GOES_TMBR07 = CMI
-                print(GOES_YEAR)
-                print(GOES_MNTH)
-                print(GOES_DAYS)
-                print(GOES_HOUR)
-                print(GOES_MINU)
-                print(GOES_SECO)
-                print(GOES_CLATH)
-                print(GOES_CLONH)
-                print(GOES_SAZA)
-                print(GOES_SOZA)
-                print(GOES_BEARAZ)
-                print(GOES_SOLAZI)
-                print(GOES_HMSL)
-                print(GOES_DQF)
-                print(GOES_TMBR07)
-                print(miao)
+                    solar_zenith  = astronomy.sun_zenith_angle(t, lon, lat)
+                    solar_altitude, solar_azimuth = astronomy.get_alt_az(t, lon, lat)
+                    solar_azimuth = np.degrees(solar_azimuth)
+                    solar_zenith  = np.reshape(solar_zenith, (-1))
+                    solar_azimuth = np.reshape(solar_azimuth, (-1))
+                    solar_azimuth[solar_azimuth < 0] = solar_azimuth[solar_azimuth < 0] + 360.0
 
-                #Quality Control
-                index = (GOES_DQF != 0) | (np.isnan(lat)) | (np.isnan(lon))
-                index = (index == False)
-                ncfile.close()
+                    # Year, Month, Day, Hour, Minute, Second
+                    GOES_YEAR   = np.full(n_x*n_y, t.year)
+                    GOES_MNTH   = np.full(n_x*n_y, t.month)
+                    GOES_DAYS   = np.full(n_x*n_y, t.day)
+                    GOES_HOUR   = np.full(n_x*n_y, t.hour)
+                    GOES_MINU   = np.full(n_x*n_y, t.minute)
+                    GOES_SECO   = np.full(n_x*n_y, t.second + t.microsecond/1000000.0)
+                    GOES_CLATH  = np.reshape(lat, (-1))
+                    GOES_CLONH  = np.reshape(lon, (-1))
+                    GOES_SAZA   = sensor_zenith
+                    GOES_SOZA   = solar_zenith
+                    GOES_BEARAZ = sensor_azimuth
+                    GOES_SOLAZI = solar_azimuth
+                    GOES_HMSL   = np.full(n_x*n_y, H - r_eq)
+                    GOES_DQF    = np.reshape(DQF, (-1))
+                    GOES_TMBR07 = np.reshape(CMI, (-1))
+                    GOES_TMBR08 = np.reshape(CMI, (-1))
+                    GOES_TMBR09 = np.reshape(CMI, (-1))
+                    GOES_TMBR10 = np.reshape(CMI, (-1))
+                    GOES_TMBR11 = np.reshape(CMI, (-1))
+                    GOES_TMBR12 = np.reshape(CMI, (-1))
+                    GOES_TMBR13 = np.reshape(CMI, (-1))
 
-                n_data = sum(index==True)
-                print(n_data)
-                if n_data > 0:
-                    n_total_data += n_data
-                    YEAR   += GOES_YEAR[index].tolist()
-                    MNTH   += GOES_MNTH[index].tolist()
-                    DAYS   += GOES_DAYS[index].tolist()
-                    HOUR   += GOES_HOUR[index].tolist()
-                    MINU   += GOES_MINU[index].tolist()
-                    SECO   += GOES_SECO[index].tolist()
-                    CLATH  += GOES_CLATH[index].tolist()
-                    CLONH  += GOES_CLONH[index].tolist()
-                    SAZA   += GOES_SAZA[index].tolist()
-                    SOZA   += GOES_SOZA[index].tolist()
-                    BEARAZ += GOES_BEARAZ[index].tolist()
-                    SOLAZI += GOES_SOLAZI[index].tolist()
-                    HMSL   += GOES_HMSL[index].tolist()
-                    TMBR07 += GOES_TMBR07[index].tolist()
-                    # TMBR08 += GOES_TMBR08[index].tolist()
-                    # TMBR09 += GOES_TMBR09[index].tolist()
-                    # TMBR10 += GOES_TMBR10[index].tolist()
-                    # TMBR11 += GOES_TMBR11[index].tolist()
-                    # TMBR12 += GOES_TMBR12[index].tolist()
-                    # TMBR13 += GOES_TMBR13[index].tolist()
+                    #Quality Control
+                    index = (GOES_DQF != 0) | (np.isnan(GOES_CLATH)) | (np.isnan(GOES_CLONH))
+                    index = (index == False)
+                    ncfile.close()
+
+                    print(GOES_YEAR[index])
+                    print(GOES_MNTH[index])
+                    print(GOES_DAYS[index])
+                    print(GOES_HOUR[index])
+                    print(GOES_MINU[index])
+                    print(GOES_SECO[index])
+                    print(GOES_CLATH[index])
+                    print(GOES_CLONH[index])
+                    print(GOES_SAZA[index])
+                    print(GOES_SOZA[index])
+                    print(GOES_BEARAZ[index])
+                    print(GOES_SOLAZI[index])
+                    print(GOES_HMSL[index])
+                    print(GOES_DQF[index])
+                    print(GOES_TMBR07[index])
+
+                    n_data = np.count_nonzero(index)
+                    print(n_data)
+                    if n_data > 0:
+                        n_total_data += n_data
+                        YEAR   += GOES_YEAR[index].tolist()
+                        MNTH   += GOES_MNTH[index].tolist()
+                        DAYS   += GOES_DAYS[index].tolist()
+                        HOUR   += GOES_HOUR[index].tolist()
+                        MINU   += GOES_MINU[index].tolist()
+                        SECO   += GOES_SECO[index].tolist()
+                        CLATH  += GOES_CLATH[index].tolist()
+                        CLONH  += GOES_CLONH[index].tolist()
+                        SAZA   += GOES_SAZA[index].tolist()
+                        SOZA   += GOES_SOZA[index].tolist()
+                        BEARAZ += GOES_BEARAZ[index].tolist()
+                        SOLAZI += GOES_SOLAZI[index].tolist()
+                        HMSL   += GOES_HMSL[index].tolist()
+                        TMBR07 += GOES_TMBR07[index].tolist()
+                        TMBR08 += GOES_TMBR08[index].tolist()
+                        TMBR09 += GOES_TMBR09[index].tolist()
+                        TMBR10 += GOES_TMBR10[index].tolist()
+                        TMBR11 += GOES_TMBR11[index].tolist()
+                        TMBR12 += GOES_TMBR12[index].tolist()
+                        TMBR13 += GOES_TMBR13[index].tolist()
 
         with open(os.path.join(dir_bufr_temp_HH,  '1.txt'), 'ab') as f:
             np.savetxt(f, YEAR)
