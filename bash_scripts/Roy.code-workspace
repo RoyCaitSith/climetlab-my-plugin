@@ -13,32 +13,36 @@
 			"path": "/uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2"
 		},
 		{
-            "name": "scratch",
-			"path": "/scratch/general/nfs1/u1237353"
-		},
-		{
-			"name": "climetlab-my-plugin",
-			"path": "/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin"
-		},
-		{
-			"name": "CFACT",
-			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CFACT"
-		},
-		{
-			"name": "CPEX",
-			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CPEX"
-		},
-		{
-			"name": "TROPICS",
-			"path": "/uufs/chpc.utah.edu/common/home/u1237353/TROPICS"
-		},
-		{
 			"name": "GOES-R-observation-error-covariance",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-observation-error-covariance"
 		},
 		{
 			"name": "GOES-R-deep-learning",
 			"path": "/uufs/chpc.utah.edu/common/home/u1237353/GOES-R-deep-learning"
+		},
+		{
+			"name": "CYGNSS",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CYGNSS"
+		},
+		{
+			"name": "TROPICS",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/TROPICS"
+		},
+		{
+			"name": "CPEX",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CPEX"
+		},
+		{
+			"name": "CFACT",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/CFACT"
+		},
+		{
+            "name": "scratch",
+			"path": "/scratch/general/nfs1/u1237353"
+		},
+		{
+			"name": "climetlab-my-plugin",
+			"path": "/uufs/chpc.utah.edu/common/home/u1237353/climetlab-my-plugin"
 		},
 		{
 			"name": "RoyCaitSith.github.io",
