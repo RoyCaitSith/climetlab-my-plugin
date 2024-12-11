@@ -102,12 +102,6 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 print(f"n_scans={n_scans}")
                 print(f"n_spots={n_spots}")
 
-                vertical_levels = np.arange(1, n_vertical_levels+1)
-                TROPICS_QHDOP = np.tile(vertical_levels, (1, n_scans, n_spots))
-                print(TROPICS_QHDOP[:,0,0])
-                print(TROPICS_QHDOP[:,5,7])
-                print(miao)
-
                 # Year, Month, Day, Hour, Minute, Second
                 TROPICS_TIME = np.tile(uradl2a.variables['time'][:,:], (n_vertical_levels, 1, 1)).flatten()
                 TROPICS_DATE = num2date(TROPICS_TIME, units="seconds since 2000-01-01 00:00:00")
@@ -120,7 +114,7 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 # Quality for observed position
                 # TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
                 # Revised for vertical observation
-                TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
+                TROPICS_QHDOP = np.transpose(np.tile(np.arange(1, n_vertical_levels+1), (n_spots, n_scans, 1))).flatten()
                 # Quality for observed meteorological parameters
                 TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
                 # Latitude (coarse accuracy)
