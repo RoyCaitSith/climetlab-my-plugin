@@ -112,9 +112,7 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 TROPICS_MINU = np.array([date.minute for date in TROPICS_DATE])
                 TROPICS_SECO = np.array([date.second for date in TROPICS_DATE])
                 # Quality for observed position
-                # TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
-                # Revised for vertical observation
-                TROPICS_QHDOP = np.transpose(np.tile(np.arange(1, n_vertical_levels+1), (n_spots, n_scans, 1))).flatten()
+                TROPICS_QHDOP = np.full((n_data), 0, dtype='int')
                 # Quality for observed meteorological parameters
                 TROPICS_QHDOM = np.full((n_data), 0, dtype='int')
                 # Latitude (coarse accuracy)
@@ -141,7 +139,9 @@ def create_tropics_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycli
                 TROPICS_WDIR = np.full((n_data), 0.0, dtype='float64')
                 # Wind speed (ms-1)
                 TROPICS_WSPD = np.full((n_data), 0.0, dtype='float64')
-                TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
+                # TROPICS_PKWDSP = np.full((n_data), 0.0, dtype='float64')
+                # Revised for vertical observation
+                TROPICS_PKWDSP = np.transpose(np.tile(np.arange(1.0, n_vertical_levels+1.0), (n_spots, n_scans, 1))).flatten()
 
                 #Quality Control
                 bad_calQual_flag = np.tile(nnavp_masks['bad_calQual_flag'][:,:], (n_vertical_levels, 1, 1)).flatten()
@@ -268,7 +268,7 @@ def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycli
 
         dir_bufr_file_YYYYMMDD = os.path.join(dir_tropics_bufr_file_version, anl_now_time_YYYYMMDD)
         bufr_file = os.path.join(dir_bufr_file_YYYYMMDD, f"gdas.t{anl_now_time_HH}z.tropics.tm00.bufr_d")
-        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'fortran_files')
+        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'Fortran_Files')
         bufr_file_fortran = os.path.join(dir_fortran_files, 'gdas.tropics.bufr')
         os.makedirs(dir_bufr_file_YYYYMMDD, exist_ok=True)
         os.system(f"rm -rf {bufr_file_fortran}")
