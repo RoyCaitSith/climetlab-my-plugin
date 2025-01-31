@@ -71,8 +71,8 @@ attributes[('/CFACT/03_IOP8', 'IOP8')] = {
     'forecast_domains': ['d01', 'd02', 'd03', 'd04'],
     'wps_interval': 6,
     'cycling_interval': 6,
-    'history_interval': 0.25,
-    'boundary_data_deterministic': 'NAM_HIRES',
-    'boundary_data_ensemble': 'NAM_HIRES',
+    'history_interval': 5/60,
+    'boundary_data_deterministic': 'NAM',
+    'boundary_data_ensemble': 'NAM',
     'ensemble_members': 60,
 }
