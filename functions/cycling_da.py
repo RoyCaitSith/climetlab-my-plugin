@@ -254,7 +254,7 @@ def run_wps_and_real(data_library_name, dir_case, case_name, exp_name, wps_versi
         namelist_input.substitude_string('end_hour',         ' = ', end_HH_str)
         namelist_input.substitude_string('interval_seconds', ' = ', str(3600*wps_interval))
         namelist_input.substitude_string('max_dom',          ' = ', f"{str(max_dom)}, ")
-        namelist_input.substitude_string('history_interval', ' = ', f'{history_interval*60}, ' * max_dom)
+        namelist_input.substitude_string('history_interval', ' = ', f'{str(int(history_interval*60))}, ' * max_dom)
         namelist_input.substitude_string('history_outname',  ' = ', f"'{folder_dir}/{initial_time_str}/wrfout_d<domain>_<date>'")
         namelist_input.substitude_string('rst_outname',      ' = ', f"'{folder_dir}/{initial_time_str}/wrfrst_d<domain>_<date>'")
 
@@ -644,7 +644,7 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
             namelist_input.substitude_string('end_month', ' = ', end_MM_str)
             namelist_input.substitude_string('end_day', ' = ', end_DD_str)
             namelist_input.substitude_string('end_hour', ' = ', end_HH_str)
-            namelist_input.substitude_string('history_interval', ' = ', max_dom * f"{str(cycling_interval*60)}, ")
+            namelist_input.substitude_string('history_interval', ' = ', max_dom * f"{str(int(cycling_interval*60))}, ")
             namelist_input.save_content()
 
             print('Copy wrfinput to Run_WRF')
