@@ -108,7 +108,7 @@ attributes[('/CFACT/05_IOP9', 'IOP9')] = {
     'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 5/60,
-    'boundary_data_deterministic': 'NAM_HIRES',
-    'boundary_data_ensemble': 'NAM_HIRES',
+    'boundary_data_deterministic': 'NAM',
+    'boundary_data_ensemble': 'NAM',
     'ensemble_members': 60,
 }
