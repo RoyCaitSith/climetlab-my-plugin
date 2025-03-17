@@ -531,7 +531,11 @@ def run_cycling_da(data_library_name, dir_case, case_name, exp_name, \
 
                 print(f"Create obs folder, and copy bufr to obs")
                 obs_dir = os.path.join(run_gsi_dir, 'obs')
-                os.makedirs(obs_dir, exist_ok=True)
+                if os.path.exists(obs_dir):
+                    print(f"Create obs folder, and copy bufr to obs")
+                    shutil.rmtree(obs_dir)
+                os.makedirs(obs_dir)
+
                 if ('ND01' not in exp_name and dom == 'd01') or ('ND02' not in exp_name and dom == 'd02'):  
                     if 'CTRL' not in exp_name and 'NPB' not in exp_name: os.system(f"cp {dir_prepbufr}/{time_now_YYYYMMDD}/prepbufr.gdas.{time_now_YYYYMMDD}.t{time_now_HH}z.nr.48h {obs_dir}/gdas.t{time_now_HH}z.prepbufr")
                     if 'ASRBC4CLD' in exp_name: os.system(f"cp {dir_goesbufr}/{time_now_YYYYMMDD}/gdas.t{time_now_HH}z.goesrabi.tm00.bufr_d {obs_dir}/gdas.t{time_now_HH}z.goesrabi.tm00.bufr_d ")
