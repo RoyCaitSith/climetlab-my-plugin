@@ -105,6 +105,8 @@ attributes[('/CFACT/05_IOP9', 'IOP9')] = {
     'time_window_max': 1.0,
     'da_domains': ['d01', 'd02', 'd03', 'd04'],
     'forecast_domains': ['d01', 'd02', 'd03', 'd04'],
+    # 'da_domains': ['d01', 'd02', 'd03', 'd04', 'd05'],
+    # 'forecast_domains': ['d01', 'd02', 'd03', 'd04', 'd05'],
     'wps_interval': 6,
     'cycling_interval': 6,
     'history_interval': 5/60,
