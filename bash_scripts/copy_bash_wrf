@@ -1,0 +1,62 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/bin
+export PATH
+
+unset USERNAME
+
+alias cp="cp -i"
+alias mv="mv -i"
+alias rm="rm -i"
+alias cdcfeng="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng"
+alias cdcfeng2="cd /uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2"
+alias cdhome="cd /uufs/chpc.utah.edu/common/home/u1237353"
+alias cdscratch="cd /scratch/general/nfs1/u1237353"
+alias cdgoes="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/GOES-R-observation-error-covariance"
+alias cdcfact="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CFACT"
+alias cdcpex="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CPEX"
+alias cdtropics="cd /uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2/TROPICS"
+alias cdsoftware="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software"
+alias cdgsi="cd /uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/comGSIv3.7_EnKFv1.3"
+alias cdstoddard="cd /uufs/chpc.utah.edu/common/home/zpu-group31/stoddard2"
+
+# Environment for WRF and WPS
+module purge
+module load ncl
+module load perl
+module load grib
+module load ncview
+module load aws-cli/2.2.29
+module load intel-oneapi-compilers/2021.4.0
+module load openmpi/4.1.1
+module load netcdf-c/4.8.1 netcdf-fortran/4.5.3
+module load parallel-netcdf/1.12.2
+module load hdf5/1.10.7
+
+export NETCDF="/uufs/chpc.utah.edu/sys/spack/linux-rocky8-nehalem/intel-2021.4.0/netcdf-ompi"
+export PATH="$NETCDF:$PATH"
+export LD_LIBRARY_PATH="$NETCDF/lib:$LD_LIBRARY_PATH"
+export HDF5="$HDF5_ROOT"
+export PATH="$HDF5:$PATH"
+export LD_LIBRARY_PATH="$HDF5/lib:$LD_LIBRARY_PATH"
+
+export J="-j 8"
+export WRF_EM_CORE="1"
+export WRFIO_NCD_LARGE_FILE_SUPPORT="1"
+export DIR="/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software"
+export JASPERLIB="$DIR/grib2/lib"
+export JASPERINC="$DIR/grib2/include" 
+
+# Miniconda3
+export PATH="/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/mymini3/bin:$PATH"
+export PYTHONPATH="$HOME/climetlab-my-plugin/functions:$PYTHONPATH"
+
+# git-lfs
+export PATH="/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/software/git-lfs-3.4.0/bin:$PATH"
