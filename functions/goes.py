@@ -272,18 +272,18 @@ def create_goes_bufr_temp(dir_data, case, anl_start_time, anl_end_time, cycling_
         np.savetxt(os.path.join(dir_bufr_temp_HH, '0.txt'), [n_total_data])
         print('\n')
 
-def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
+def create_goes_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycling_interval, version):
 
     total_hours = (anl_end_time-anl_start_time).total_seconds()/3600
     total_da_cycles = int(total_hours/cycling_interval+1)
 
-    dir_tropics = os.path.join(dir_data, 'TROPICS', case, 'TROPICS_V3')
-    dir_tropics_bufr_temp = os.path.join(dir_tropics, 'bufr_temp')
-    dir_tropics_bufr_file = os.path.join(dir_tropics, 'bufr_file')
-    dir_tropics_bufr_temp_version = os.path.join(dir_tropics_bufr_temp, version)
-    dir_tropics_bufr_file_version = os.path.join(dir_tropics_bufr_file, version)
-    os.makedirs(dir_tropics_bufr_file, exist_ok=True)
-    os.makedirs(dir_tropics_bufr_file_version, exist_ok=True)
+    dir_goes = os.path.join(dir_data, 'GOES', case)
+    dir_goes_bufr_temp = os.path.join(dir_goes, 'bufr_temp')
+    dir_goes_bufr_file = os.path.join(dir_goes, 'bufr_file')
+    dir_goes_bufr_temp_version = os.path.join(dir_goes_bufr_temp, version)
+    dir_goes_bufr_file_version = os.path.join(dir_goes_bufr_file, version)
+    os.makedirs(dir_goes_bufr_file, exist_ok=True)
+    os.makedirs(dir_goes_bufr_file_version, exist_ok=True)
 
     for idc in tqdm(range(1, total_da_cycles+1), desc='Cycles', unit='files', bar_format="{desc}: {n}/{total} files | {elapsed}<{remaining}"):
 
@@ -292,16 +292,16 @@ def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycli
         anl_now_time_HH = anl_now_time.strftime('%H')
         print(anl_now_time)
 
-        dir_bufr_file_YYYYMMDD = os.path.join(dir_tropics_bufr_file_version, anl_now_time_YYYYMMDD)
-        bufr_file = os.path.join(dir_bufr_file_YYYYMMDD, f"gdas.t{anl_now_time_HH}z.tropics.tm00.bufr_d")
-        dir_fortran_files = os.path.join(dir_data, 'TROPICS', 'Fortran_Files')
-        bufr_file_fortran = os.path.join(dir_fortran_files, 'gdas.tropics.bufr')
+        dir_bufr_file_YYYYMMDD = os.path.join(dir_goes_bufr_file_version, anl_now_time_YYYYMMDD)
+        bufr_file = os.path.join(dir_bufr_file_YYYYMMDD, f"gdas.t{anl_now_time_HH}z.goesrabi.tm00.bufr_d")
+        dir_fortran_files = os.path.join(dir_data, 'GOES', 'Fortran_Files')
+        bufr_file_fortran = os.path.join(dir_fortran_files, 'gdas.goesrabi.bufr')
         os.makedirs(dir_bufr_file_YYYYMMDD, exist_ok=True)
         os.system(f"rm -rf {bufr_file_fortran}")
 
         print('Check bufr_temp: ')
         flag = True
-        info = os.popen(f"cd {dir_tropics_bufr_temp_version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH} && ls ./*.txt").readlines()
+        info = os.popen(f"cd {dir_goes_bufr_temp_version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH} && ls ./*.txt").readlines()
         if len(info) != 22:
             flag = False
         print(len(info))
@@ -310,18 +310,18 @@ def create_tropics_bufr_file(dir_data, case, anl_start_time, anl_end_time, cycli
         if flag:
 
             fdata = ''
-            with open(f"{dir_fortran_files}/bufr_encode_tropics.f90", 'r') as f:
+            with open(f"{dir_fortran_files}/bufr_encode_goes.f90", 'r') as f:
                 for line in f.readlines():
                     if(line.find('idate = ') == 4): line = f"    idate = {anl_now_time_YYYYMMDD}{anl_now_time_HH}\n"
-                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_tropics_bufr_temp}/{version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH}/'\n"
+                    if(line.find('dir_files = ') == 4): line = f"    dir_files = '{dir_goes_bufr_temp}/{version}/{anl_now_time_YYYYMMDD}/{anl_now_time_HH}/'\n"
                     fdata += line
             f.close()
 
-            with open(f"{dir_fortran_files}/bufr_encode_tropics.f90", 'w') as f:
+            with open(f"{dir_fortran_files}/bufr_encode_goes.f90", 'w') as f:
                 f.writelines(fdata)
             f.close()
 
-            os.popen(f"cd {dir_fortran_files} && ./run_encode_tropics.sh > log_out")
+            os.popen(f"cd {dir_fortran_files} && ./run_encode_goes.sh > log_out")
             flag = True
             file_size = 0
             while flag:
