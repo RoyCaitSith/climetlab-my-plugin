@@ -206,7 +206,7 @@ attributes[('/CFACT/07_IOP8_IOP9_Resolution', 'IOP9')] = {
 }
 
 attributes[('/CFACT/08_IOP8_IOP9_MP', 'IOP8')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CFACT/08_IOP8_IOP9_MP',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2/CFACT/08_IOP8_IOP9_MP',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CFACT/08_IOP8_IOP9_MP/namelists',
     'itime': (2022, 2, 18, 0, 0, 0),
     'forecast_hours': 24,
@@ -224,7 +224,7 @@ attributes[('/CFACT/08_IOP8_IOP9_MP', 'IOP8')] = {
 }
 
 attributes[('/CFACT/08_IOP8_IOP9_MP', 'IOP9')] = {
-    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group30/cfeng/CFACT/08_IOP8_IOP9_MP',
+    'dir_exp': '/uufs/chpc.utah.edu/common/home/zpu-group31/cfeng2/CFACT/08_IOP8_IOP9_MP',
     'dir_namelists': '/uufs/chpc.utah.edu/common/home/u1237353/CFACT/08_IOP8_IOP9_MP/namelists',
     'itime': (2022, 2, 23, 0, 0, 0),
     'forecast_hours': 24,
